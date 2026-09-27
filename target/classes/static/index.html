@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý lịch họp</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main class="dashboard">
+    <section class="card meeting-card">
+        <header class="card-header primary-header">
+            <svg viewBox="0 0 24 24"><path d="M7 2v2h10V2h2v2h3v18H2V4h3V2h2Zm13 8H4v10h16V10ZM7 13h4v4H7v-4Z"/></svg>
+            <h1>QUẢN LÝ LỊCH HỌP</h1>
+        </header>
+        <div class="card-body meeting-body">
+            <div id="message" class="message" role="status" aria-live="polite"></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>ID</th><th>Tên cuộc họp</th><th>Người tổ chức</th><th>Ngày</th><th>Phòng</th><th>Status</th></tr></thead>
+                    <tbody id="meetingRows"><tr><td colspan="6" class="empty">Đang tải dữ liệu...</td></tr></tbody>
+                </table>
+            </div>
+
+            <section class="edit-box">
+                <div class="form-grid">
+                    <label class="field title-field"><span>Tên mới:</span><input id="newTitle" maxlength="255" placeholder="Nhập tên cuộc họp mới"></label>
+                    <label class="field employee-field"><span>Mã nhân viên:</span><input id="userId" type="text" value="NV001" maxlength="30" pattern="[A-Za-z]+[0-9]+" placeholder="NV001"></label>
+                </div>
+                <p class="permission-note">Chỉ người tổ chức được sửa hoặc hủy cuộc họp đang hoạt động và chưa bắt đầu.</p>
+                <div class="actions">
+                    <button id="editButton" class="button button-primary" type="button" disabled><svg viewBox="0 0 24 24"><path d="M4 17.3V21h3.7L18.6 10.1l-3.7-3.7L4 17.3ZM21.4 7.3a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.7 3.7 1.8-1.8Z"/></svg>SỬA LỊCH</button>
+                    <button id="cancelButton" class="button button-danger-outline" type="button" disabled><svg viewBox="0 0 24 24"><path d="M7 21a2 2 0 0 1-2-2V6h14v13a2 2 0 0 1-2 2H7ZM9 9v8h2V9H9Zm4 0v8h2V9h-2ZM4 3h5l1-1h4l1 1h5v2H4V3Z"/></svg>HỦY CUỘC HỌP</button>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <section class="card suggestion-card">
+        <header class="card-header suggestion-header">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 3v4.6l3.2 3.2-1.4 1.4L11 12.4V7h2Z"/></svg>
+            <h1>GỢI Ý THỜI GIAN</h1>
+        </header>
+        <div class="card-body suggestion-body">
+            <label class="field"><span>Ngày</span><div class="input-with-icon"><svg viewBox="0 0 24 24"><path d="M7 2v2h10V2h2v2h3v18H2V4h3V2h2Zm13 8H4v10h16V10Z"/></svg><input id="suggestionDate" type="date"></div></label>
+            <label class="field"><span>Người tham dự</span><div class="input-with-icon"><svg viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-1a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 21v-2c0-3 3-6 6-6s6 3 6 6v2H2Zm13 0v-2c0-1.7-.6-3.2-1.6-4.4.8-.4 1.7-.6 2.6-.6 3 0 6 2.5 6 5v2h-7Z"/></svg><input id="participants" type="text" value="Long, My, Lệ" placeholder="Nhập tên, cách nhau bằng dấu phẩy"></div></label>
+            <button id="findSlotsButton" class="button find-button" type="button"><svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 1 1-5 14.2L1.6 19.6 3 21l3.4-3.4A8 8 0 0 1 10 2Zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>TÌM KHUNG GIỜ CHUNG</button>
+            <div class="divider"></div>
+            <div class="slot-heading"><svg viewBox="0 0 24 24"><path d="M7 2v2h10V2h2v2h3v18H2V4h3V2h2Zm13 8H4v10h16V10Z"/></svg><strong>Khung giờ phù hợp</strong></div>
+            <div id="slotList" class="slot-list"><p class="slot-empty">Chọn ngày và người tham dự để tìm khung giờ.</p></div>
+        </div>
+    </section>
+</main>
+
+<dialog id="confirmDialog">
+    <h2>Xác nhận hủy cuộc họp</h2><p id="confirmText"></p>
+    <div class="dialog-actions"><button id="closeDialogButton" class="button button-secondary" type="button">Quay lại</button><button id="confirmCancelButton" class="button button-danger" type="button">Xác nhận hủy</button></div>
+</dialog>
+<script src="/app.js"></script>
+</body>
+</html>
