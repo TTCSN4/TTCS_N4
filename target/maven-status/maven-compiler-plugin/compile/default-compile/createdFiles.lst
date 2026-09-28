@@ -1,0 +1,15 @@
+com\ttcs\meetingmanagement\MeetingmanagementApplication.class
+com\ttcs\meetingmanagement\meeting\participant\Participant.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityDtos$SlotResponse.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityDtos$AvailabilityResponse.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityController.class
+com\ttcs\meetingmanagement\meeting\participant\ParticipantRepository.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityDtos.class
+com\ttcs\meetingmanagement\meeting\MeetingRepository.class
+com\ttcs\meetingmanagement\meeting\Meeting.class
+com\ttcs\meetingmanagement\recurrence\package-info.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityController$ParticipantList.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityService.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityDtos$AvailabilityRequest.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityDtos$ParticipantResponse.class
+com\ttcs\meetingmanagement\meeting\availability\AvailabilityController$ErrorResponse.class
