@@ -1,0 +1,6 @@
+CREATE TABLE participants (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100) NOT NULL, role VARCHAR(100) NOT NULL);
+CREATE TABLE meetings (id BIGINT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(255) NOT NULL, start_time TIMESTAMP NOT NULL, end_time TIMESTAMP NOT NULL, CONSTRAINT chk_meeting_time CHECK (end_time > start_time));
+CREATE TABLE meeting_participants (meeting_id BIGINT NOT NULL, participant_id BIGINT NOT NULL, PRIMARY KEY (meeting_id, participant_id), FOREIGN KEY (meeting_id) REFERENCES meetings(id), FOREIGN KEY (participant_id) REFERENCES participants(id));
+INSERT INTO participants (name, role) VALUES ('Long', 'Kỹ thuật'), ('My', 'Sản phẩm'), ('Lệ', 'Thiết kế');
+INSERT INTO meetings (title, start_time, end_time) VALUES ('Daily Meeting - Long', '2026-09-26 08:00:00', '2026-09-26 09:00:00'), ('Planning - Long', '2026-09-26 11:00:00', '2026-09-26 12:00:00'), ('Lunch - My', '2026-09-26 12:00:00', '2026-09-26 13:00:00'), ('Design Review - Le', '2026-09-26 13:00:00', '2026-09-26 15:00:00'), ('Wrap-up - My', '2026-09-26 16:00:00', '2026-09-26 17:00:00');
+INSERT INTO meeting_participants (meeting_id, participant_id) VALUES (1,1), (2,1), (3,2), (4,3), (5,2);

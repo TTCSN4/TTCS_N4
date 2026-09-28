@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gợi ý thời gian họp</title>
+  <link rel="stylesheet" href="/css/common.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="panel" aria-labelledby="form-title">
+      <header class="panel-heading"><span class="header-icon" aria-hidden="true">♙</span><h1 id="form-title">GỢI Ý THỜI GIAN</h1></header>
+      <div class="panel-body">
+        <form id="availability-form">
+          <label for="date">Ngày</label>
+          <input id="date" name="date" type="date" required>
+          <label>Người tham dự <span id="selected-count">0 đã chọn</span></label>
+          <div id="participants" class="participants" aria-live="polite"></div>
+          <div class="duration-row"><label for="duration">Thời lượng</label><select id="duration" name="durationMinutes"><option value="30">30 phút</option><option value="60" selected>60 phút</option><option value="90">90 phút</option><option value="120">120 phút</option></select></div>
+          <button type="submit"><span class="search-icon">⌕</span> TÌM KHUNG GIỜ CHUNG</button>
+        </form>
+        <div class="results" aria-live="polite">
+          <div class="results-title"><h2>Khung giờ phù hợp</h2><span id="result-count"></span></div>
+          <div id="slots" class="slots"><p class="empty">Chọn người tham dự để bắt đầu tìm.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+</body>
+</html>
