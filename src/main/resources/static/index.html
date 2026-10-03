@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lịch họp</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/" aria-label="Lịch họp"><span class="brand-mark">H</span><span>Họp</span></a>
+    <nav class="tabs" aria-label="Điều hướng chính">
+        <button class="tab active" data-view="meetings">Lịch họp</button>
+        <button class="tab" data-view="history">Lịch sử</button>
+        <button class="tab" data-view="equipment">Thiết bị</button>
+    </nav>
+    <button class="button button-primary" id="new-meeting"><span aria-hidden="true">＋</span> Tạo cuộc họp</button>
+    <button class="button button-primary" id="new-equipment" hidden><span aria-hidden="true">＋</span> Thêm thiết bị</button>
+</header>
+
+<main class="page">
+    <div id="meetings-view">
+    <section class="page-heading">
+        <div>
+            <p class="eyebrow">KHÔNG GIAN LÀM VIỆC</p>
+            <h1 id="page-title">Lịch họp</h1>
+            <p class="subheading" id="page-subtitle">Theo dõi và sắp xếp các cuộc họp của bạn.</p>
+        </div>
+        <div class="date-chip"><span class="date-icon" aria-hidden="true">▦</span><span id="today-label"></span></div>
+    </section>
+
+    <section class="summary" aria-label="Tổng quan">
+        <div class="summary-item"><span class="summary-label">Sắp diễn ra</span><strong id="upcoming-count">0</strong></div>
+        <div class="summary-item"><span class="summary-label">Hôm nay</span><strong id="today-count">0</strong></div>
+        <div class="summary-item"><span class="summary-label">Đã hủy</span><strong id="cancelled-count">0</strong></div>
+    </section>
+
+    <section class="toolbar" aria-label="Tìm và lọc cuộc họp">
+        <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Tìm cuộc họp..." aria-label="Tìm cuộc họp"></label>
+        <select id="status-filter" aria-label="Lọc theo trạng thái">
+            <option value="ALL">Tất cả trạng thái</option>
+            <option value="SCHEDULED">Đã lên lịch</option>
+            <option value="CANCELLED">Đã hủy</option>
+        </select>
+    </section>
+
+    <section class="meeting-section">
+        <div class="section-title"><h2 id="list-title">Cuộc họp</h2><span id="result-count">0 cuộc họp</span></div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Cuộc họp</th><th>Thời gian</th><th>Người tham dự</th><th>Trạng thái</th><th></th></tr></thead>
+                <tbody id="meeting-list"></tbody>
+            </table>
+            <div class="empty-state" id="empty-state" hidden>
+                <div class="empty-icon" aria-hidden="true">▤</div>
+                <strong>Chưa có cuộc họp nào</strong>
+                <p>Tạo một cuộc họp để bắt đầu sắp xếp lịch.</p>
+                <button class="button button-secondary" id="empty-create">Tạo cuộc họp</button>
+            </div>
+        </div>
+    </section>
+    </div>
+
+    <section id="equipment-view" hidden>
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">PHÒNG HỌP & THIẾT BỊ</p>
+                <h1>Thiết bị</h1>
+                <p class="subheading">Tra cứu số lượng thiết bị có sẵn, đã đặt hoặc đang bảo trì theo phòng và thời điểm.</p>
+            </div>
+            <button class="button button-primary equipment-mobile-add" id="new-equipment-mobile"><span aria-hidden="true">＋</span> Thêm thiết bị</button>
+        </section>
+
+        <section class="equipment-toolbar" aria-label="Tra cứu trạng thái thiết bị">
+            <label class="field">Phòng<select id="equipment-room-filter"><option value="">Tất cả phòng</option></select></label>
+            <label class="field">Thời điểm<input id="equipment-at" type="datetime-local"></label>
+            <button class="button button-secondary" id="refresh-equipment">Tra cứu trạng thái</button>
+        </section>
+
+        <section class="equipment-layout">
+            <div class="equipment-panel">
+                <div class="section-title"><h2>Thiết bị theo phòng</h2><span id="equipment-count">0 thiết bị</span></div>
+                <div class="equipment-list" id="equipment-list" aria-live="polite"></div>
+                <div class="empty-equipment" id="empty-equipment" hidden>
+                    <strong>Chưa có thiết bị</strong>
+                    <p>Thêm thiết bị và số lượng cho phòng để bắt đầu.</p>
+                </div>
+            </div>
+
+            <aside class="equipment-panel">
+                <div class="section-title"><h2>Trạng thái thiết bị</h2></div>
+                <p>Chọn phòng và thời điểm để xem số lượng có sẵn, đã đặt và bảo trì. API đặt thiết bị nằm trong TTCS_N4_1.</p>
+            </aside>
+        </section>
+    </section>
+</main>
+
+<dialog id="equipment-dialog">
+    <form id="equipment-form">
+        <div class="dialog-heading">
+            <div><p class="eyebrow">KHO THIẾT BỊ</p><h2>Thêm thiết bị</h2></div>
+            <button type="button" class="icon-button" id="close-equipment-dialog" aria-label="Đóng">×</button>
+        </div>
+        <label class="field">Tên thiết bị<input id="equipment-name" maxlength="160" required placeholder="Ví dụ: Máy chiếu"></label>
+        <div class="field-row">
+            <label class="field">Phòng<input id="equipment-room" maxlength="120" required placeholder="Ví dụ: P.101"></label>
+            <label class="field">Số lượng<input id="equipment-total" type="number" min="1" value="1" required></label>
+        </div>
+        <p class="form-error" id="equipment-error" role="alert"></p>
+        <div class="dialog-actions"><button type="button" class="button button-secondary" id="cancel-equipment-dialog">Đóng</button><button type="submit" class="button button-primary">Lưu thiết bị</button></div>
+    </form>
+</dialog>
+
+<dialog id="meeting-dialog">
+    <form id="meeting-form">
+        <div class="dialog-heading">
+            <div><p class="eyebrow">LỊCH HỌP</p><h2 id="dialog-title">Tạo cuộc họp</h2></div>
+            <button type="button" class="icon-button" id="close-dialog" aria-label="Đóng">×</button>
+        </div>
+        <input type="hidden" id="meeting-id">
+        <label class="field">Tiêu đề <span class="required">*</span><input id="title" maxlength="200" required placeholder="Ví dụ: Họp kế hoạch tuần"></label>
+        <label class="field">Mô tả<textarea id="description" rows="2" placeholder="Nội dung cần trao đổi"></textarea></label>
+        <label class="field">Phòng<input id="meeting-room" maxlength="120" placeholder="Ví dụ: P.101"></label>
+        <div class="field-row">
+            <label class="field">Bắt đầu <span class="required">*</span><input id="start-time" type="datetime-local" required></label>
+            <label class="field">Kết thúc <span class="required">*</span><input id="end-time" type="datetime-local" required></label>
+        </div>
+        <label class="field">Người tham dự <span class="field-hint">Phân cách bằng dấu phẩy</span><input id="participants" placeholder="ten@congty.vn, ..."></label>
+        <div class="field-row recurrence-row">
+            <label class="field">Lặp lại<select id="recurrence"><option value="NONE">Không lặp</option><option value="WEEKLY">Hàng tuần</option><option value="MONTHLY">Hàng tháng</option></select></label>
+            <label class="field" id="repeat-count-wrap" hidden>Số lần lặp thêm<input id="repeat-count" type="number" min="1" max="12" value="3"></label>
+        </div>
+        <section class="suggestion-box">
+            <div class="suggestion-heading"><div><strong>Gợi ý thời gian</strong><p>Kiểm tra lịch trống của người tham dự</p></div><button type="button" id="find-times" class="button button-secondary">Tìm giờ trống</button></div>
+            <div id="suggestions" class="suggestions" aria-live="polite"></div>
+        </section>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <div class="dialog-actions"><button type="button" class="button button-secondary" id="cancel-dialog">Đóng</button><button type="submit" class="button button-primary" id="save-meeting">Lưu cuộc họp</button></div>
+    </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/app.js" defer></script>
+</body>
+</html>
