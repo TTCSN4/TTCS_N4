@@ -13,7 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const endTimeInput = document.getElementById("endTime");
     const roomAvailabilityStatus = document.getElementById("roomAvailabilityStatus");
 
-    const apiUrl = "/api/meetings";
+    const apiBaseUrl = window.MEETING_API_BASE_URL
+        || (window.location.port === "5500" ? "http://localhost:8080" : "");
+    const apiUrl = `${apiBaseUrl}/api/meetings`;
 
     const urlParams = new URLSearchParams(window.location.search);
     const editMeetingId = urlParams.get("meetingId") || urlParams.get("id");
@@ -23,6 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let availabilityTimer;
     let equipmentInventory = [];
     let equipmentLoadStatus = "loading";
+    let equipmentRefreshTimer;
+    let equipmentRequestSequence = 0;
+    const selectedEquipmentIds = new Set();
 
     function toIso(dateValue, timeValue) {
         if (!dateValue || !timeValue) return "";
@@ -75,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const rooms = getRoomOptions();
         const range = getRequestedTimeRange();
         const currentResult = range && roomAvailability.key === range.key;
-        const failed = currentResult && roomAvailability.status === "error";
 
         roomSelect.replaceChildren(new Option("Chọn phòng họp", ""));
         rooms.forEach(room => {
@@ -83,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 && roomAvailability.busyRoomNames.has(room.name.trim().toLocaleLowerCase("vi"));
             const roomLabel = `${room.name} · ${room.capacity} người${room.location ? ` · ${room.location}` : ""}`;
             const option = new Option(busy ? `${roomLabel} · Đã được đặt` : roomLabel, room.id);
-            option.disabled = Boolean(busy || failed);
+            option.disabled = Boolean(busy);
             roomSelect.append(option);
         });
 
@@ -167,41 +171,103 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getSelectedEquipment() {
-        return Array.from(document.querySelectorAll('#equipmentOptions input[name="equipment"]:checked'))
-            .map(input => input.value);
+        return Array.from(selectedEquipmentIds);
     }
 
-    function getAvailableEquipment(room) {
+    function getRoomEquipment(room) {
         const roomKeys = [room.id, room.name]
             .map(value => String(value || "").trim().toLocaleLowerCase("vi"));
 
         return equipmentInventory.filter(equipment => {
             const equipmentRoom = String(equipment.roomId || "").trim().toLocaleLowerCase("vi");
-            const quantity = Number(equipment.totalQuantity) || 0;
-            const status = String(equipment.status || "").trim().toLocaleLowerCase("vi");
-            const unavailable = /unavailable|inactive|maintenance|broken|hỏng|bảo trì|ngưng hoạt động|không khả dụng/.test(status);
-            return roomKeys.includes(equipmentRoom) && quantity > 0 && !unavailable;
+            return roomKeys.includes(equipmentRoom);
         });
     }
 
-    async function loadEquipmentInventory() {
+    function createPreviewEquipmentInventory() {
+        return getRoomOptions().flatMap(room => (room.devices || []).map((name, index) => ({
+            equipmentId: `preview-${room.id}-${index}`,
+            roomId: String(room.id),
+            equipmentName: name,
+            totalQuantity: 1,
+            status: index % 3 === 1 ? "BOOKED" : index % 3 === 2 ? "MAINTENANCE" : "AVAILABLE",
+            isPreview: true
+        })));
+    }
+
+    function getEquipmentAvailability(equipment) {
+        const quantity = Number(equipment.availableQuantity ?? equipment.totalQuantity) || 0;
+        const status = String(equipment.availabilityStatus || equipment.status || "").trim();
+        const normalizedStatus = status.toLocaleLowerCase("vi");
+        const maintenance = /maintenance|under repair|bảo trì|đang sửa|sửa chữa/.test(normalizedStatus);
+        const booked = /booked|busy|in use|đã đặt|đang sử dụng|bận/.test(normalizedStatus);
+        const unavailable = quantity <= 0
+            || maintenance
+            || booked
+            || /unavailable|inactive|broken|hỏng|ngưng hoạt động|không khả dụng/.test(normalizedStatus);
+
+        const label = maintenance
+            ? "Bảo trì"
+            : booked
+                ? "Đã đặt"
+                : quantity <= 0
+                    ? "Hết thiết bị"
+                    : unavailable
+                        ? "Không khả dụng"
+                        : "Có sẵn";
+        const state = maintenance
+            ? "maintenance"
+            : booked
+                ? "booked"
+                : quantity <= 0
+                    ? "out-of-stock"
+                    : unavailable
+                        ? "unavailable"
+                        : "available";
+
+        return { quantity, unavailable, label, state };
+    }
+
+    async function loadEquipmentInventory(requestSequence = ++equipmentRequestSequence) {
         equipmentLoadStatus = "loading";
         renderEquipmentOptions(getSelectedRoom());
 
         try {
-            const response = await fetch("/api/equipment", { headers: { Accept: "application/json" } });
+            const params = new URLSearchParams();
+            const room = getSelectedRoom();
+            const range = getRequestedTimeRange();
+            if (room) params.set("roomId", room.id);
+            if (range) {
+                params.set("startTime", toIso(range.date, range.start));
+                params.set("endTime", toIso(range.date, range.end));
+            }
+            const query = params.toString();
+            const response = await fetch(`${apiBaseUrl}/api/equipment${query ? `?${query}` : ""}`, {
+                headers: { Accept: "application/json" }
+            });
             if (!response.ok) throw new Error(`Không thể tải thiết bị (HTTP ${response.status}).`);
 
             const inventory = await response.json();
             if (!Array.isArray(inventory)) throw new Error("Danh sách thiết bị không hợp lệ.");
+            if (requestSequence !== equipmentRequestSequence) return;
             equipmentInventory = inventory;
             equipmentLoadStatus = "ready";
         } catch (error) {
-            equipmentLoadStatus = "error";
+            if (requestSequence !== equipmentRequestSequence) return;
+            equipmentInventory = createPreviewEquipmentInventory();
+            equipmentLoadStatus = "demo";
             console.warn("Không thể tải thiết bị khả dụng:", error);
         }
 
         renderEquipmentOptions(getSelectedRoom());
+    }
+
+    function scheduleEquipmentRefresh() {
+        clearTimeout(equipmentRefreshTimer);
+        const requestSequence = ++equipmentRequestSequence;
+        equipmentLoadStatus = "loading";
+        renderEquipmentOptions(getSelectedRoom());
+        equipmentRefreshTimer = setTimeout(() => loadEquipmentInventory(requestSequence), 250);
     }
 
     function renderEquipmentOptions(room) {
@@ -233,27 +299,60 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const availableEquipment = getAvailableEquipment(room);
-        if (!availableEquipment.length) {
+        if (equipmentLoadStatus === "demo") {
+            const message = document.createElement("p");
+            message.className = "equipment-data-note";
+            message.textContent = "Dữ liệu minh họa, chưa đồng bộ backend.";
+            equipmentOptions.append(message);
+        }
+
+        const roomEquipment = getRoomEquipment(room);
+        if (!roomEquipment.length) {
             const message = document.createElement("p");
             message.className = "equipment-empty";
-            message.textContent = "Phòng này hiện không có thiết bị khả dụng.";
+            message.textContent = "Phòng này chưa có thiết bị trong danh sách.";
             equipmentOptions.append(message);
             return;
         }
 
-        availableEquipment.forEach(equipment => {
+        const selectableEquipmentIds = new Set(roomEquipment
+            .filter(equipment => !getEquipmentAvailability(equipment).unavailable)
+            .map(equipment => String(equipment.equipmentId)));
+        selectedEquipmentIds.forEach(equipmentId => {
+            if (!selectableEquipmentIds.has(equipmentId)) selectedEquipmentIds.delete(equipmentId);
+        });
+
+        roomEquipment.forEach(equipment => {
+            const availability = getEquipmentAvailability(equipment);
             const label = document.createElement("label");
-            label.className = "checkbox-label";
+            label.className = `checkbox-label${availability.unavailable ? " is-unavailable" : ""}`;
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.name = "equipment";
             checkbox.value = equipment.equipmentId;
-            checkbox.checked = selected.has(equipment.equipmentId);
-            const text = document.createElement("span");
-            const status = equipment.status ? ` · ${equipment.status}` : "";
-            text.textContent = `${equipment.equipmentName} · ${equipment.totalQuantity} trong kho${status}`;
-            label.append(checkbox, text);
+            checkbox.checked = !availability.unavailable && selected.has(String(equipment.equipmentId));
+            checkbox.disabled = availability.unavailable;
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked) selectedEquipmentIds.add(String(equipment.equipmentId));
+                else selectedEquipmentIds.delete(String(equipment.equipmentId));
+            });
+
+            const info = document.createElement("span");
+            info.className = "equipment-option-info";
+            const name = document.createElement("span");
+            name.className = "equipment-name";
+            name.textContent = equipment.equipmentName || "Thiết bị chưa đặt tên";
+            const details = document.createElement("span");
+            details.className = "equipment-option-details";
+            const quantity = document.createElement("span");
+            quantity.className = "equipment-quantity";
+            quantity.textContent = `${availability.quantity} trong kho`;
+            const status = document.createElement("span");
+            status.className = `equipment-status-pill is-${availability.state}`;
+            status.textContent = availability.label;
+            details.append(quantity, status);
+            info.append(name, details);
+            label.append(checkbox, info);
             equipmentOptions.append(label);
         });
     }
@@ -331,19 +430,23 @@ document.addEventListener("DOMContentLoaded", function () {
             status: "SCHEDULED",
             participantCount,
             room: selectedRoom ? selectedRoom.name : "",
-            devices: getSelectedEquipment().map(equipmentId =>
-                equipmentInventory.find(item => String(item.equipmentId) === String(equipmentId))?.equipmentName
-            ).filter(Boolean)
+            devices: getSelectedEquipment()
+                .map(equipmentId => equipmentInventory.find(item => String(item.equipmentId) === String(equipmentId)))
+                .filter(equipment => equipment && !equipment.isPreview)
+                .map(equipment => equipment.equipmentName)
         };
     }
 
     async function bookEquipment(meetingId, payload) {
         const selectedRoom = getSelectedRoom();
-        const selectedEquipment = getSelectedEquipment();
+        const selectedEquipment = getSelectedEquipment().filter(equipmentId => {
+            const equipment = equipmentInventory.find(item => String(item.equipmentId) === equipmentId);
+            return equipment && !equipment.isPreview;
+        });
         if (!selectedRoom || selectedEquipment.length === 0) return [];
 
         return Promise.all(selectedEquipment.map(async equipmentId => {
-            const response = await fetch("/api/equipment/bookings", {
+            const response = await fetch(`${apiBaseUrl}/api/equipment/bookings`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -426,9 +529,16 @@ document.addEventListener("DOMContentLoaded", function () {
     populateRoomOptions();
     loadEquipmentInventory();
     participantCountInput?.addEventListener("input", updateCapacityWarning);
-    roomSelect?.addEventListener("change", renderRoomDeviceSummary);
+    roomSelect?.addEventListener("change", () => {
+        selectedEquipmentIds.clear();
+        renderRoomDeviceSummary();
+        scheduleEquipmentRefresh();
+    });
     [meetingDateInput, startTimeInput, endTimeInput].forEach(input => {
-        input?.addEventListener("change", scheduleRoomAvailabilityCheck);
+        input?.addEventListener("change", () => {
+            scheduleRoomAvailabilityCheck();
+            scheduleEquipmentRefresh();
+        });
     });
 
     if (isEditMode) {

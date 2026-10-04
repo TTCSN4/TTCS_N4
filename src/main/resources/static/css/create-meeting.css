@@ -633,6 +633,14 @@ textarea {
     font-size: 12px;
 }
 
+.equipment-data-note {
+    width: 100%;
+    margin: 0 0 4px;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 600;
+}
+
 .meeting-visual {
     position: relative;
     display: flex;
@@ -805,6 +813,75 @@ textarea {
 
 .checkbox-label input[type="checkbox"] {
     flex: 0 0 16px;
+}
+
+.equipment-option-info {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+}
+
+.equipment-name {
+    font-weight: 600;
+}
+
+.equipment-option-details {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.equipment-quantity {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.equipment-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.equipment-status-pill.is-available {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.equipment-status-pill.is-unavailable {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.equipment-status-pill.is-booked {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.equipment-status-pill.is-maintenance {
+    color: #9a3412;
+    background: #ffedd5;
+}
+
+.equipment-status-pill.is-out-of-stock {
+    color: #475569;
+    background: #e2e8f0;
+}
+
+.checkbox-label.is-unavailable {
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.checkbox-label input[type="checkbox"]:disabled {
+    cursor: not-allowed;
 }
 
 .notes-card {
