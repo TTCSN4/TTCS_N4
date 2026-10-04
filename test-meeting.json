@@ -1,0 +1,10 @@
+﻿{
+  "title": "TEST TRUNG LICH",
+  "description": "Test US11",
+  "startTime": "2026-10-06T19:30:00Z",
+  "endTime": "2026-10-06T20:30:00Z",
+  "organizerId": "user01",
+  "status": "SCHEDULED",
+  "room": "Phòng họp B23123",
+  "participantCount": 2
+}

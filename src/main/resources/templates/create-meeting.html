@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo lịch họp - Meeting</title>
+   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../static/css/create-meeting.css" th:href="@{/css/create-meeting.css}">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">M</div>
+                <div class="brand-text">
+                    <h2>Meeting</h2>
+                    <span>Meeting Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Trang chủ</span>
+                </a>
+
+                <div class="menu-group">
+                    <a href="#" class="menu-item parent active">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        <span>Lịch họp</span>
+                        <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                    </a>
+                    <div class="sub-menu">
+                        <a href="create-meeting.html" class="sub-item active">
+                            <span class="dot"></span>
+                            <span>Tạo lịch họp</span>
+                        </a>
+                        <a href="update-meeting.html" class="sub-item">
+                            <span class="dot"></span>
+                            <span>Quản lý lịch họp</span>
+                        </a>
+                        <a href="rooms.html" class="sub-item">
+                            <span class="dot"></span>
+                            <span>Quản trị phòng họp</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="#" class="menu-item">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Lịch của tôi</span>
+                </a>
+                <a href="participants.html" class="menu-item">
+                    <i class="fa-solid fa-user-group"></i>
+                    <span>Người tham gia</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </nav>
+
+            <div class="user-profile-bottom">
+                <div class="avatar-circle">L</div>
+                <div class="user-info">
+                    <span class="name"></span>
+                    <span class="role"></span>
+                </div>
+                <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="topbar" aria-label="Tiện ích tài khoản">
+                <button class="topbar-button" type="button" aria-label="Thông báo" title="Thông báo">
+                    <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                    <span class="notification-dot"></span>
+                </button>
+                <button class="topbar-avatar" type="button" aria-label="Tài khoản Lộc" title="Tài khoản">L</button>
+            </div>
+            <div class="content-body">
+                <div class="page-title">
+                    <div class="title-icon"><i class="fa-regular fa-calendar-plus" id="pageTitleIcon"></i></div>
+                    <div>
+                        <h1 id="pageTitleHeading">Tạo lịch họp</h1>
+                        <p id="pageSubtitle">Tạo một cuộc họp mới cho phòng họp</p>
+                    </div>
+                </div>
+
+                <form id="createMeetingForm">
+                    <div class="meeting-layout">
+                        <section class="card meeting-details">
+                            <div class="card-header">
+                                <i class="fa-regular fa-calendar-days icon-blue" aria-hidden="true"></i>
+                                <div>
+                                    <h3>Thông tin cuộc họp</h3>
+                                    <p>Tạo cuộc họp mới trong hệ thống</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="meetingTitle">Tên cuộc họp <span class="required">*</span></label>
+                                <input type="text" id="meetingTitle" placeholder="Ví dụ: Tổng kết đánh giá cuộc họp" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="meetingDate">Ngày họp <span class="required">*</span></label>
+                                    <input type="date" id="meetingDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="meetingRoom">Phòng họp <span class="required">*</span></label>
+                                    <select id="meetingRoom" required>
+                                        <option value="">Chọn phòng họp</option>
+                                    </select>
+                                    <p id="roomAvailabilityStatus" class="room-availability-status" role="status" aria-live="polite">Chọn ngày, giờ bắt đầu và kết thúc để kiểm tra phòng trống.</p>
+                                    <div id="roomDeviceSummary" class="room-device-summary" aria-live="polite"></div>
+                                    <div id="roomCapacityWarning" class="room-capacity-warning" role="alert" hidden></div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="startTime">Giờ bắt đầu <span class="required">*</span></label>
+                                    <input type="time" id="startTime" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="endTime">Giờ kết thúc <span class="required">*</span></label>
+                                    <input type="time" id="endTime" required>
+                                </div>
+                            </div>
+
+                        </section>
+                        <input type="hidden" id="organizerId" value="user01">
+
+                        <aside class="meeting-visual" aria-label="Minh họa lịch họp">
+                            <div class="visual-kicker"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> LỊCH LÀM VIỆC</div>
+                            <div class="calendar-art" aria-hidden="true">
+                                <div class="calendar-art-header"><i class="fa-regular fa-calendar-check"></i><span>THÁNG MỚI</span><i class="fa-solid fa-ellipsis"></i></div>
+                                <div class="calendar-art-grid">
+                                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                                    <b>08</b><b>09</b><b>10</b><b>11</b><b>12</b><b>13</b><b>14</b>
+                                    <b>15</b><b>16</b><b class="selected-day">17</b><b>18</b><b>19</b><b>20</b><b>21</b>
+                                </div>
+                                <div class="calendar-clock"><i class="fa-regular fa-clock"></i></div>
+                                <i class="fa-solid fa-leaf calendar-leaf"></i>
+                            </div>
+                            <h3>Sắp xếp cuộc họp<br>thật dễ dàng</h3>
+                            <p>Chọn thời gian phù hợp và mời mọi người cùng tham gia.</p>
+                        </aside>
+                    </div>
+
+                    <div class="form-secondary-grid">
+                        <section class="card participant-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-users icon-blue" aria-hidden="true"></i>
+                                <div>
+                                    <h3>Mời người tham gia</h3>
+                                    <p>Mời đồng nghiệp tham gia cuộc họp</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="participantCount">Số người tham gia <span class="required">*</span></label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fa-regular fa-user" aria-hidden="true"></i>
+                                    <input type="number" id="participantCount" placeholder="Nhập số lượng người..." min="1" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="participantEmails">Email người tham gia</label>
+                                <textarea id="participantEmails" rows="3" placeholder="Nhập email, cách nhau bằng dấu phẩy"></textarea>
+                            </div>
+                        </section>
+
+                        <section class="card equipment-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-tv icon-blue" aria-hidden="true"></i>
+                                <div>
+                                    <h3>Thiết bị &amp; dịch vụ</h3>
+                                    <p>Chọn thiết bị cần sử dụng</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Thiết bị cần sử dụng</label>
+                                <div class="checkbox-group" id="equipmentOptions" aria-live="polite">
+                                    <p class="equipment-empty">Chọn phòng để xem thiết bị khả dụng.</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <section class="card notes-card">
+                        <div class="card-header">
+                            <i class="fa-regular fa-note-sticky icon-blue" aria-hidden="true"></i>
+                            <div>
+                                <h3>Ghi chú</h3>
+                                <p>Thêm nội dung cần lưu ý cho cuộc họp</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="visually-hidden" for="meetingNotes">Ghi chú cuộc họp</label>
+                            <textarea id="meetingNotes" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                        </div>
+                    </section>
+
+                    <div class="form-footer-actions">
+                        <button type="button" class="btn btn-cancel"><i class="fa-solid fa-xmark"></i> Hủy</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-regular fa-calendar-plus" id="submitBtnIcon"></i> <span id="submitBtnText">Tạo lịch họp</span></button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="../static/js/create-meeting.js" th:src="@{/js/create-meeting.js}" defer></script>
+</body>
+</html>

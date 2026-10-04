@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meeting Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --navy: #1d2d4d;
+      --navy-soft: #233b63;
+      --bg: #f3f5f8;
+      --panel: #ffffff;
+      --line: #e6ebf2;
+      --text: #111827;
+      --muted: #718096;
+      --blue: #2f6fed;
+      --blue-soft: #e9f2ff;
+      --green: #dff7ea;
+      --green-text: #1c8b5b;
+      --violet-soft: #f1ecff;
+      --violet-text: #7a5ec7;
+      --shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--navy);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 16px 14px;
+      min-height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 8px 18px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      background: linear-gradient(135deg, #3d8bfd, #214ec8);
+      box-shadow: 0 10px 18px rgba(46, 103, 255, 0.35);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      border-radius: 10px;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.2s ease;
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .nav-item .fa-solid,
+    .nav-item .fa-regular {
+      width: 16px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .nav-item.parent {
+      position: relative;
+    }
+
+    .nav-item.parent .chev {
+      margin-left: auto;
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .sub-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 2px 0 0 36px;
+    }
+
+    .sub-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .sub-item.active {
+      color: #fff;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      display: inline-block;
+    }
+
+    .sub-item.active .dot {
+      background: #7aaefc;
+      box-shadow: 0 0 0 5px rgba(122, 174, 252, 0.18);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 14px;
+      margin-top: auto;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f9fafb, #dfe7f4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .user-mini {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .user-mini .name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .user-mini .role {
+      font-size: 11px;
+      opacity: 0.72;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .topbar {
+      height: 68px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px 0 16px;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 760px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #edf1f5;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .search-box i {
+      color: #98a5b8;
+      font-size: 14px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .search-box input::placeholder {
+      color: #9aa5b3;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-left: 16px;
+    }
+
+    .bell {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: #f8fafc;
+      color: #46596c;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .page {
+      padding: 24px 18px 18px;
+      width: 100%;
+    }
+
+    .header-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .header-text h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .header-text p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      background: linear-gradient(135deg, #2d6df5, #1c4fd9);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 18px rgba(45, 109, 245, 0.25);
+      text-decoration: none;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .mini-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mini-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .mini-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .mini-card.blue .mini-icon {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .mini-card.green .mini-icon {
+      background: #ebfff2;
+      color: var(--green-text);
+    }
+
+    .mini-card.purple .mini-icon {
+      background: #f2ebff;
+      color: var(--violet-text);
+    }
+
+    .mini-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .mini-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(270px, 1fr);
+      gap: 18px;
+    }
+
+    .schedule-panel,
+    .rooms-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .schedule-panel {
+      padding: 18px 18px 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .range-switch {
+      display: flex;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .range-switch span {
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .range-switch span.active {
+      background: #edf5ff;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timeline-empty {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 12px 0;
+    }
+
+    .time-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .time-label {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .event {
+      position: relative;
+      min-height: 64px;
+      border-radius: 10px;
+      padding: 11px 14px 10px 20px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .event::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 18px;
+      width: 8px;
+      height: 8px;
+      background: currentColor;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.2);
+    }
+
+    .event-blue {
+      background: #dfeeff;
+      color: #1d4ed8;
+    }
+
+    .event-green {
+      background: #e1f7ea;
+      color: #1b8d5e;
+    }
+
+    .event-violet {
+      background: #f0eaff;
+      color: #7d5bc7;
+    }
+
+    .event-time,
+    .event-title,
+    .event-room {
+      margin-left: 18px;
+    }
+
+    .event-time {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #1f2937;
+    }
+
+    .event-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+
+    .event-room {
+      font-size: 12px;
+      color: rgba(17, 24, 39, 0.7);
+    }
+
+    .rooms-panel {
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .side-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .room-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .room-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .room-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #f0f3f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #687482;
+    }
+
+    .room-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .room-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .state {
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid transparent;
+    }
+
+    .state.free {
+      background: #eafaf0;
+      color: #1b8e5c;
+      border-color: #ccefd8;
+    }
+
+    .state.busy {
+      background: #fff5e6;
+      color: #d88a1d;
+      border-color: #f4d89b;
+    }
+
+    .equipment-box {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .equipment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .equipment-row {
+      display: grid;
+      grid-template-columns: 16px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      color: #374151;
+    }
+
+    .check {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+      border: 1.5px solid #c6ced8;
+      background: #fff;
+      position: relative;
+    }
+
+    .check.checked {
+      border-color: #25c46b;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+
+    .check.checked::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 1px;
+      width: 4px;
+      height: 7px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .count {
+      font-size: 12px;
+      color: #667085;
+    }
+
+    @media (max-width: 980px) {
+      .cards { grid-template-columns: 1fr; }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; }
+      .time-row { grid-template-columns: 1fr; }
+      .header-cta { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">Meeting</div>
+          <div class="brand-sub">Meeting Management</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="nav-item active" href="dashboard.html">
+          <i class="fa-solid fa-house"></i>
+          <span>Trang chủ</span>
+        </a>
+
+        <div>
+          <a class="nav-item parent" href="create-meeting.html">
+            <i class="fa-regular fa-calendar-days"></i>
+            <span>Lịch họp</span>
+            <span class="chev"><i class="fa-solid fa-chevron-down"></i></span>
+          </a>
+          <div class="sub-menu">
+            <a class="sub-item" href="create-meeting.html"><span class="dot"></span><span>Tạo lịch họp</span></a>
+            <a class="sub-item" href="update-meeting.html"><span class="dot"></span><span>Quản lý lịch họp</span></a>
+          </div>
+        </div>
+
+        <a class="nav-item" href="#">
+          <i class="fa-regular fa-clock"></i>
+          <span>Lịch của tôi</span>
+        </a>
+
+        <a class="nav-item" href="participants.html">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Người tham gia</span>
+        </a>
+
+        <a class="nav-item" href="#">
+          <i class="fa-solid fa-gear"></i>
+          <span>Cài đặt</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">L</div>
+        <div class="user-mini">
+          <div class="name">Lê</div>
+          <div class="role">Nhân viên</div>
+        </div>
+        <i class="fa-solid fa-chevron-down" style="opacity:0.7; font-size:11px;"></i>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Tìm kiếm cuộc họp, phòng họp..." />
+        </div>
+
+        <div class="top-actions">
+          <button class="bell" aria-label="Thông báo"><i class="fa-regular fa-bell"></i></button>
+          <div class="avatar">L</div>
+        </div>
+      </header>
+
+      <div class="page">
+        <div class="header-cta">
+          <div class="header-text">
+            <h1>Trang chủ</h1>
+            <p>Tổng quan lịch họp và phòng họp hôm nay</p>
+          </div>
+          <a class="primary-btn" href="create-meeting.html"><i class="fa-solid fa-plus"></i> Tạo lịch họp</a>
+        </div>
+
+        <div class="cards">
+          <div class="mini-card blue">
+            <div class="mini-icon"><i class="fa-regular fa-calendar-days"></i></div>
+            <div>
+              <div class="mini-title">Tạo lịch họp</div>
+              <div class="mini-sub">Tạo cuộc họp mới</div>
+            </div>
+          </div>
+
+          <div class="mini-card green">
+            <div class="mini-icon"><i class="fa-solid fa-check"></i></div>
+            <div>
+              <div class="mini-title">Phòng trống</div>
+              <div class="mini-sub">Xem danh sách phòng</div>
+            </div>
+          </div>
+
+          <div class="mini-card purple">
+            <div class="mini-icon"><i class="fa-regular fa-clock"></i></div>
+            <div>
+              <div class="mini-title">Lịch cá nhân</div>
+              <div class="mini-sub">Hôm nay có 3 cuộc họp</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <section class="schedule-panel">
+            <div class="panel-header">
+              <div class="panel-title">Danh sách cuộc họp</div>
+              <div class="range-switch">
+                <span class="active">Ngày</span>
+                <span>Tuần</span>
+                <span>Tháng</span>
+              </div>
+            </div>
+
+            <div class="timeline" id="meetingTimeline" aria-live="polite">
+              <div class="timeline-empty">Đang tải cuộc họp...</div>
+            </div>
+          </section>
+
+          <aside class="rooms-panel">
+            <div class="side-title">Phòng họp</div>
+
+            <div class="room-item">
+              <div class="room-main">
+                <div class="room-icon"><i class="fa-regular fa-building"></i></div>
+                <div>
+                  <div class="room-name">Phòng họp A1</div>
+                  <div class="room-meta">3:00 - 15:00</div>
+                </div>
+              </div>
+              <span class="state free">Trống</span>
+            </div>
+
+            <div class="room-item">
+              <div class="room-main">
+                <div class="room-icon"><i class="fa-regular fa-building"></i></div>
+                <div>
+                  <div class="room-name">Phòng họp B2</div>
+                  <div class="room-meta">3:00 - 15:00</div>
+                </div>
+              </div>
+              <span class="state free">Trống</span>
+            </div>
+
+            <div class="room-item">
+              <div class="room-main">
+                <div class="room-icon"><i class="fa-regular fa-building"></i></div>
+                <div>
+                  <div class="room-name">Phòng họp C1</div>
+                  <div class="room-meta">Sức chứa: 6 người</div>
+                </div>
+              </div>
+              <span class="state busy">Bận</span>
+            </div>
+
+            <div class="equipment-box">
+              <div class="side-title">Thiết bị sẵn có</div>
+              <div class="equipment-list">
+                <div class="equipment-row">
+                  <span class="check checked"></span>
+                  <span>Máy chiếu</span>
+                  <span class="count">12/15</span>
+                </div>
+                <div class="equipment-row">
+                  <span class="check"></span>
+                  <span>TV / Màn hình</span>
+                  <span class="count">8/10</span>
+                </div>
+                <div class="equipment-row">
+                  <span class="check"></span>
+                  <span>Bảng trắng</span>
+                  <span class="count">5/5</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const toCreatePage = () => {
+        window.location.href = 'create-meeting.html';
+      };
+
+      const primaryBtn = document.querySelector('.primary-btn');
+      const createCard = document.querySelector('.mini-card.blue');
+
+      if (primaryBtn) {
+        primaryBtn.addEventListener('click', function (event) {
+          event.preventDefault();
+          toCreatePage();
+        });
+      }
+
+      if (createCard) {
+        createCard.addEventListener('click', function () {
+          toCreatePage();
+        });
+      }
+
+      loadMeetings();
+
+      async function loadMeetings() {
+        const timeline = document.getElementById('meetingTimeline');
+        if (!timeline) return;
+
+        try {
+          const response = await fetch('/api/meetings', {
+            headers: { 'Accept': 'application/json' }
+          });
+          if (!response.ok) {
+            throw new Error(`Không thể tải cuộc họp (HTTP ${response.status}).`);
+          }
+
+          const meetings = await response.json();
+          timeline.replaceChildren();
+
+          if (!Array.isArray(meetings) || meetings.length === 0) {
+            showTimelineMessage(timeline, 'Chưa có cuộc họp nào.');
+            updateTodayCount([]);
+            return;
+          }
+
+          const today = new Date().toLocaleDateString('sv-SE');
+          updateTodayCount(meetings.filter(meeting =>
+            new Date(meeting.startTime).toLocaleDateString('sv-SE') === today
+          ));
+
+          meetings.forEach((meeting, index) => {
+            const start = new Date(meeting.startTime);
+            const end = new Date(meeting.endTime);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+
+            const row = document.createElement('div');
+            row.className = 'time-row';
+
+            const dateLabel = document.createElement('div');
+            dateLabel.className = 'time-label';
+            dateLabel.textContent = start.toLocaleDateString('vi-VN', {
+              day: '2-digit', month: '2-digit'
+            });
+
+            const event = document.createElement('div');
+            event.className = `event ${['event-blue', 'event-green', 'event-violet'][index % 3]}`;
+
+            const eventTime = document.createElement('div');
+            eventTime.className = 'event-time';
+            eventTime.textContent = `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+
+            const eventTitle = document.createElement('div');
+            eventTitle.className = 'event-title';
+            eventTitle.textContent = meeting.title || 'Cuộc họp không có tiêu đề';
+
+            const eventDetails = document.createElement('div');
+            eventDetails.className = 'event-room';
+            eventDetails.style.display = 'flex';
+            eventDetails.style.alignItems = 'center';
+            eventDetails.style.gap = '8px';
+            eventDetails.style.flexWrap = 'wrap';
+
+            const statusText = document.createElement('span');
+            statusText.textContent = `${start.toLocaleDateString('vi-VN')} · ${meeting.status || 'SCHEDULED'}`;
+
+            const editLink = document.createElement('a');
+            editLink.href = `update-meeting.html?meetingId=${encodeURIComponent(meeting.id)}`;
+            editLink.textContent = `[Sửa / Hủy]`;
+            editLink.style.color = '#2563eb';
+            editLink.style.fontWeight = '600';
+            editLink.style.textDecoration = 'none';
+
+            const partLink = document.createElement('a');
+            partLink.href = `participants.html?meetingId=${encodeURIComponent(meeting.id)}`;
+            partLink.textContent = `[Người tham dự]`;
+            partLink.style.color = '#475569';
+            partLink.style.textDecoration = 'none';
+
+            eventDetails.append(statusText, editLink, partLink);
+
+            event.append(eventTime, eventTitle, eventDetails);
+            row.append(dateLabel, event);
+            timeline.append(row);
+          });
+
+          if (!timeline.childElementCount) {
+            showTimelineMessage(timeline, 'Không có dữ liệu thời gian hợp lệ.');
+          }
+        } catch (error) {
+          timeline.replaceChildren();
+          showTimelineMessage(timeline, error.message || 'Không thể kết nối API lịch họp.');
+          updateTodayCount([]);
+        }
+      }
+
+      function showTimelineMessage(timeline, message) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'timeline-empty';
+        emptyMessage.textContent = message;
+        timeline.append(emptyMessage);
+      }
+
+      function updateTodayCount(meetings) {
+        const count = document.querySelector('.mini-card.purple .mini-sub');
+        if (count) count.textContent = `Hôm nay có ${meetings.length} cuộc họp`;
+      }
+    });
+  </script>
+</body>
+</html>
