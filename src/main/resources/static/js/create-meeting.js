@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let roomAvailability = { key: "", status: "idle", busyRoomNames: new Set() };
     let availabilityRequestSequence = 0;
     let availabilityTimer;
+    let equipmentInventory = [];
+    let equipmentLoadStatus = "loading";
 
     function toIso(dateValue, timeValue) {
         if (!dateValue || !timeValue) return "";
@@ -169,29 +171,88 @@ document.addEventListener("DOMContentLoaded", function () {
             .map(input => input.value);
     }
 
+    function getAvailableEquipment(room) {
+        const roomKeys = [room.id, room.name]
+            .map(value => String(value || "").trim().toLocaleLowerCase("vi"));
+
+        return equipmentInventory.filter(equipment => {
+            const equipmentRoom = String(equipment.roomId || "").trim().toLocaleLowerCase("vi");
+            const quantity = Number(equipment.totalQuantity) || 0;
+            const status = String(equipment.status || "").trim().toLocaleLowerCase("vi");
+            const unavailable = /unavailable|inactive|maintenance|broken|hỏng|bảo trì|ngưng hoạt động|không khả dụng/.test(status);
+            return roomKeys.includes(equipmentRoom) && quantity > 0 && !unavailable;
+        });
+    }
+
+    async function loadEquipmentInventory() {
+        equipmentLoadStatus = "loading";
+        renderEquipmentOptions(getSelectedRoom());
+
+        try {
+            const response = await fetch("/api/equipment", { headers: { Accept: "application/json" } });
+            if (!response.ok) throw new Error(`Không thể tải thiết bị (HTTP ${response.status}).`);
+
+            const inventory = await response.json();
+            if (!Array.isArray(inventory)) throw new Error("Danh sách thiết bị không hợp lệ.");
+            equipmentInventory = inventory;
+            equipmentLoadStatus = "ready";
+        } catch (error) {
+            equipmentLoadStatus = "error";
+            console.warn("Không thể tải thiết bị khả dụng:", error);
+        }
+
+        renderEquipmentOptions(getSelectedRoom());
+    }
+
     function renderEquipmentOptions(room) {
         if (!equipmentOptions) return;
 
         const selected = new Set(getSelectedEquipment());
         equipmentOptions.replaceChildren();
-        if (!room || !room.devices.length) {
+        if (!room) {
             const message = document.createElement("p");
             message.className = "equipment-empty";
-            message.textContent = room ? "Phòng này chưa khai báo thiết bị." : "Chọn phòng để xem thiết bị khả dụng.";
+            message.textContent = "Chọn phòng để xem thiết bị khả dụng.";
             equipmentOptions.append(message);
             return;
         }
 
-        room.devices.forEach(device => {
+        if (equipmentLoadStatus === "loading") {
+            const message = document.createElement("p");
+            message.className = "equipment-empty";
+            message.textContent = "Đang tải thiết bị khả dụng…";
+            equipmentOptions.append(message);
+            return;
+        }
+
+        if (equipmentLoadStatus === "error") {
+            const message = document.createElement("p");
+            message.className = "equipment-empty";
+            message.textContent = "Không tải được danh sách thiết bị. Vui lòng thử lại.";
+            equipmentOptions.append(message);
+            return;
+        }
+
+        const availableEquipment = getAvailableEquipment(room);
+        if (!availableEquipment.length) {
+            const message = document.createElement("p");
+            message.className = "equipment-empty";
+            message.textContent = "Phòng này hiện không có thiết bị khả dụng.";
+            equipmentOptions.append(message);
+            return;
+        }
+
+        availableEquipment.forEach(equipment => {
             const label = document.createElement("label");
             label.className = "checkbox-label";
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.name = "equipment";
-            checkbox.value = device;
-            checkbox.checked = selected.has(device);
+            checkbox.value = equipment.equipmentId;
+            checkbox.checked = selected.has(equipment.equipmentId);
             const text = document.createElement("span");
-            text.textContent = device;
+            const status = equipment.status ? ` · ${equipment.status}` : "";
+            text.textContent = `${equipment.equipmentName} · ${equipment.totalQuantity} trong kho${status}`;
             label.append(checkbox, text);
             equipmentOptions.append(label);
         });
@@ -270,37 +331,40 @@ document.addEventListener("DOMContentLoaded", function () {
             status: "SCHEDULED",
             participantCount,
             room: selectedRoom ? selectedRoom.name : "",
-            devices: selectedRoom ? (selectedRoom.devices || []) : []
+            devices: getSelectedEquipment().map(equipmentId =>
+                equipmentInventory.find(item => String(item.equipmentId) === String(equipmentId))?.equipmentName
+            ).filter(Boolean)
         };
     }
 
     async function bookEquipment(meetingId, payload) {
         const selectedRoom = getSelectedRoom();
-        const equipment = getSelectedEquipment();
-        if (!selectedRoom || equipment.length === 0) return [];
+        const selectedEquipment = getSelectedEquipment();
+        if (!selectedRoom || selectedEquipment.length === 0) return [];
 
-        const response = await fetch("/api/equipment/bookings", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                meetingId,
-                roomId: Number(selectedRoom.id),
-                roomName: selectedRoom.name,
-                equipment,
-                availableEquipment: selectedRoom.devices,
-                startTime: payload.startTime,
-                endTime: payload.endTime
-            })
-        });
+        return Promise.all(selectedEquipment.map(async equipmentId => {
+            const response = await fetch("/api/equipment/bookings", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    equipmentId,
+                    meetingId,
+                    room: selectedRoom.name,
+                    quantity: 1,
+                    startTime: payload.startTime,
+                    endTime: payload.endTime
+                })
+            });
 
-        const result = await response.json().catch(() => null);
-        if (!response.ok) {
-            throw new Error(result?.message || `Không thể đặt thiết bị (HTTP ${response.status}).`);
-        }
-        return Array.isArray(result) ? result : [];
+            const result = await response.json().catch(() => null);
+            if (!response.ok) {
+                throw new Error(result?.message || `Không thể đặt thiết bị (HTTP ${response.status}).`);
+            }
+            return result;
+        }));
     }
 
     async function loadMeetingForEdit(id) {
@@ -360,6 +424,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     populateRoomOptions();
+    loadEquipmentInventory();
     participantCountInput?.addEventListener("input", updateCapacityWarning);
     roomSelect?.addEventListener("change", renderRoomDeviceSummary);
     [meetingDateInput, startTimeInput, endTimeInput].forEach(input => {
