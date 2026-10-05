@@ -3,15 +3,20 @@ package com.ttcs.meetingmanagement.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class CreateEquipmentRequest {
 
+    @Size(max = 50, message = "Mã phòng không được vượt quá 50 ký tự")
     private String roomId;
 
     @NotBlank(message = "Tên thiết bị không được để trống")
+    @Size(max = 255, message = "Tên thiết bị không được vượt quá 255 ký tự")
     private String equipmentName;
 
     @NotBlank(message = "Loại thiết bị không được để trống")
+    @Size(max = 100, message = "Loại thiết bị không được vượt quá 100 ký tự")
     private String type;
 
     @NotNull(message = "Số lượng thiết bị không được để trống")
@@ -19,6 +24,10 @@ public class CreateEquipmentRequest {
     private Integer totalQuantity;
 
     @NotBlank(message = "Trạng thái thiết bị không được để trống")
+    @Pattern(
+            regexp = "^\\s*(AVAILABLE|BOOKED|IN_USE|MAINTENANCE|BROKEN)\\s*$",
+            message = "Trạng thái thiết bị không hợp lệ (chỉ chấp nhận: AVAILABLE, BOOKED, IN_USE, MAINTENANCE, BROKEN)"
+    )
     private String status;
 
     public String getRoomId() {
