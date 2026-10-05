@@ -21,7 +21,7 @@ public class Equipment {
     private String room;
 
     @Column(name = "total_quantity", nullable = false)
-    private int totalQuantity;
+    private int quantity;
 
     public Equipment() {
     }
@@ -31,6 +31,6 @@ public class Equipment {
     public void setName(String name) { this.name = name; }
     public String getRoom() { return room; }
     public void setRoom(String room) { this.room = room; }
-    public int getTotalQuantity() { return totalQuantity; }
-    public void setTotalQuantity(int totalQuantity) { this.totalQuantity = totalQuantity; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

@@ -59,7 +59,7 @@ public class EquipmentController {
         Equipment equipment = new Equipment();
         equipment.setName(request.name().trim());
         equipment.setRoom(request.room().trim());
-        equipment.setTotalQuantity(request.quantity());
+        equipment.setQuantity(request.quantity());
         return toResponse(equipmentRepository.save(equipment));
     }
 
@@ -146,7 +146,7 @@ public class EquipmentController {
             inUse += event.change();
             peak = Math.max(peak, inUse);
         }
-        if (peak > equipment.getTotalQuantity()) {
+        if (peak > equipment.getQuantity()) {
             String message = requestedStatus == EquipmentBookingStatus.MAINTENANCE
                     ? "Số lượng thiết bị bảo trì vượt quá số lượng còn khả dụng trong khung giờ này."
                     : "Không đủ thiết bị khả dụng trong khung giờ này.";
@@ -181,19 +181,19 @@ public class EquipmentController {
                 if (reservation.getStatus() == EquipmentBookingStatus.MAINTENANCE) maintenance += reservation.getQuantity();
             }
         }
-        int available = Math.max(0, equipment.getTotalQuantity() - booked - maintenance);
+        int available = Math.max(0, equipment.getQuantity() - booked - maintenance);
         List<EquipmentAvailabilityStatus> statuses = new ArrayList<>();
         if (available > 0) statuses.add(EquipmentAvailabilityStatus.AVAILABLE);
         if (booked > 0) statuses.add(EquipmentAvailabilityStatus.BOOKED);
         if (maintenance > 0) statuses.add(EquipmentAvailabilityStatus.MAINTENANCE);
         return new EquipmentStatusResponse(
-                equipment.getId(), equipment.getName(), equipment.getRoom(), equipment.getTotalQuantity(),
+                equipment.getId(), equipment.getName(), equipment.getRoom(), equipment.getQuantity(),
                 booked, maintenance, available, statuses
         );
     }
 
     private EquipmentResponse toResponse(Equipment equipment) {
-        return new EquipmentResponse(equipment.getId(), equipment.getName(), equipment.getRoom(), equipment.getTotalQuantity());
+        return new EquipmentResponse(equipment.getId(), equipment.getName(), equipment.getRoom(), equipment.getQuantity());
     }
 
     private BookingResponse toResponse(EquipmentBooking reservation) {

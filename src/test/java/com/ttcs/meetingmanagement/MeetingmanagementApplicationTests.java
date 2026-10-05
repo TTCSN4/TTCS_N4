@@ -34,8 +34,10 @@ class MeetingmanagementApplicationTests {
         Equipment equipment = new Equipment();
         equipment.setName("Test projector");
         equipment.setRoom(room);
-        equipment.setTotalQuantity(3);
+        equipment.setQuantity(3);
         equipment = equipmentRepository.save(equipment);
+        equipmentRepository.flush();
+        assertEquals(3, equipmentRepository.findById(equipment.getId()).orElseThrow().getQuantity());
 
         OffsetDateTime start = OffsetDateTime.parse("2030-05-10T09:00:00+07:00");
         saveReservation(equipment, room, 1, start, start.plusHours(1), EquipmentBookingStatus.BOOKED);
