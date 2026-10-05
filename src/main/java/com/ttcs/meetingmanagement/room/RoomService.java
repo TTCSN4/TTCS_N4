@@ -17,13 +17,20 @@ public class RoomService {
         this.roomRepository = roomRepository;
     }
 
+
+    // =========================
+    // US11 - QUẢN LÝ PHÒNG
+    // =========================
+
     // Lấy toàn bộ phòng
     public List<Room> getAllRooms() {
         return roomRepository.findAll();
     }
 
+
     // Lấy phòng theo mã
     public Room getRoomById(String roomId) {
+
         return roomRepository.findById(roomId)
                 .orElseThrow(() ->
                         new RoomException(
@@ -31,6 +38,7 @@ public class RoomService {
                         )
                 );
     }
+
 
     // Thêm phòng
     @Transactional
@@ -85,6 +93,7 @@ public class RoomService {
         return roomRepository.save(room);
     }
 
+
     // Cập nhật phòng
     @Transactional
     public Room updateRoom(
@@ -135,6 +144,7 @@ public class RoomService {
         return roomRepository.save(room);
     }
 
+
     // Xóa phòng
     @Transactional
     public void deleteRoom(String roomId) {
@@ -151,5 +161,27 @@ public class RoomService {
         }
 
         roomRepository.delete(room);
+    }
+
+
+    // =========================
+    // US10 - SỨC CHỨA PHÒNG
+    // =========================
+
+    public List<Room> filterByParticipantCount(
+            Integer participantCount) {
+
+        if (participantCount == null ||
+                participantCount <= 0) {
+
+            throw new RoomException(
+                    "Số người tham dự phải lớn hơn 0"
+            );
+        }
+
+        return roomRepository
+                .findByCapacityGreaterThanEqualOrderByCapacityAsc(
+                        participantCount
+                );
     }
 }
