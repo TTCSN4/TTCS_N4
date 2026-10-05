@@ -7,6 +7,11 @@ import com.ttcs.meetingmanagement.model.EquipmentAvailabilityStatus;
 import com.ttcs.meetingmanagement.model.EquipmentBooking;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
 import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
+import com.ttcs.meetingmanagement.model.Meeting;
+import com.ttcs.meetingmanagement.model.MeetingStatus;
+import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +36,38 @@ class MeetingmanagementApplicationTests {
 
     @Autowired
     private EquipmentBookingRepository bookingRepository;
+
+    @Autowired
+    private MeetingRepository meetingRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Test
+    @Transactional
+    void meetingQueriesFetchParticipantsBeforeSerialization() {
+        OffsetDateTime start = OffsetDateTime.parse("2030-07-10T09:00:00+07:00");
+        Meeting meeting = new Meeting();
+        meeting.setTitle("Meeting with participants");
+        meeting.setStartTime(start);
+        meeting.setEndTime(start.plusHours(1));
+        meeting.setOrganizerId(1L);
+        meeting.setStatus(MeetingStatus.SCHEDULED);
+        meeting.setCreatedAt(start.minusDays(1));
+        meeting.setUpdatedAt(start.minusDays(1));
+        meeting.setParticipants(List.of("attendee@example.com"));
+        Meeting saved = meetingRepository.saveAndFlush(meeting);
+        entityManager.clear();
+
+        Meeting loaded = meetingRepository.findAllByOrderByStartTimeAsc().stream()
+                .filter(item -> item.getId().equals(saved.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(entityManager.getEntityManagerFactory()
+                .getPersistenceUnitUtil()
+                .isLoaded(loaded, "participants"));
+        assertEquals(List.of("attendee@example.com"), loaded.getParticipants());
+    }
 
     @Test
     @Transactional

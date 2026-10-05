@@ -3,6 +3,9 @@
 Ứng dụng chạy tại cổng `8080`. Mặc định dùng H2; profile `mysql` đọc cấu hình
 từ `DB_URL`, `DB_USERNAME` và `DB_PASSWORD`.
 
+Giao diện tạo cuộc họp từ frontend US13 có tại `/create-meeting.html`; trang
+này nạp phòng từ danh sách thiết bị trên backend và đặt thiết bị cùng cuộc họp.
+
 ## Tra cứu trạng thái thiết bị
 
 `GET /api/equipment/status?room=P.101&at=2030-05-10T09:30:00%2B07:00`

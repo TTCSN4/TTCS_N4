@@ -22,6 +22,8 @@ button { cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 9px; color: var(--ink); font: 800 20px Manrope, sans-serif; text-decoration: none; }
 .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--green); color: white; font-size: 17px; }
 .tabs { display: flex; align-self: stretch; gap: 26px; }
+.new-meeting-link { color: var(--green); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.new-meeting-link:hover { color: var(--green-dark); text-decoration: underline; }
 .tab { position: relative; border: 0; padding: 2px 0 0; background: none; color: var(--muted); font-weight: 600; }
 .tab.active { color: var(--green-dark); }
 .tab.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--green); content: ''; }
