@@ -130,6 +130,18 @@
             <label class="field">Lặp lại<select id="recurrence"><option value="NONE">Không lặp</option><option value="WEEKLY">Hàng tuần</option><option value="MONTHLY">Hàng tháng</option></select></label>
             <label class="field" id="repeat-count-wrap" hidden>Số lần lặp thêm<input id="repeat-count" type="number" min="1" max="12" value="3"></label>
         </div>
+        <section class="meeting-equipment" id="meeting-equipment-section" aria-labelledby="meeting-equipment-title">
+            <div class="meeting-equipment-heading">
+                <div>
+                    <strong id="meeting-equipment-title">Thiết bị &amp; dịch vụ</strong>
+                    <p>Chọn thiết bị khả dụng cho phòng và khung giờ cuộc họp.</p>
+                </div>
+                <span id="meeting-equipment-count" class="field-hint"></span>
+            </div>
+            <div id="meeting-equipment-options" class="meeting-equipment-options" aria-live="polite">
+                <p class="field-hint">Nhập phòng và thời gian để xem thiết bị.</p>
+            </div>
+        </section>
         <section class="suggestion-box">
             <div class="suggestion-heading"><div><strong>Gợi ý thời gian</strong><p>Kiểm tra lịch trống của người tham dự</p></div><button type="button" id="find-times" class="button button-secondary">Tìm giờ trống</button></div>
             <div id="suggestions" class="suggestions" aria-live="polite"></div>

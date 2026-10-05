@@ -12,6 +12,11 @@ lượng bảo trì, số lượng còn khả dụng và danh sách trạng thá
 `AVAILABLE`, `BOOKED`, `MAINTENANCE`. Một thiết bị có thể có nhiều trạng thái
 đồng thời nếu các số lượng khác nhau đang ở từng trạng thái.
 
+Trong giao diện tạo cuộc họp, nhập phòng và khung giờ để tải danh sách trạng
+thái thiết bị. Chỉ thiết bị còn số lượng khả dụng mới chọn được; khi tạo cuộc
+họp, thiết bị đã chọn được đặt cho cuộc họp và các lần lặp. Nếu đặt thiết bị
+thất bại, hệ thống hủy các lượt đặt đã tạo và cuộc họp vừa tạo.
+
 Danh sách và tạo thiết bị dùng `GET /api/equipment` và `POST /api/equipment`.
 Để ghi nhận khoảng thời gian bảo trì, gửi:
 

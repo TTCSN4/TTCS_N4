@@ -88,6 +88,22 @@ dialog::backdrop { background: #18251f70; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
 .required { color: #b34a4a; }
 .field-hint { margin-left: auto; color: #89948e; font-size: 10px; font-weight: 400; }
+.meeting-equipment { margin: 15px 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #fbfcfa; }
+.meeting-equipment-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.meeting-equipment-heading strong { font: 700 13px Manrope, sans-serif; }
+.meeting-equipment-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+.meeting-equipment-options { display: grid; gap: 7px; }
+.meeting-equipment-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 5px; background: white; cursor: pointer; }
+.meeting-equipment-option.unavailable { color: var(--muted); cursor: not-allowed; }
+.meeting-equipment-option input { margin: 3px 0 0; accent-color: var(--green); }
+.meeting-equipment-option input:disabled { cursor: not-allowed; }
+.meeting-equipment-details { display: grid; flex: 1; gap: 4px; }
+.meeting-equipment-details strong { font-size: 12px; }
+.meeting-equipment-quantities { color: var(--muted); font-size: 10px; }
+.meeting-equipment-status { width: fit-content; padding: 3px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+.meeting-equipment-status.available { color: #166534; background: #dcfce7; }
+.meeting-equipment-status.unavailable { color: #9a3412; background: #ffedd5; }
+.meeting-equipment[hidden] { display: none; }
 .recurrence-row { align-items: end; }
 .suggestion-box { margin: 3px 0 14px; padding: 12px; border: 1px solid #e6ebe6; border-radius: 5px; background: #fafbf9; }
 .suggestion-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

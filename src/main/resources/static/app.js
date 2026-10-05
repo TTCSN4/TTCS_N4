@@ -17,6 +17,9 @@ const fields = {
 let meetings = [];
 let equipment = [];
 let equipmentStatuses = new Map();
+let meetingEquipment = [];
+let selectedMeetingEquipmentIds = new Set();
+let meetingEquipmentRequestSequence = 0;
 let currentView = 'meetings';
 let toastTimer;
 
@@ -172,6 +175,7 @@ function render() {
 
 function openCreate() {
     form.reset();
+    selectedMeetingEquipmentIds.clear();
     fields.id.value = '';
     fields.repeatCount.value = '3';
     document.querySelector('#dialog-title').textContent = 'Tạo cuộc họp';
@@ -184,6 +188,8 @@ function openCreate() {
     const end = new Date(start.getTime() + 60 * 60 * 1000);
     fields.start.value = toLocalInput(start);
     fields.end.value = toLocalInput(end);
+    document.querySelector('#meeting-equipment-section').hidden = false;
+    refreshMeetingEquipment();
     dialog.showModal();
 }
 
@@ -203,6 +209,8 @@ function openEdit(id) {
     fields.start.value = toLocalInput(new Date(meeting.startTime));
     fields.end.value = toLocalInput(new Date(meeting.endTime));
     fields.participants.value = (meeting.participants || []).join(', ');
+    selectedMeetingEquipmentIds.clear();
+    document.querySelector('#meeting-equipment-section').hidden = true;
     fields.recurrence.value = 'NONE';
     document.querySelector('#dialog-title').textContent = 'Chỉnh sửa cuộc họp';
     document.querySelector('#save-meeting').textContent = 'Lưu thay đổi';
@@ -226,6 +234,159 @@ function payload() {
     };
 }
 
+function renderMeetingEquipment(message) {
+    const options = document.querySelector('#meeting-equipment-options');
+    const count = document.querySelector('#meeting-equipment-count');
+    options.replaceChildren();
+    if (message) {
+        const hint = document.createElement('p');
+        hint.className = 'field-hint';
+        hint.textContent = message;
+        options.append(hint);
+        count.textContent = '';
+        return;
+    }
+
+    if (!meetingEquipment.length) {
+        const empty = document.createElement('p');
+        empty.className = 'field-hint';
+        empty.textContent = 'Phòng này chưa có thiết bị.';
+        options.append(empty);
+        count.textContent = '0 thiết bị';
+        return;
+    }
+
+    const selectableIds = new Set(meetingEquipment
+        .filter(item => item.availableQuantity > 0)
+        .map(item => String(item.equipmentId)));
+    selectedMeetingEquipmentIds.forEach(id => {
+        if (!selectableIds.has(id)) selectedMeetingEquipmentIds.delete(id);
+    });
+
+    meetingEquipment.forEach(item => {
+        const available = item.availableQuantity > 0;
+        const label = document.createElement('label');
+        label.className = `meeting-equipment-option${available ? '' : ' unavailable'}`;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = item.equipmentId;
+        checkbox.checked = available && selectedMeetingEquipmentIds.has(String(item.equipmentId));
+        checkbox.disabled = !available;
+        checkbox.addEventListener('change', () => {
+            const id = String(item.equipmentId);
+            if (checkbox.checked) selectedMeetingEquipmentIds.add(id);
+            else selectedMeetingEquipmentIds.delete(id);
+        });
+
+        const details = document.createElement('span');
+        details.className = 'meeting-equipment-details';
+        const name = document.createElement('strong');
+        name.textContent = item.name;
+
+        const quantities = document.createElement('span');
+        quantities.className = 'meeting-equipment-quantities';
+        quantities.textContent = `${item.availableQuantity}/${item.totalQuantity} có sẵn · ${item.bookedQuantity} đã đặt · ${item.maintenanceQuantity} bảo trì`;
+
+        const status = document.createElement('span');
+        status.className = `meeting-equipment-status ${available ? 'available' : 'unavailable'}`;
+        status.textContent = available
+            ? 'Có thể chọn'
+            : item.maintenanceQuantity > 0 ? 'Bảo trì / hết hàng' : 'Đã đặt hết';
+
+        details.append(name, quantities, status);
+        label.append(checkbox, details);
+        options.append(label);
+    });
+    count.textContent = `${meetingEquipment.length} thiết bị`;
+}
+
+async function refreshMeetingEquipment() {
+    const sequence = ++meetingEquipmentRequestSequence;
+    const room = fields.room.value.trim();
+    if (!room) {
+        meetingEquipment = [];
+        renderMeetingEquipment('Chọn phòng để xem thiết bị khả dụng.');
+        return;
+    }
+
+    if (fields.start.value && fields.end.value
+            && new Date(fields.end.value) <= new Date(fields.start.value)) {
+        meetingEquipment = [];
+        renderMeetingEquipment('Thời gian kết thúc phải sau thời gian bắt đầu.');
+        return;
+    }
+
+    renderMeetingEquipment('Đang tải trạng thái thiết bị…');
+    const at = fields.start.value
+        ? new Date(fields.start.value).toISOString()
+        : new Date().toISOString();
+    try {
+        const result = await api(`/api/equipment/status?room=${encodeURIComponent(room)}&at=${encodeURIComponent(at)}`);
+        if (sequence !== meetingEquipmentRequestSequence) return;
+        meetingEquipment = result;
+        renderMeetingEquipment();
+    } catch (requestError) {
+        if (sequence !== meetingEquipmentRequestSequence) return;
+        meetingEquipment = [];
+        renderMeetingEquipment(`Không tải được trạng thái thiết bị: ${requestError.message}`);
+    }
+}
+
+async function bookSelectedEquipment(createdMeeting) {
+    const selectedIds = [...selectedMeetingEquipmentIds];
+    if (selectedIds.length === 0) return;
+
+    let occurrences = [createdMeeting];
+    const createdBookings = [];
+
+    try {
+        const allMeetings = await api('/api/meetings');
+        const matchingMeetings = allMeetings.filter(meeting =>
+            Number(meeting.id) === Number(createdMeeting.id)
+            || Number(meeting.recurrenceSeriesId) === Number(createdMeeting.id)
+        );
+        if (matchingMeetings.length) occurrences = matchingMeetings;
+
+        for (const meeting of occurrences) {
+            for (const selectedId of selectedIds) {
+                const booking = await api('/api/equipment/bookings', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        equipmentId: Number(selectedId),
+                        meetingId: meeting.id,
+                        room: meeting.room,
+                        quantity: 1,
+                        startTime: meeting.startTime,
+                        endTime: meeting.endTime
+                    })
+                });
+                createdBookings.push(booking);
+            }
+        }
+    } catch (bookingError) {
+        const rollbackErrors = [];
+        for (const booking of createdBookings.reverse()) {
+            try {
+                await api(`/api/equipment/bookings/${booking.id}`, { method: 'DELETE' });
+            } catch (rollbackError) {
+                rollbackErrors.push(rollbackError.message);
+            }
+        }
+        for (const meeting of [...occurrences].reverse()) {
+            try {
+                await api(`/api/meetings/${meeting.id}`, { method: 'DELETE' });
+            } catch (rollbackError) {
+                rollbackErrors.push(rollbackError.message);
+            }
+        }
+        const rollbackMessage = rollbackErrors.length
+            ? ` Không thể hoàn tác đầy đủ: ${rollbackErrors.join('; ')}.`
+            : ' Cuộc họp đã được hủy.';
+        throw new Error(`Không thể đặt thiết bị: ${bookingError.message}.${rollbackMessage}`);
+    }
+}
+
 form.addEventListener('submit', async event => {
     event.preventDefault();
     const error = document.querySelector('#form-error');
@@ -236,10 +397,11 @@ form.addEventListener('submit', async event => {
     }
     try {
         const id = fields.id.value;
-        await api(id ? `/api/meetings/${id}` : '/api/meetings', {
+        const meeting = await api(id ? `/api/meetings/${id}` : '/api/meetings', {
             method: id ? 'PUT' : 'POST',
             body: JSON.stringify(payload())
         });
+        if (!id) await bookSelectedEquipment(meeting);
         dialog.close();
         showToast(id ? 'Đã cập nhật cuộc họp.' : 'Đã tạo cuộc họp.');
         await loadMeetings();
@@ -247,6 +409,13 @@ form.addEventListener('submit', async event => {
         error.textContent = requestError.message;
     }
 });
+
+fields.room.addEventListener('input', () => {
+    selectedMeetingEquipmentIds.clear();
+    refreshMeetingEquipment();
+});
+fields.start.addEventListener('change', refreshMeetingEquipment);
+fields.end.addEventListener('change', refreshMeetingEquipment);
 
 document.querySelector('#find-times').addEventListener('click', async () => {
     const date = fields.start.value ? fields.start.value.slice(0, 10) : toLocalInput(new Date()).slice(0, 10);
@@ -268,6 +437,7 @@ document.querySelector('#find-times').addEventListener('click', async () => {
             const slot = suggestions[Number(button.dataset.slot)];
             fields.start.value = toLocalInput(new Date(slot.startTime));
             fields.end.value = toLocalInput(new Date(slot.endTime));
+            refreshMeetingEquipment();
         }));
     } catch (error) {
         target.textContent = error.message;
