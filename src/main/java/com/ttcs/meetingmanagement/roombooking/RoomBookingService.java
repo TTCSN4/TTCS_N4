@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import java.time.OffsetDateTime;
 @Service
 public class RoomBookingService {
 
@@ -105,4 +105,50 @@ public class RoomBookingService {
                 "Room booked successfully"
         );
     }
+    @Transactional
+public RoomBookingResponse cancelRoomBooking(Long meetingId) {
+
+    // 1. Kiểm tra cuộc họp tồn tại
+    Meeting meeting = meetingRepository
+            .findById(meetingId)
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Meeting not found: " + meetingId
+                    )
+            );
+
+    // 2. Kiểm tra cuộc họp hiện có đặt phòng hay không
+    if (meeting.getRoom() == null || meeting.getRoom().isBlank()) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Meeting has no room booking to cancel"
+        );
+    }
+
+    // 3. Lưu thông tin phòng và khung giờ trước khi giải phóng
+    String releasedRoomId = meeting.getRoom();
+    OffsetDateTime startTime = meeting.getStartTime();
+    OffsetDateTime endTime = meeting.getEndTime();
+
+    // 4. Hủy liên kết Meeting - Room
+    // Khi room = null, truy vấn kiểm tra xung đột của US08
+    // sẽ không còn coi khung giờ này là đã được đặt.
+    meeting.setRoom(null);
+
+    // 5. Cập nhật thời gian chỉnh sửa
+    meeting.setUpdatedAt(OffsetDateTime.now());
+
+    // 6. Lưu xuống database
+    meetingRepository.save(meeting);
+
+    // 7. Trả kết quả
+    return new RoomBookingResponse(
+            meeting.getId(),
+            releasedRoomId,
+            startTime,
+            endTime,
+            "Room booking cancelled successfully"
+    );
+}
 }
