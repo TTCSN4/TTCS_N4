@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # API quản lý cuộc họp và trạng thái thiết bị
 
 Ứng dụng chạy tại cổng `8080`. Mặc định dùng H2; profile `mysql` đọc cấu hình
@@ -15,6 +16,23 @@ múi giờ. Mỗi mục trả về `equipmentId`, `name`, `room`, `totalQuantity
 `bookedQuantity`, `maintenanceQuantity`, `availableQuantity` và `statuses`.
 Trạng thái được trả về là `AVAILABLE`, `BOOKED` và/hoặc `MAINTENANCE` tùy theo
 số lượng thuộc từng trạng thái tại thời điểm truy vấn.
+=======
+# TTCS_N4_1 - API đặt thiết bị
+
+Ứng dụng cung cấp API đặt thiết bị cho phòng họp. Máy chủ chạy ở cổng `8080`.
+
+## Tạo thiết bị
+
+`POST /api/equipment`
+
+```json
+{
+  "name": "Máy chiếu",
+  "room": "P.101",
+  "quantity": 2
+}
+```
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 
 ## Đặt thiết bị
 
@@ -22,8 +40,13 @@ số lượng thuộc từng trạng thái tại thời điểm truy vấn.
 
 ```json
 {
+<<<<<<< HEAD
   "equipmentId": "EQ-123",
   "meetingId": 42,
+=======
+  "equipmentId": 1,
+  "meetingId": 1,
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
   "room": "P.101",
   "quantity": 1,
   "startTime": "2030-05-10T09:00:00+07:00",
@@ -31,6 +54,7 @@ số lượng thuộc từng trạng thái tại thời điểm truy vấn.
 }
 ```
 
+<<<<<<< HEAD
 `meetingId` có thể bỏ qua nếu lượt đặt không gắn với cuộc họp. Khi có
 `meetingId`, cuộc họp phải tồn tại, đang được lên lịch, cùng phòng và bao trùm
 khung giờ đặt. Hệ thống kiểm tra số lượng trên toàn khoảng thời gian và trả
@@ -65,3 +89,21 @@ tra với các lượt đặt và bảo trì đang tồn tại.
 Trong giao diện, thiết bị có thể được chọn ngay khi tạo cuộc họp. Với cuộc họp
 lặp lại, lượt đặt được tạo cho từng lần diễn ra; nếu có lỗi, giao diện hủy các
 lượt đặt và cuộc họp vừa tạo.
+=======
+`meetingId` có thể bỏ trống hoặc để `null`. Khi có giá trị, cuộc họp phải tồn tại,
+đang được lên lịch, bao trùm khung giờ đặt và không khác phòng được yêu cầu.
+Thiết bị phải thuộc phòng đó. Đặt vượt số lượng khả dụng trong bất kỳ phần nào
+của khung giờ bị từ chối với HTTP `409 Conflict`; khoảng giờ được xem là
+`[startTime, endTime)`, vì vậy hai lượt đặt liền kề không bị xem là trùng.
+
+## Hủy đặt
+
+`DELETE /api/equipment/bookings/{id}`
+
+Danh sách thiết bị có thể lấy từ `GET /api/equipment`; cuộc họp có thể tạo và
+tra cứu qua `/api/meetings`.
+
+Mặc định ứng dụng dùng H2 cục bộ. Để API tra cứu trong `TTCS_N4_2` nhìn thấy các
+lượt đặt này, hãy chạy cả hai ứng dụng với profile `mysql` và cùng cấu hình
+`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`.
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94

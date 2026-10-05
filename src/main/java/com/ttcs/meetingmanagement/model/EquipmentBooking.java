@@ -1,6 +1,9 @@
 package com.ttcs.meetingmanagement.model;
 
+<<<<<<< HEAD
 import com.ttcs.meetingmanagement.equipment.Equipment;
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

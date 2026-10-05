@@ -2,9 +2,12 @@ package com.ttcs.meetingmanagement.controller;
 
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.model.MeetingStatus;
+<<<<<<< HEAD
 import com.ttcs.meetingmanagement.model.EquipmentBooking;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
 import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +32,17 @@ import java.util.Locale;
 @RequestMapping("/api/meetings")
 public class MeetingController {
     private final MeetingRepository meetings;
+<<<<<<< HEAD
     private final EquipmentBookingRepository equipmentBookings;
 
     public MeetingController(MeetingRepository meetings, EquipmentBookingRepository equipmentBookings) {
         this.meetings = meetings;
         this.equipmentBookings = equipmentBookings;
+=======
+
+    public MeetingController(MeetingRepository meetings) {
+        this.meetings = meetings;
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     }
 
     @GetMapping
@@ -94,16 +103,22 @@ public class MeetingController {
     }
 
     @DeleteMapping("/{id}")
+<<<<<<< HEAD
     @Transactional
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     public void cancel(@PathVariable Long id) {
         Meeting meeting = findMeeting(id);
         meeting.setStatus(MeetingStatus.CANCELLED);
         meeting.setUpdatedAt(OffsetDateTime.now());
         meetings.save(meeting);
+<<<<<<< HEAD
         for (EquipmentBooking booking : equipmentBookings.findAllByMeetingId(id)) {
             booking.setStatus(EquipmentBookingStatus.CANCELLED);
             equipmentBookings.save(booking);
         }
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     }
 
     @PostMapping("/suggestions")

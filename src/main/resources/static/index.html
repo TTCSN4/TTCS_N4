@@ -14,7 +14,10 @@
         <button class="tab" data-view="history">Lịch sử</button>
         <button class="tab" data-view="equipment">Thiết bị</button>
     </nav>
+<<<<<<< HEAD
     <a class="new-meeting-link" href="/create-meeting.html">Tạo lịch mới</a>
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     <button class="button button-primary" id="new-meeting"><span aria-hidden="true">＋</span> Tạo cuộc họp</button>
     <button class="button button-primary" id="new-equipment" hidden><span aria-hidden="true">＋</span> Thêm thiết bị</button>
 </header>
@@ -67,15 +70,25 @@
             <div>
                 <p class="eyebrow">PHÒNG HỌP & THIẾT BỊ</p>
                 <h1>Thiết bị</h1>
+<<<<<<< HEAD
                 <p class="subheading">Tra cứu số lượng thiết bị có sẵn, đã đặt hoặc đang bảo trì theo phòng và thời điểm.</p>
+=======
+                <p class="subheading">Đặt thiết bị theo phòng và kiểm tra số lượng trùng lịch tự động.</p>
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
             </div>
             <button class="button button-primary equipment-mobile-add" id="new-equipment-mobile"><span aria-hidden="true">＋</span> Thêm thiết bị</button>
         </section>
 
+<<<<<<< HEAD
         <section class="equipment-toolbar" aria-label="Tra cứu trạng thái thiết bị">
             <label class="field">Phòng<select id="equipment-room-filter"><option value="">Tất cả phòng</option></select></label>
             <label class="field">Thời điểm<input id="equipment-at" type="datetime-local"></label>
             <button class="button button-secondary" id="refresh-equipment">Tra cứu trạng thái</button>
+=======
+        <section class="equipment-toolbar" aria-label="Lọc thiết bị theo phòng">
+            <label class="field">Phòng<select id="equipment-room-filter"><option value="">Tất cả phòng</option></select></label>
+            <button class="button button-secondary" id="refresh-equipment">Làm mới danh sách</button>
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         </section>
 
         <section class="equipment-layout">
@@ -88,10 +101,32 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <aside class="equipment-panel">
                 <div class="section-title"><h2>Trạng thái thiết bị</h2></div>
                 <p>Chọn phòng và thời điểm để xem số lượng có sẵn, đã đặt và bảo trì. Thiết bị được đặt trực tiếp khi tạo cuộc họp.</p>
             </aside>
+=======
+            <form class="equipment-panel equipment-form" id="booking-form">
+                <div class="section-title"><h2>Đặt thiết bị</h2><span>Kiểm tra trùng lịch tự động</span></div>
+                <div class="equipment-form-body">
+                    <div class="section-title"><span>Đặt dùng</span></div>
+                    <label class="field">Thiết bị<select id="booking-equipment" required></select></label>
+                    <label class="field">Gắn với cuộc họp <span class="field-hint">Không bắt buộc</span><select id="booking-meeting"><option value="">Không gắn cuộc họp</option></select></label>
+                    <label class="field">Phòng<input id="booking-room" required placeholder="Chọn thiết bị trước"></label>
+                    <div class="field-row">
+                        <label class="field">Số lượng<input id="booking-quantity" type="number" min="1" value="1" required></label>
+                        <div class="field" aria-hidden="true"><span>Sẵn có</span><strong id="selected-availability">Chọn khung giờ</strong></div>
+                    </div>
+                    <div class="field-row">
+                        <label class="field">Bắt đầu<input id="booking-start" type="datetime-local" required></label>
+                        <label class="field">Kết thúc<input id="booking-end" type="datetime-local" required></label>
+                    </div>
+                    <p class="form-error" id="booking-error" role="alert"></p>
+                    <button class="button button-primary booking-submit" type="submit">Xác nhận đặt</button>
+                </div>
+            </form>
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         </section>
     </section>
 </main>
@@ -103,12 +138,18 @@
             <button type="button" class="icon-button" id="close-equipment-dialog" aria-label="Đóng">×</button>
         </div>
         <label class="field">Tên thiết bị<input id="equipment-name" maxlength="160" required placeholder="Ví dụ: Máy chiếu"></label>
+<<<<<<< HEAD
         <label class="field">Loại thiết bị<input id="equipment-type" maxlength="100" required value="GENERAL"></label>
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         <div class="field-row">
             <label class="field">Phòng<input id="equipment-room" maxlength="120" required placeholder="Ví dụ: P.101"></label>
             <label class="field">Số lượng<input id="equipment-total" type="number" min="1" value="1" required></label>
         </div>
+<<<<<<< HEAD
         <input id="equipment-status" type="hidden" value="AVAILABLE">
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         <p class="form-error" id="equipment-error" role="alert"></p>
         <div class="dialog-actions"><button type="button" class="button button-secondary" id="cancel-equipment-dialog">Đóng</button><button type="submit" class="button button-primary">Lưu thiết bị</button></div>
     </form>
@@ -133,6 +174,7 @@
             <label class="field">Lặp lại<select id="recurrence"><option value="NONE">Không lặp</option><option value="WEEKLY">Hàng tuần</option><option value="MONTHLY">Hàng tháng</option></select></label>
             <label class="field" id="repeat-count-wrap" hidden>Số lần lặp thêm<input id="repeat-count" type="number" min="1" max="12" value="3"></label>
         </div>
+<<<<<<< HEAD
         <section class="meeting-equipment" id="meeting-equipment-section" aria-labelledby="meeting-equipment-title">
             <div class="meeting-equipment-heading">
                 <div>
@@ -145,6 +187,8 @@
                 <p class="field-hint">Nhập phòng và thời gian để xem thiết bị.</p>
             </div>
         </section>
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         <section class="suggestion-box">
             <div class="suggestion-heading"><div><strong>Gợi ý thời gian</strong><p>Kiểm tra lịch trống của người tham dự</p></div><button type="button" id="find-times" class="button button-secondary">Tìm giờ trống</button></div>
             <div id="suggestions" class="suggestions" aria-live="polite"></div>
