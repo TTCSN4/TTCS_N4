@@ -60,7 +60,7 @@ public class EquipmentController {
         Equipment equipment = new Equipment();
         equipment.setName(request.name().trim());
         equipment.setRoom(request.room().trim());
-        equipment.setTotalQuantity(request.quantity());
+        equipment.setQuantity(request.quantity());
         return toResponse(equipmentRepository.save(equipment));
     }
 
@@ -149,7 +149,7 @@ public class EquipmentController {
             inUse += event.change();
             peak = Math.max(peak, inUse);
         }
-        if (peak > equipment.getTotalQuantity()) {
+        if (peak > equipment.getQuantity()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Không đủ thiết bị khả dụng trong khung giờ này.");
         }
     }
@@ -173,7 +173,7 @@ public class EquipmentController {
     }
 
     private EquipmentResponse toResponse(Equipment equipment) {
-        return new EquipmentResponse(equipment.getId(), equipment.getName(), equipment.getRoom(), equipment.getTotalQuantity());
+        return new EquipmentResponse(equipment.getId(), equipment.getName(), equipment.getRoom(), equipment.getQuantity());
     }
 
     private BookingResponse toResponse(EquipmentBooking reservation) {

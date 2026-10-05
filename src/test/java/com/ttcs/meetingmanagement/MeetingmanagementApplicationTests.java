@@ -30,6 +30,10 @@ class MeetingmanagementApplicationTests {
     @Test
     void overlappingBookingsCannotExceedEquipmentQuantity() {
         Equipment equipment = createEquipment("P-booking-capacity", 2);
+        equipmentRepository.flush();
+        Equipment savedEquipment = equipmentRepository.findById(equipment.getId()).orElseThrow();
+        assertEquals(2, savedEquipment.getQuantity());
+
         OffsetDateTime start = OffsetDateTime.parse("2030-05-10T09:00:00+07:00");
         OffsetDateTime end = OffsetDateTime.parse("2030-05-10T11:00:00+07:00");
 
@@ -85,7 +89,7 @@ class MeetingmanagementApplicationTests {
         Equipment equipment = new Equipment();
         equipment.setName("Test projector");
         equipment.setRoom(room);
-        equipment.setTotalQuantity(quantity);
+        equipment.setQuantity(quantity);
         return equipmentRepository.save(equipment);
     }
 
