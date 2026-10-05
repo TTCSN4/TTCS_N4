@@ -16,10 +16,13 @@ const fields = {
 
 let meetings = [];
 let equipment = [];
+<<<<<<< HEAD
 let equipmentStatuses = new Map();
 let meetingEquipment = [];
 let selectedMeetingEquipmentIds = new Set();
 let meetingEquipmentRequestSequence = 0;
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 let currentView = 'meetings';
 let toastTimer;
 
@@ -63,11 +66,16 @@ function setView(view) {
     document.querySelector('#new-equipment').hidden = view !== 'equipment';
     if (view === 'equipment') {
         loadEquipment();
+<<<<<<< HEAD
+=======
+        loadBookingMeetings();
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     } else {
         loadMeetings();
     }
 }
 
+<<<<<<< HEAD
 async function loadEquipment() {
     try {
         equipment = (await api('/api/equipment')).map(item => ({
@@ -76,17 +84,43 @@ async function loadEquipment() {
             room: item.roomId,
             totalQuantity: item.totalQuantity
         }));
+=======
+async function loadBookingMeetings() {
+    try {
+        const allMeetings = await api('/api/meetings');
+        const select = document.querySelector('#booking-meeting');
+        const selectedId = select.value;
+        const active = allMeetings.filter(meeting => meeting.status === 'SCHEDULED' && new Date(meeting.endTime) > new Date());
+        select.innerHTML = '<option value="">Không gắn cuộc họp</option>' + active.map(meeting =>
+            `<option value="${meeting.id}">${escapeHtml(meeting.title)} · ${formatDate(meeting.startTime, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}${meeting.room ? ` · ${escapeHtml(meeting.room)}` : ''}</option>`
+        ).join('');
+        if (active.some(meeting => String(meeting.id) === selectedId)) select.value = selectedId;
+        select.dataset.meetings = JSON.stringify(active);
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+async function loadEquipment() {
+    try {
+        equipment = await api('/api/equipment');
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         const rooms = [...new Set(equipment.map(item => item.room))].sort((a, b) => a.localeCompare(b, 'vi'));
         const roomFilter = document.querySelector('#equipment-room-filter');
         const selectedRoom = roomFilter.value;
         roomFilter.innerHTML = '<option value="">Tất cả phòng</option>' + rooms.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
         if (rooms.includes(selectedRoom)) roomFilter.value = selectedRoom;
+<<<<<<< HEAD
+=======
+        updateEquipmentSelect();
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         await refreshEquipmentStatuses();
     } catch (error) {
         showToast(error.message);
     }
 }
 
+<<<<<<< HEAD
 async function refreshEquipmentStatuses() {
     const atInput = document.querySelector('#equipment-at');
     if (!atInput.value) atInput.value = toLocalInput(new Date());
@@ -100,10 +134,25 @@ async function refreshEquipmentStatuses() {
     } catch (error) {
         showToast(error.message);
     }
+=======
+function updateEquipmentSelect() {
+    const select = document.querySelector('#booking-equipment');
+    const selected = select.value;
+    select.innerHTML = '<option value="">Chọn thiết bị</option>' + equipment.map(item =>
+        `<option value="${item.id}">${escapeHtml(item.name)} · ${escapeHtml(item.room)} (${item.totalQuantity})</option>`
+    ).join('');
+    if (equipment.some(item => String(item.id) === selected)) select.value = selected;
+}
+
+async function refreshEquipmentStatuses() {
+    renderEquipment();
+    updateSelectedAvailability();
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 }
 
 function renderEquipment() {
     const list = document.querySelector('#equipment-list');
+<<<<<<< HEAD
     const labels = { AVAILABLE: 'Có sẵn', BOOKED: 'Đã đặt', MAINTENANCE: 'Bảo trì' };
     const roomFilter = document.querySelector('#equipment-room-filter').value;
     const visibleEquipment = equipment.filter(item => !roomFilter || item.room === roomFilter);
@@ -114,17 +163,44 @@ function renderEquipment() {
             <div class="equipment-main"><span class="equipment-icon" aria-hidden="true">▧</span><div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.room)}</span></div></div>
             <div class="equipment-quantities"><span><strong>${status?.availableQuantity ?? item.totalQuantity}</strong> có sẵn</span><span>${status?.bookedQuantity ?? 0} đặt · ${status?.maintenanceQuantity ?? 0} bảo trì / ${item.totalQuantity}</span></div>
             <div class="equipment-statuses">${badges || '<span class="field-hint">Chưa có trạng thái</span>'}</div>
+=======
+    const roomFilter = document.querySelector('#equipment-room-filter').value;
+    const visibleEquipment = equipment.filter(item => !roomFilter || item.room === roomFilter);
+    list.innerHTML = visibleEquipment.map(item => {
+        return `<article class="equipment-row">
+            <div class="equipment-main"><span class="equipment-icon" aria-hidden="true">▧</span><div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.room)}</span></div></div>
+            <div class="equipment-quantities"><span><strong>${item.totalQuantity}</strong> tổng số lượng</span></div>
+            <div class="equipment-statuses"><span class="field-hint">Số lượng khả dụng được kiểm tra khi đặt</span></div>
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         </article>`;
     }).join('');
     document.querySelector('#equipment-count').textContent = `${visibleEquipment.length} thiết bị`;
     document.querySelector('#empty-equipment').hidden = visibleEquipment.length > 0;
 }
 
+<<<<<<< HEAD
 function openEquipmentDialog() {
     document.querySelector('#equipment-form').reset();
     document.querySelector('#equipment-total').value = '1';
     document.querySelector('#equipment-type').value = 'GENERAL';
     document.querySelector('#equipment-status').value = 'AVAILABLE';
+=======
+async function updateSelectedAvailability() {
+    const id = Number(document.querySelector('#booking-equipment').value);
+    const item = equipment.find(entry => entry.id === id);
+    const start = document.querySelector('#booking-start').value;
+    const output = document.querySelector('#selected-availability');
+    if (!item || !start) {
+        output.textContent = 'Chọn khung giờ';
+        return;
+    }
+    output.textContent = 'Kiểm tra khi gửi yêu cầu';
+}
+
+function openEquipmentDialog() {
+    document.querySelector('#equipment-form').reset();
+    document.querySelector('#equipment-total').value = '1';
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     document.querySelector('#equipment-error').textContent = '';
     document.querySelector('#equipment-dialog').showModal();
 }
@@ -182,7 +258,10 @@ function render() {
 
 function openCreate() {
     form.reset();
+<<<<<<< HEAD
     selectedMeetingEquipmentIds.clear();
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     fields.id.value = '';
     fields.repeatCount.value = '3';
     document.querySelector('#dialog-title').textContent = 'Tạo cuộc họp';
@@ -195,8 +274,11 @@ function openCreate() {
     const end = new Date(start.getTime() + 60 * 60 * 1000);
     fields.start.value = toLocalInput(start);
     fields.end.value = toLocalInput(end);
+<<<<<<< HEAD
     document.querySelector('#meeting-equipment-section').hidden = false;
     refreshMeetingEquipment();
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     dialog.showModal();
 }
 
@@ -216,8 +298,11 @@ function openEdit(id) {
     fields.start.value = toLocalInput(new Date(meeting.startTime));
     fields.end.value = toLocalInput(new Date(meeting.endTime));
     fields.participants.value = (meeting.participants || []).join(', ');
+<<<<<<< HEAD
     selectedMeetingEquipmentIds.clear();
     document.querySelector('#meeting-equipment-section').hidden = true;
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     fields.recurrence.value = 'NONE';
     document.querySelector('#dialog-title').textContent = 'Chỉnh sửa cuộc họp';
     document.querySelector('#save-meeting').textContent = 'Lưu thay đổi';
@@ -241,6 +326,7 @@ function payload() {
     };
 }
 
+<<<<<<< HEAD
 function renderMeetingEquipment(message) {
     const options = document.querySelector('#meeting-equipment-options');
     const count = document.querySelector('#meeting-equipment-count');
@@ -394,6 +480,8 @@ async function bookSelectedEquipment(createdMeeting) {
     }
 }
 
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 form.addEventListener('submit', async event => {
     event.preventDefault();
     const error = document.querySelector('#form-error');
@@ -404,11 +492,18 @@ form.addEventListener('submit', async event => {
     }
     try {
         const id = fields.id.value;
+<<<<<<< HEAD
         const meeting = await api(id ? `/api/meetings/${id}` : '/api/meetings', {
             method: id ? 'PUT' : 'POST',
             body: JSON.stringify(payload())
         });
         if (!id) await bookSelectedEquipment(meeting);
+=======
+        await api(id ? `/api/meetings/${id}` : '/api/meetings', {
+            method: id ? 'PUT' : 'POST',
+            body: JSON.stringify(payload())
+        });
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         dialog.close();
         showToast(id ? 'Đã cập nhật cuộc họp.' : 'Đã tạo cuộc họp.');
         await loadMeetings();
@@ -417,6 +512,7 @@ form.addEventListener('submit', async event => {
     }
 });
 
+<<<<<<< HEAD
 fields.room.addEventListener('input', () => {
     selectedMeetingEquipmentIds.clear();
     refreshMeetingEquipment();
@@ -424,6 +520,8 @@ fields.room.addEventListener('input', () => {
 fields.start.addEventListener('change', refreshMeetingEquipment);
 fields.end.addEventListener('change', refreshMeetingEquipment);
 
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 document.querySelector('#find-times').addEventListener('click', async () => {
     const date = fields.start.value ? fields.start.value.slice(0, 10) : toLocalInput(new Date()).slice(0, 10);
     const duration = fields.start.value && fields.end.value
@@ -444,7 +542,10 @@ document.querySelector('#find-times').addEventListener('click', async () => {
             const slot = suggestions[Number(button.dataset.slot)];
             fields.start.value = toLocalInput(new Date(slot.startTime));
             fields.end.value = toLocalInput(new Date(slot.endTime));
+<<<<<<< HEAD
             refreshMeetingEquipment();
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
         }));
     } catch (error) {
         target.textContent = error.message;
@@ -485,8 +586,27 @@ document.querySelector('#new-equipment-mobile').addEventListener('click', openEq
 document.querySelector('#close-equipment-dialog').addEventListener('click', () => document.querySelector('#equipment-dialog').close());
 document.querySelector('#cancel-equipment-dialog').addEventListener('click', () => document.querySelector('#equipment-dialog').close());
 document.querySelector('#equipment-room-filter').addEventListener('change', loadEquipment);
+<<<<<<< HEAD
 document.querySelector('#refresh-equipment').addEventListener('click', refreshEquipmentStatuses);
 document.querySelector('#equipment-at').addEventListener('change', refreshEquipmentStatuses);
+=======
+document.querySelector('#refresh-equipment').addEventListener('click', loadEquipment);
+document.querySelector('#booking-equipment').addEventListener('change', event => {
+    const selected = equipment.find(item => item.id === Number(event.target.value));
+    document.querySelector('#booking-room').value = selected?.room || '';
+    updateSelectedAvailability();
+});
+document.querySelector('#booking-meeting').addEventListener('change', event => {
+    const selected = JSON.parse(event.target.dataset.meetings || '[]').find(meeting => meeting.id === Number(event.target.value));
+    if (!selected) return;
+    document.querySelector('#booking-room').value = selected.room || document.querySelector('#booking-room').value;
+    document.querySelector('#booking-start').value = toLocalInput(new Date(selected.startTime));
+    document.querySelector('#booking-end').value = toLocalInput(new Date(selected.endTime));
+    refreshEquipmentStatuses();
+});
+document.querySelector('#booking-start').addEventListener('change', updateSelectedAvailability);
+
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 document.querySelector('#equipment-form').addEventListener('submit', async event => {
     event.preventDefault();
     const error = document.querySelector('#equipment-error');
@@ -495,11 +615,17 @@ document.querySelector('#equipment-form').addEventListener('submit', async event
         await api('/api/equipment', {
             method: 'POST',
             body: JSON.stringify({
+<<<<<<< HEAD
                 equipmentName: document.querySelector('#equipment-name').value.trim(),
                 roomId: document.querySelector('#equipment-room').value.trim(),
                 totalQuantity: Number(document.querySelector('#equipment-total').value),
                 type: document.querySelector('#equipment-type').value.trim(),
                 status: document.querySelector('#equipment-status').value
+=======
+                name: document.querySelector('#equipment-name').value.trim(),
+                room: document.querySelector('#equipment-room').value.trim(),
+                quantity: Number(document.querySelector('#equipment-total').value)
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
             })
         });
         document.querySelector('#equipment-dialog').close();
@@ -510,6 +636,38 @@ document.querySelector('#equipment-form').addEventListener('submit', async event
     }
 });
 
+<<<<<<< HEAD
+=======
+document.querySelector('#booking-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const error = document.querySelector('#booking-error');
+    error.textContent = '';
+    const start = document.querySelector('#booking-start').value;
+    const end = document.querySelector('#booking-end').value;
+    if (new Date(end) <= new Date(start)) {
+        error.textContent = 'Thời gian kết thúc phải sau thời gian bắt đầu.';
+        return;
+    }
+    try {
+        await api('/api/equipment/bookings', {
+            method: 'POST',
+            body: JSON.stringify({
+                equipmentId: Number(document.querySelector('#booking-equipment').value),
+                meetingId: document.querySelector('#booking-meeting').value ? Number(document.querySelector('#booking-meeting').value) : null,
+                room: document.querySelector('#booking-room').value.trim(),
+                quantity: Number(document.querySelector('#booking-quantity').value),
+                startTime: new Date(start).toISOString(),
+                endTime: new Date(end).toISOString()
+            })
+        });
+        showToast('Đã đặt thiết bị.');
+        await loadEquipment();
+    } catch (requestError) {
+        error.textContent = requestError.message;
+    }
+});
+
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 function showToast(message) {
     const toast = document.querySelector('#toast');
     toast.textContent = message;
@@ -519,5 +677,12 @@ function showToast(message) {
 }
 
 document.querySelector('#today-label').textContent = formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+<<<<<<< HEAD
 document.querySelector('#equipment-at').value = toLocalInput(new Date());
+=======
+const bookingStart = new Date(Date.now() + 60 * 60 * 1000);
+bookingStart.setMinutes(Math.ceil(bookingStart.getMinutes() / 30) * 30, 0, 0);
+document.querySelector('#booking-start').value = toLocalInput(bookingStart);
+document.querySelector('#booking-end').value = toLocalInput(new Date(bookingStart.getTime() + 60 * 60 * 1000));
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 loadMeetings();

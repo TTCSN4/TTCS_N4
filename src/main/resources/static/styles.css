@@ -22,8 +22,11 @@ button { cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 9px; color: var(--ink); font: 800 20px Manrope, sans-serif; text-decoration: none; }
 .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--green); color: white; font-size: 17px; }
 .tabs { display: flex; align-self: stretch; gap: 26px; }
+<<<<<<< HEAD
 .new-meeting-link { color: var(--green); font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .new-meeting-link:hover { color: var(--green-dark); text-decoration: underline; }
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 .tab { position: relative; border: 0; padding: 2px 0 0; background: none; color: var(--muted); font-weight: 600; }
 .tab.active { color: var(--green-dark); }
 .tab.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--green); content: ''; }
@@ -90,6 +93,7 @@ dialog::backdrop { background: #18251f70; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
 .required { color: #b34a4a; }
 .field-hint { margin-left: auto; color: #89948e; font-size: 10px; font-weight: 400; }
+<<<<<<< HEAD
 .meeting-equipment { margin: 15px 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: #fbfcfa; }
 .meeting-equipment-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .meeting-equipment-heading strong { font: 700 13px Manrope, sans-serif; }
@@ -106,6 +110,8 @@ dialog::backdrop { background: #18251f70; }
 .meeting-equipment-status.available { color: #166534; background: #dcfce7; }
 .meeting-equipment-status.unavailable { color: #9a3412; background: #ffedd5; }
 .meeting-equipment[hidden] { display: none; }
+=======
+>>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
 .recurrence-row { align-items: end; }
 .suggestion-box { margin: 3px 0 14px; padding: 12px; border: 1px solid #e6ebe6; border-radius: 5px; background: #fafbf9; }
 .suggestion-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
