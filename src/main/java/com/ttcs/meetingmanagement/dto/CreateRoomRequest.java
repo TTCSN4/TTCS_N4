@@ -1,35 +1,27 @@
-package com.ttcs.meetingmanagement.room;
+package com.ttcs.meetingmanagement.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Entity
-@Table(name = "room")
-public class Room {
+public class CreateRoomRequest {
 
-    @Id
-    @Column(name = "room_id", nullable = false, length = 50)
+    @NotBlank(message = "Mã phòng không được để trống")
     private String roomId;
 
-    @Column(name = "room_name", nullable = false)
+    @NotBlank(message = "Tên phòng không được để trống")
     private String roomName;
 
-    @Column(name = "capacity", nullable = false)
+    @NotNull(message = "Sức chứa không được để trống")
+    @Min(value = 1, message = "Sức chứa phải lớn hơn 0")
     private Integer capacity;
 
-    @Column(name = "location")
     private String location;
 
-    @Column(name = "qr_code")
     private String qrCode;
 
-    @Column(name = "status", nullable = false)
+    @NotBlank(message = "Trạng thái phòng không được để trống")
     private String status;
-
-    public Room() {
-    }
 
     public String getRoomId() {
         return roomId;
