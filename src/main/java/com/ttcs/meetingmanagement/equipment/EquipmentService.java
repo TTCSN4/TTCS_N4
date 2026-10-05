@@ -139,6 +139,12 @@ public class EquipmentService {
 
         equipmentRepository.delete(equipment);
     }
+    // ==============================
+    // LẤY DANH SÁCH THIẾT BỊ THEO ROOM ID
+    // ==============================
+    public List<Equipment> getEquipmentByRoomId(String roomId) {
+        return equipmentRepository.findByRoomId(roomId);
+    }
 
     // ==============================
     // KIỂM TRA ĐANG ĐƯỢC ĐẶT

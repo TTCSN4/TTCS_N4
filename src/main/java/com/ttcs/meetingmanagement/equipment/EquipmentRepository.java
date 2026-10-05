@@ -3,9 +3,12 @@ package com.ttcs.meetingmanagement.equipment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.List;
 
-public interface EquipmentRepository
-        extends JpaRepository<Equipment, String> {
+public interface EquipmentRepository extends JpaRepository<Equipment, String> {
+
+    // Tìm tất cả thiết bị thuộc về một phòng họp cụ thể
+    List<Equipment> findByRoomId(String roomId);
 
     @Query(
         value = """

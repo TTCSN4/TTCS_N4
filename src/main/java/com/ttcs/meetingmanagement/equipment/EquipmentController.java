@@ -38,6 +38,19 @@ public class EquipmentController {
         );
     }
 
+    // ==========================================
+    // BỔ SUNG: LẤY DANH SÁCH THIẾT BỊ THEO ROOM ID
+    // Endpoint: GET /api/equipment/room/{roomId}
+    // ==========================================
+    @GetMapping("/room/{roomId}")
+    public ResponseEntity<List<Equipment>> getEquipmentByRoomId(
+            @PathVariable String roomId) {
+
+        return ResponseEntity.ok(
+                equipmentService.getEquipmentByRoomId(roomId)
+        );
+    }
+
     @PostMapping
     public ResponseEntity<Equipment> createEquipment(
             @Valid @RequestBody CreateEquipmentRequest request) {
