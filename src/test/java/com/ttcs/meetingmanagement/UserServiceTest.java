@@ -1,0 +1,4 @@
+package com.ttcs.meetingmanagement;
+import org.junit.jupiter.api.Test;import org.springframework.beans.factory.annotation.Autowired;import org.springframework.boot.test.context.SpringBootTest;import static org.assertj.core.api.Assertions.assertThat;
+@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:us18test;MODE=MySQL","spring.datasource.driver-class-name=org.h2.Driver","spring.jpa.hibernate.ddl-auto=create-drop"})
+class UserServiceTest{@Autowired UserService service;@Autowired UserRepository users;@Autowired RoleRepository roles;@Test void createsUserWithHashedPassword(){if(!roles.existsById("ADMIN"))roles.save(new Role("ADMIN","Admin"));var result=service.create(new CreateUserRequest("Nguyen A","A@Example.com","0900000000","password123","ADMIN",null));var saved=users.findById(result.id()).orElseThrow();assertThat(saved.email).isEqualTo("a@example.com");assertThat(saved.passwordHash).isNotEqualTo("password123");}}

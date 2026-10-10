@@ -1,0 +1,12 @@
+com\ttcs\meetingmanagement\MeetingManagementApplication.class
+com\ttcs\meetingmanagement\UserRepository.class
+com\ttcs\meetingmanagement\RoleRepository.class
+com\ttcs\meetingmanagement\User.class
+com\ttcs\meetingmanagement\SeedData.class
+com\ttcs\meetingmanagement\Department.class
+com\ttcs\meetingmanagement\DepartmentRepository.class
+com\ttcs\meetingmanagement\UserResponse.class
+com\ttcs\meetingmanagement\UserService.class
+com\ttcs\meetingmanagement\Role.class
+com\ttcs\meetingmanagement\CreateUserRequest.class
+com\ttcs\meetingmanagement\UserController.class

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.ttcs.meetingmanagement.UserServiceTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 25.32 s -- in com.ttcs.meetingmanagement.UserServiceTest
