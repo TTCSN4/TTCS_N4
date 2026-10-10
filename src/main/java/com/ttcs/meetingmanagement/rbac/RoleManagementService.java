@@ -10,12 +10,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 @Service
+@PreAuthorize("@rbacAccess.isAdmin(authentication)")
 public class RoleManagementService {
 
     private static final Set<String> ALLOWED_ROLES = Set.of(
@@ -42,13 +44,16 @@ public class RoleManagementService {
     ) {
     }
 
+    // Lay danh sach vai tro
     @Transactional(readOnly = true)
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }
 
+    // Lay vai tro cua mot nguoi dung
     @Transactional(readOnly = true)
     public RoleResult getUserRole(String userId) {
+
         User user = userRepository.findWithRole(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -57,6 +62,7 @@ public class RoleManagementService {
         return toResult(user);
     }
 
+    // Gan hoac thay doi vai tro
     @Transactional
     public RoleResult assignRole(
             String userId,
@@ -86,12 +92,13 @@ public class RoleManagementService {
 
         Role currentRole = user.getRole();
 
+        // Khong can cap nhat neu vai tro khong thay doi
         if (currentRole != null &&
                 currentRole.getRoleId().equals(targetRole.getRoleId())) {
             return toResult(user);
         }
 
-        // Prevent removing the last administrator.
+        // Khong cho phep xoa Admin cuoi cung
         if (isAdmin(currentRole) && !isAdmin(targetRole)) {
 
             roleRepository.lockById(currentRole.getRoleId())
@@ -109,6 +116,7 @@ public class RoleManagementService {
             }
         }
 
+        // USER.role_id -> ROLE.role_id theo ERD
         user.setRole(targetRole);
         user.setUpdatedAt(LocalDateTime.now());
 
@@ -117,11 +125,11 @@ public class RoleManagementService {
         return toResult(user);
     }
 
+    // Thu hoi vai tro dac quyen
+    // Chuyen nguoi dung ve vai tro Nguoi tham du
     @Transactional
     public RoleResult revokeRole(String userId) {
 
-        // ERD: one role per user.
-        // Revocation returns user to participant role.
         Role participant = roleRepository
                 .findByRoleName("Người tham dự")
                 .orElseThrow(() -> new ResponseStatusException(
@@ -137,6 +145,7 @@ public class RoleManagementService {
     }
 
     private RoleResult toResult(User user) {
+
         Role role = user.getRole();
 
         return new RoleResult(
