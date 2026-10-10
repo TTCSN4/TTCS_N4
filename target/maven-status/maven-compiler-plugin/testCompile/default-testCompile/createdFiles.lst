@@ -1,0 +1,4 @@
+com\ttcs\meetingmanagement\ReminderServiceTest.class
+com\ttcs\meetingmanagement\ReminderServiceTest$FakeEmailGateway.class
+com\ttcs\meetingmanagement\ReminderServiceTest$MutableClock.class
+com\ttcs\meetingmanagement\ReminderServiceTest$Config.class
