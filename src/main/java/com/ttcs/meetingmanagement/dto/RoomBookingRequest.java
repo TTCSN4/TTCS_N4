@@ -1,24 +1,24 @@
+
 package com.ttcs.meetingmanagement.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public class RoomBookingRequest {
 
-    @NotNull(message = "meetingId is required")
-    private Long meetingId;
+    @NotBlank(message = "Meeting ID is required")
+    private String meetingId;
 
-    @NotBlank(message = "roomId is required")
+    @NotBlank(message = "Room ID is required")
     private String roomId;
 
     public RoomBookingRequest() {
     }
 
-    public Long getMeetingId() {
+    public String getMeetingId() {
         return meetingId;
     }
 
-    public void setMeetingId(Long meetingId) {
+    public void setMeetingId(String meetingId) {
         this.meetingId = meetingId;
     }
 
