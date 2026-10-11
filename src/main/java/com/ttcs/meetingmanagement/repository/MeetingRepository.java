@@ -1,7 +1,6 @@
 package com.ttcs.meetingmanagement.repository;
 
 import com.ttcs.meetingmanagement.model.Meeting;
-<<<<<<< HEAD
 import com.ttcs.meetingmanagement.model.MeetingStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,13 +34,3 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
             @Param("endTime") OffsetDateTime endTime
     );
 }
-=======
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
-
-public interface MeetingRepository extends JpaRepository<Meeting, Long> {
-    List<Meeting> findAllByOrderByStartTimeAsc();
-    List<Meeting> findAllByEndTimeBeforeOrderByStartTimeDesc(java.time.OffsetDateTime time);
-}
->>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94

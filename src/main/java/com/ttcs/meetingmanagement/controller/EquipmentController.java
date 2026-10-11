@@ -1,5 +1,8 @@
 package com.ttcs.meetingmanagement.controller;
 
+/* Legacy controller retained only to preserve the original folder structure.
+ * US12 uses com.ttcs.meetingmanagement.equipment.EquipmentController.
+
 import com.ttcs.meetingmanagement.model.Equipment;
 import com.ttcs.meetingmanagement.model.EquipmentBooking;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
@@ -214,3 +217,4 @@ public class EquipmentController {
     ) { }
 
 }
+*/

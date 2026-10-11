@@ -1,5 +1,8 @@
 package com.ttcs.meetingmanagement.repository;
 
+/* Legacy repository retained to preserve the original folder structure.
+ * US12 uses com.ttcs.meetingmanagement.equipment.EquipmentRepository.
+
 import com.ttcs.meetingmanagement.model.Equipment;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,3 +20,4 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     @Query("select equipment from Equipment equipment where equipment.id = :id")
     Optional<Equipment> findByIdForUpdate(@Param("id") Long id);
 }
+*/

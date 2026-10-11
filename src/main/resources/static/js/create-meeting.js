@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitButton = form.querySelector('button[type="submit"]');
 
     let equipmentInventory = [];
+    let roomInventory = [];
     let equipmentStatuses = new Map();
     let selectedEquipmentIds = new Set();
     let roomAvailability = { key: "", status: "idle", busyRooms: new Set() };
@@ -38,7 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toIso(date, time) {
-        return new Date(`${date}T${time}:00`).toISOString();
+        const local = new Date(`${date}T${time}:00`);
+        if (Number.isNaN(local.getTime())) throw new Error("Ngày hoặc giờ không hợp lệ.");
+        return local.toISOString();
     }
 
     function localDateTime(date) {
@@ -68,14 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function populateRoomOptions() {
         const currentValue = roomSelect.value;
-        const rooms = [...new Set(equipmentInventory
-            .map(item => item.roomId?.trim())
-            .filter(Boolean))]
-            .sort((a, b) => a.localeCompare(b, "vi"));
+        const rooms = roomInventory
+            .filter(room => String(room.status).toUpperCase() === "ACTIVE")
+            .sort((a, b) => a.roomName.localeCompare(b.roomName, "vi"));
 
         roomSelect.replaceChildren(new Option("Chọn phòng họp", ""));
-        rooms.forEach(room => roomSelect.append(new Option(room, room)));
-        if (rooms.includes(currentValue)) roomSelect.value = currentValue;
+        rooms.forEach(room => roomSelect.append(new Option(`${room.roomName} (${room.capacity} người)`, room.roomId)));
+        if (rooms.some(room => room.roomId === currentValue)) roomSelect.value = currentValue;
         roomSelect.disabled = rooms.length === 0;
 
         if (!rooms.length) {
@@ -91,9 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
         equipmentOptions.append(loading);
 
         try {
-            const items = await api("/api/equipment");
+            const [items, rooms] = await Promise.all([api("/api/equipment"), api("/api/rooms")]);
             if (!Array.isArray(items)) throw new Error("Dữ liệu thiết bị trả về không hợp lệ.");
+            if (!Array.isArray(rooms)) throw new Error("Dữ liệu phòng trả về không hợp lệ.");
             equipmentInventory = items;
+            roomInventory = rooms;
             populateRoomOptions();
             if (roomSelect.value) {
                 await Promise.all([refreshRoomAvailability(), refreshEquipmentStatus()]);
@@ -310,7 +314,8 @@ document.addEventListener("DOMContentLoaded", () => {
             participants,
             recurrence: recurrenceSelect.value,
             repeatCount: recurrenceSelect.value === "NONE" ? 0 : Number(repeatCountInput.value),
-            room
+            room,
+            equipmentIds: [...selectedEquipmentIds]
         };
     }
 
@@ -408,25 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await refreshEquipmentStatus();
             }
 
-            const meeting = await createMeeting(payload);
-            let meetingsToBook = [meeting];
-            const bookings = [];
-            if (selectedEquipmentIds.size > 0) {
-                try {
-                    const scheduledMeetings = await api("/api/meetings");
-                    const occurrences = scheduledMeetings.filter(item =>
-                        Number(item.id) === Number(meeting.id)
-                        || Number(item.recurrenceSeriesId) === Number(meeting.id));
-                    if (occurrences.length) meetingsToBook = occurrences;
-                    bookings.push(...await bookSelectedEquipment(meetingsToBook, payload));
-                } catch (error) {
-                    const rollbackFailures = await rollbackMeetings(meetingsToBook, bookings, meeting.id);
-                    const rollbackNote = rollbackFailures.length
-                        ? ` Không thể hoàn tác đầy đủ: ${rollbackFailures.join("; ")}.`
-                        : " Cuộc họp đã được hủy.";
-                    throw new Error(`Không thể đặt thiết bị: ${error.message}.${rollbackNote}`);
-                }
-            }
+            await createMeeting(payload);
 
             window.alert("Đã tạo cuộc họp và đặt thiết bị thành công.");
             window.location.assign("/");

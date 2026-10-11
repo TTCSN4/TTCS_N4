@@ -1,5 +1,8 @@
 package com.ttcs.meetingmanagement.model;
 
+/* Legacy entity retained to preserve the original folder structure.
+ * US12 uses com.ttcs.meetingmanagement.equipment.Equipment.
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,3 +37,4 @@ public class Equipment {
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 }
+*/

@@ -2,12 +2,10 @@ package com.ttcs.meetingmanagement.controller;
 
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.model.MeetingStatus;
-<<<<<<< HEAD
 import com.ttcs.meetingmanagement.model.EquipmentBooking;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
 import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
-=======
->>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
+import com.ttcs.meetingmanagement.equipment.EquipmentController;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -32,17 +31,17 @@ import java.util.Locale;
 @RequestMapping("/api/meetings")
 public class MeetingController {
     private final MeetingRepository meetings;
-<<<<<<< HEAD
     private final EquipmentBookingRepository equipmentBookings;
+    private final EquipmentController equipmentController;
 
-    public MeetingController(MeetingRepository meetings, EquipmentBookingRepository equipmentBookings) {
+    public MeetingController(
+            MeetingRepository meetings,
+            EquipmentBookingRepository equipmentBookings,
+            EquipmentController equipmentController
+    ) {
         this.meetings = meetings;
         this.equipmentBookings = equipmentBookings;
-=======
-
-    public MeetingController(MeetingRepository meetings) {
-        this.meetings = meetings;
->>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
+        this.equipmentController = equipmentController;
     }
 
     @GetMapping
@@ -62,7 +61,9 @@ public class MeetingController {
         List<String> participants = cleanParticipants(request.participants());
         ensureNoConflict(request.startTime(), request.endTime(), participants, null);
 
+        List<Meeting> createdMeetings = new ArrayList<>();
         Meeting first = save(request, participants, null, null);
+        createdMeetings.add(first);
         int repeatCount = Math.clamp(request.repeatCount() == null ? 0 : request.repeatCount(), 0, 12);
         String recurrence = request.recurrence() == null ? "NONE" : request.recurrence().toUpperCase(Locale.ROOT);
         if (repeatCount > 0 && !List.of("WEEKLY", "MONTHLY").contains(recurrence)) {
@@ -76,11 +77,12 @@ public class MeetingController {
                 OffsetDateTime start = recurrence.equals("WEEKLY")
                         ? request.startTime().plusWeeks(occurrence)
                         : request.startTime().plusMonths(occurrence);
-                OffsetDateTime end = start.plusSeconds(request.endTime().toEpochSecond() - request.startTime().toEpochSecond());
+                OffsetDateTime end = start.plus(Duration.between(request.startTime(), request.endTime()));
                 ensureNoConflict(start, end, participants, null);
-                save(request, participants, start, first.getId());
+                createdMeetings.add(save(request, participants, start, first.getId()));
             }
         }
+        bookEquipment(request, createdMeetings);
         return first;
     }
 
@@ -103,22 +105,16 @@ public class MeetingController {
     }
 
     @DeleteMapping("/{id}")
-<<<<<<< HEAD
     @Transactional
-=======
->>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     public void cancel(@PathVariable Long id) {
         Meeting meeting = findMeeting(id);
         meeting.setStatus(MeetingStatus.CANCELLED);
         meeting.setUpdatedAt(OffsetDateTime.now());
         meetings.save(meeting);
-<<<<<<< HEAD
         for (EquipmentBooking booking : equipmentBookings.findAllByMeetingId(id)) {
             booking.setStatus(EquipmentBookingStatus.CANCELLED);
             equipmentBookings.save(booking);
         }
-=======
->>>>>>> e1f3f6bac2a4ff949c9d212475e9ffdfb21b5c94
     }
 
     @PostMapping("/suggestions")
@@ -148,7 +144,7 @@ public class MeetingController {
         meeting.setDescription(request.description());
         meeting.setRoom(cleanRoom(request.room()));
         meeting.setStartTime(start == null ? request.startTime() : start);
-        meeting.setEndTime(start == null ? request.endTime() : start.plusSeconds(request.endTime().toEpochSecond() - request.startTime().toEpochSecond()));
+        meeting.setEndTime(start == null ? request.endTime() : start.plus(Duration.between(request.startTime(), request.endTime())));
         meeting.setOrganizerId(request.organizerId() == null ? 1L : request.organizerId());
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setRecurrenceSeriesId(seriesId);
@@ -199,6 +195,23 @@ public class MeetingController {
         return meetings.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy cuộc họp."));
     }
 
+    private void bookEquipment(MeetingRequest request, List<Meeting> createdMeetings) {
+        if (request.equipmentIds() == null || request.equipmentIds().isEmpty()) return;
+        String room = cleanRoom(request.room());
+        List<String> equipmentIds = request.equipmentIds().stream()
+                .filter(id -> id != null && !id.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+        for (Meeting meeting : createdMeetings) {
+            for (String equipmentId : equipmentIds) {
+                equipmentController.book(new EquipmentController.EquipmentBookingRequest(
+                        equipmentId, meeting.getId(), room, 1, meeting.getStartTime(), meeting.getEndTime()
+                ));
+            }
+        }
+    }
+
     public record MeetingRequest(
             String title,
             String description,
@@ -208,7 +221,8 @@ public class MeetingController {
             List<String> participants,
             String recurrence,
             Integer repeatCount,
-            String room
+            String room,
+            List<String> equipmentIds
     ) { }
 
     public record SuggestionRequest(LocalDate date, Integer durationMinutes, List<String> participants) { }
