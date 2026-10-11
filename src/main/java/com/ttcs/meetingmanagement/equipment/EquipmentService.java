@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 
 @Service
 public class EquipmentService {
@@ -148,6 +149,6 @@ public class EquipmentService {
         getEquipmentById(equipmentId);
 
         return equipmentRepository
-                .countActiveBookings(equipmentId) > 0;
+                .countActiveBookings(equipmentId, OffsetDateTime.now()) > 0;
     }
 }

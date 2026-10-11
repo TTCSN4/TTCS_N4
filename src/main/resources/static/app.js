@@ -15,6 +15,7 @@ const fields = {
 };
 
 let meetings = [];
+let rooms = [];
 let equipment = [];
 let equipmentStatuses = new Map();
 let meetingEquipment = [];
@@ -24,6 +25,16 @@ let currentView = 'meetings';
 let toastTimer;
 
 const formatDate = (value, options) => new Intl.DateTimeFormat('vi-VN', options).format(new Date(value));
+const toOffsetIso = value => {
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) throw new Error('Ngày hoặc giờ không hợp lệ.');
+    const pad = number => String(Math.abs(number)).padStart(2, '0');
+    const offsetMinutes = -date.getTimezoneOffset();
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+        + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+        + `${sign}${pad(Math.trunc(offsetMinutes / 60))}:${pad(offsetMinutes % 60)}`;
+};
 const escapeHtml = (value = '') => String(value).replace(/[&<>"']/g, character => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 }[character]));
@@ -51,6 +62,20 @@ async function loadMeetings() {
         render();
     } catch (error) {
         showToast(error.message);
+    }
+}
+
+async function loadRooms() {
+    try {
+        rooms = await api('/api/rooms');
+        const currentRoom = fields.room.value;
+        fields.room.replaceChildren(new Option('Chọn phòng họp', ''));
+        rooms.filter(room => String(room.status).toUpperCase() === 'ACTIVE')
+            .sort((a, b) => a.roomName.localeCompare(b.roomName, 'vi'))
+            .forEach(room => fields.room.append(new Option(`${room.roomName} (${room.capacity} người)`, room.roomId)));
+        if (rooms.some(room => room.roomId === currentRoom)) fields.room.value = currentRoom;
+    } catch (error) {
+        showToast(`Không tải được danh sách phòng: ${error.message}`);
     }
 }
 
@@ -90,7 +115,7 @@ async function loadEquipment() {
 async function refreshEquipmentStatuses() {
     const atInput = document.querySelector('#equipment-at');
     if (!atInput.value) atInput.value = toLocalInput(new Date());
-    const at = new Date(atInput.value).toISOString();
+    const at = toOffsetIso(atInput.value);
     const rooms = [...new Set(equipment.map(item => item.room))];
     try {
         const results = await Promise.all(rooms.map(room => api(`/api/equipment/status?room=${encodeURIComponent(room)}&at=${encodeURIComponent(at)}`)));
@@ -232,8 +257,8 @@ function payload() {
         title: fields.title.value.trim(),
         description: fields.description.value.trim(),
         room: fields.room.value.trim(),
-        startTime: new Date(fields.start.value).toISOString(),
-        endTime: new Date(fields.end.value).toISOString(),
+        startTime: toOffsetIso(fields.start.value),
+        endTime: toOffsetIso(fields.end.value),
         organizerId: 1,
         participants: fields.participants.value.split(',').map(value => value.trim()).filter(Boolean),
         recurrence: fields.recurrence.value,
@@ -326,8 +351,8 @@ async function refreshMeetingEquipment() {
 
     renderMeetingEquipment('Đang tải trạng thái thiết bị…');
     const at = fields.start.value
-        ? new Date(fields.start.value).toISOString()
-        : new Date().toISOString();
+        ? toOffsetIso(fields.start.value)
+        : toOffsetIso(new Date());
     try {
         const result = await api(`/api/equipment/status?room=${encodeURIComponent(room)}&at=${encodeURIComponent(at)}`);
         if (sequence !== meetingEquipmentRequestSequence) return;
@@ -520,4 +545,4 @@ function showToast(message) {
 
 document.querySelector('#today-label').textContent = formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 document.querySelector('#equipment-at').value = toLocalInput(new Date());
-loadMeetings();
+Promise.all([loadMeetings(), loadRooms()]);

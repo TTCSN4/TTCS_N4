@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
+import java.time.OffsetDateTime;
 
 public interface EquipmentRepository
         extends JpaRepository<Equipment, String> {
@@ -23,12 +24,13 @@ public interface EquipmentRepository
             SELECT COUNT(*)
             FROM equipment_bookings
             WHERE equipment_id = :equipmentId
-              AND end_time >= CURRENT_TIMESTAMP
+              AND end_time >= :at
               AND status IN ('BOOKED', 'MAINTENANCE')
             """,
         nativeQuery = true
     )
     long countActiveBookings(
-            @Param("equipmentId") String equipmentId
+            @Param("equipmentId") String equipmentId,
+            @Param("at") OffsetDateTime at
     );
 }

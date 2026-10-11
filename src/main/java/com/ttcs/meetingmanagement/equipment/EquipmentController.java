@@ -247,7 +247,12 @@ public class EquipmentController {
             }
         }
         int totalQuantity = equipment.getTotalQuantity() == null ? 0 : equipment.getTotalQuantity();
-        int available = Math.max(0, totalQuantity - booked - maintenance);
+        boolean administrativelyUnavailable = equipment.getStatus() != null
+                && !equipment.getStatus().equalsIgnoreCase("AVAILABLE");
+        if (administrativelyUnavailable) {
+            maintenance = Math.max(maintenance, totalQuantity - booked);
+        }
+        int available = administrativelyUnavailable ? 0 : Math.max(0, totalQuantity - booked - maintenance);
         List<EquipmentAvailabilityStatus> statuses = new ArrayList<>();
         if (available > 0) statuses.add(EquipmentAvailabilityStatus.AVAILABLE);
         if (booked > 0) statuses.add(EquipmentAvailabilityStatus.BOOKED);

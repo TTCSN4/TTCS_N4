@@ -26,7 +26,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.datasource.url=jdbc:h2:mem:us13test;MODE=MySQL;DB_CLOSE_DELAY=-1",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
 class MeetingmanagementApplicationTests {
     @Autowired
     private EquipmentController equipmentController;
@@ -120,6 +126,23 @@ class MeetingmanagementApplicationTests {
                 ))
         );
         assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+    }
+
+    @Test
+    @Transactional
+    void statusQueryHonorsAdministrativeMaintenanceState() {
+        String room = "P-admin-maintenance";
+        Equipment equipment = saveEquipment(room, "Broken projector", 2);
+        equipment.setStatus("BROKEN");
+        equipmentRepository.saveAndFlush(equipment);
+
+        EquipmentController.EquipmentStatusResponse status = equipmentController
+                .status(room, OffsetDateTime.parse("2030-05-10T09:30:00+07:00"))
+                .get(0);
+
+        assertEquals(0, status.availableQuantity());
+        assertEquals(2, status.maintenanceQuantity());
+        assertEquals(List.of(EquipmentAvailabilityStatus.MAINTENANCE), status.statuses());
     }
 
     private Equipment saveEquipment(String room, String name, int quantity) {

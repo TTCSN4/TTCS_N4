@@ -38,7 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toIso(date, time) {
-        return new Date(`${date}T${time}:00`).toISOString();
+        const local = new Date(`${date}T${time}:00`);
+        if (Number.isNaN(local.getTime())) throw new Error("Ngày hoặc giờ không hợp lệ.");
+        const pad = value => String(Math.abs(value)).padStart(2, "0");
+        const offsetMinutes = -local.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? "+" : "-";
+        return `${date}T${time}:00${sign}${pad(Math.trunc(offsetMinutes / 60))}:${pad(offsetMinutes % 60)}`;
     }
 
     function localDateTime(date) {
