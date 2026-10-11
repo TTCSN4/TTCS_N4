@@ -1,0 +1,74 @@
+[
+  {
+    "us": "US02",
+    "slug": "update-cancel-meeting",
+    "branch": "feature/US02-update-cancel-meeting-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US04",
+    "slug": "meeting-participants",
+    "branch": "feature/US04-meeting-participants-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US05",
+    "slug": "available-time-slots",
+    "branch": "feature/US05-available-time-slots-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US08",
+    "slug": "room-booking",
+    "branch": "feature/US08-room-booking-frontend",
+    "branchSource": "existing US repository"
+  },
+  {
+    "us": "US09",
+    "slug": "cancel-room-booking",
+    "branch": "feature/US09-cancel-room-frontend",
+    "branchSource": "existing US repository"
+  },
+  {
+    "us": "US14",
+    "slug": "equipment-management",
+    "branch": "feature/US14-equipment-management-frontend",
+    "branchSource": "existing US repository"
+  },
+  {
+    "us": "US16",
+    "slug": "meeting-reminder",
+    "branch": "feature/US16-meeting-reminder-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US19",
+    "slug": "user-list",
+    "branch": "feature/US19-user-list-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US20",
+    "slug": "user-permission",
+    "branch": "feature/US20-user-permission-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US23",
+    "slug": "cancelled-meeting-statistics",
+    "branch": "feature/US23-cancelled-meeting-statistics-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US25",
+    "slug": "chatbot-room-booking",
+    "branch": "feature/US25-chatbot-room-booking-frontend",
+    "branchSource": "US_list.txt"
+  },
+  {
+    "us": "US26",
+    "slug": "room-recommendation",
+    "branch": "feature/US26-room-recommendation-frontend",
+    "branchSource": "US_list.txt"
+  }
+]
