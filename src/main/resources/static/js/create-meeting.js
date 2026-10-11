@@ -24,41 +24,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function toIso(dateValue, timeValue) {
         if (!dateValue || !timeValue) return "";
-        return new Date(`${dateValue}T${timeValue}:00`).toISOString();
+        return new Date(`${dateValue}T${timeValue}:00+07:00`).toISOString();
     }
 
-    function getRoomOptions() {
-        try {
-            const savedRooms = JSON.parse(localStorage.getItem("meetingRooms") || "[]");
-            if (Array.isArray(savedRooms) && savedRooms.length) {
-                return savedRooms.map(room => ({
-                    ...room,
-                    capacity: Number(room.capacity) || 0,
-                    devices: Array.isArray(room.devices) ? room.devices.filter(Boolean) : []
-                }));
-            }
-        } catch (error) {
-            console.warn("Không thể đọc danh sách phòng đã lưu:", error);
-        }
-        return [
-            { id: 1, name: "Phòng họp A1", location: "Tầng 2, khu A", capacity: 8, devices: ["Máy chiếu", "TV", "Bảng trắng"] },
-            { id: 2, name: "Phòng họp B2", location: "Tầng 3, khu B", capacity: 12, devices: ["Máy chiếu", "Micro", "Camera", "Wi‑Fi"] },
-            { id: 3, name: "Phòng họp C1", location: "Tầng 1, khu C", capacity: 6, devices: ["TV", "Bảng trắng"] }
-        ];
-    }
+    function getRoomOptions() { return window.RoomAvailability.getRooms(); }
 
-    function getRequestedTimeRange() {
-        const date = meetingDateInput?.value || "";
-        const start = startTimeInput?.value || "";
-        const end = endTimeInput?.value || "";
-        if (!date || !start || !end) return null;
-
-        const startValue = Date.parse(toIso(date, start));
-        const endValue = Date.parse(toIso(date, end));
-        if (!Number.isFinite(startValue) || !Number.isFinite(endValue) || endValue <= startValue) return null;
-
-        return { date, start, end, startValue, endValue, key: `${date}|${start}|${end}` };
-    }
+    function getRequestedTimeRange() { const query = window.RoomAvailability.range(meetingDateInput.value, startTimeInput.value, endTimeInput.value); return query ? {...query, startValue: query.start, endValue: query.end} : null; }
 
     function setRoomAvailabilityMessage(message, state = "") {
         if (!roomAvailabilityStatus) return;
@@ -107,23 +78,8 @@ document.addEventListener("DOMContentLoaded", function () {
         renderRoomOptions();
 
         try {
-            const response = await fetch(apiUrl, { headers: { Accept: "application/json" } });
-            if (!response.ok) throw new Error(`Không thể kiểm tra phòng trống (HTTP ${response.status}).`);
-
-            const meetings = await response.json();
+            const {busyRoomNames} = await window.RoomAvailability.check(range, editMeetingId);
             if (requestSequence !== availabilityRequestSequence) return false;
-
-            const busyRoomNames = new Set();
-            meetings.filter(meeting => {
-                if (String(meeting.id) === String(editMeetingId) || meeting.status === "CANCELLED") return false;
-                const start = Date.parse(meeting.startTime);
-                const end = Date.parse(meeting.endTime);
-                return Number.isFinite(start) && Number.isFinite(end)
-                    && start < range.endValue && end > range.startValue;
-            }).forEach(meeting => {
-                if (meeting.room) busyRoomNames.add(meeting.room.trim().toLocaleLowerCase("vi"));
-            });
-
             roomAvailability = { key: range.key, status: "ready", busyRoomNames };
             renderRoomOptions();
             const rooms = getRoomOptions();
@@ -358,7 +314,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    if (!isEditMode) {
+        meetingDateInput.value = urlParams.get('date') || '';
+        startTimeInput.value = urlParams.get('startTime') || '';
+        endTimeInput.value = urlParams.get('endTime') || '';
+        participantCountInput.value = urlParams.get('participantCount') || '';
+    }
     populateRoomOptions();
+    if (!isEditMode && urlParams.has('roomId')) {
+        roomSelect.value = urlParams.get('roomId');
+        renderRoomDeviceSummary();
+        refreshRoomAvailability();
+    }
     participantCountInput?.addEventListener("input", updateCapacityWarning);
     roomSelect?.addEventListener("change", renderRoomDeviceSummary);
     [meetingDateInput, startTimeInput, endTimeInput].forEach(input => {
@@ -500,6 +467,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     const availabilityConfirmed = await refreshRoomAvailability();
                     if (!availabilityConfirmed) {
                         throw new Error("Không thể xác nhận phòng còn trống. Vui lòng kiểm tra lại ngày và giờ.");
+                    }
+                    if (window.RoomAvailability.demo) {
+                        const payload = getMeetingPayload();
+                        const emails = (document.getElementById('participantEmails')?.value || '').split(/[,;\n]/).map(value => value.trim()).filter(Boolean);
+                        if (emails.some(email => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) throw new Error('Email người tham gia chưa hợp lệ.');
+                        const created = await window.RoomAvailability.createDemo({...payload, participants: emails, equipment: getSelectedEquipment()});
+                        const result = document.getElementById('roomDemoCreated');
+                        result.textContent = 'Đã lưu lịch thử “' + created.title + '” tại ' + created.room + ' trên trình duyệt. Chưa đặt phòng thật hoặc gửi lời mời.';
+                        result.hidden = false;
+                        scheduleRoomAvailabilityCheck();
+                        return;
                     }
                     const createdMeeting = await createMeeting();
                     const attendees = await addParticipants(createdMeeting.id);

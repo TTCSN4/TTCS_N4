@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="../static/css/create-meeting.css" th:href="@{/css/create-meeting.css}">
+  <script src="../static/js/room-availability.js" th:src="@{/js/room-availability.js}" defer></script>
 </head>
 <body>
     <div class="app-container">
@@ -90,7 +91,7 @@
                     </div>
                 </div>
 
-                <form id="createMeetingForm">
+                <p class="room-availability-status">Demo chọn phòng: lịch tạo thử được lưu trên trình duyệt; không gửi email hoặc đặt thiết bị thật.</p><p id="roomDemoCreated" class="room-availability-status" role="status" hidden></p><form id="createMeetingForm">
                     <div class="meeting-layout">
                         <section class="card meeting-details">
                             <div class="card-header">

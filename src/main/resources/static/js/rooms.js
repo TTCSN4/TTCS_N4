@@ -1,10 +1,6 @@
 const ROOM_STORAGE_KEY = "meetingRooms";
 
-const defaultRooms = [
-    { id: 1, name: "Phòng họp A1", location: "Tầng 2, khu A", capacity: 8, devices: ["Máy chiếu", "TV", "Bảng trắng"] },
-    { id: 2, name: "Phòng họp B2", location: "Tầng 3, khu B", capacity: 12, devices: ["Máy chiếu", "Micro", "Camera", "Wi‑Fi"] },
-    { id: 3, name: "Phòng họp C1", location: "Tầng 1, khu C", capacity: 6, devices: ["TV", "Bảng trắng"] }
-];
+const defaultRooms = window.RoomAvailability.defaults;
 
 const form = document.getElementById("roomForm");
 const formTitle = document.getElementById("formTitle");
@@ -30,6 +26,7 @@ const availabilityEnd = document.getElementById("availabilityEnd");
 const availabilityMessage = document.getElementById("availabilityMessage");
 const checkAvailabilityButton = document.getElementById("checkRoomAvailability");
 let availabilitySnapshot = null;
+let availabilitySequence = 0;
 
 function escapeHtml(value) {
     const element = document.createElement("span");
@@ -37,18 +34,7 @@ function escapeHtml(value) {
     return element.innerHTML;
 }
 
-function getAvailabilityQuery() {
-    const date = availabilityDate.value;
-    const startTime = availabilityStart.value;
-    const endTime = availabilityEnd.value;
-    if (!date || !startTime || !endTime) return null;
-
-    const start = new Date(`${date}T${startTime}:00`).getTime();
-    const end = new Date(`${date}T${endTime}:00`).getTime();
-    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
-
-    return { date, startTime, endTime, start, end, key: `${date}|${startTime}|${endTime}` };
-}
+function getAvailabilityQuery() { return window.RoomAvailability.range(availabilityDate.value, availabilityStart.value, availabilityEnd.value); }
 
 function getRoomAvailability(room) {
     const query = getAvailabilityQuery();
@@ -64,6 +50,7 @@ function getRoomAvailability(room) {
 }
 
 async function checkRoomAvailability() {
+    const request = ++availabilitySequence;
     const query = getAvailabilityQuery();
     if (!query) {
         availabilitySnapshot = null;
@@ -73,24 +60,15 @@ async function checkRoomAvailability() {
         return;
     }
 
+    availabilitySnapshot = null;
+    renderRoomTable();
     checkAvailabilityButton.disabled = true;
     availabilityMessage.textContent = "Đang kiểm tra lịch phòng…";
     availabilityMessage.className = "availability-message";
     try {
-        const response = await fetch("/api/meetings", { headers: { Accept: "application/json" } });
-        if (!response.ok) throw new Error(`Không thể tải lịch họp (HTTP ${response.status}).`);
-
-        const meetings = await response.json();
-        const busyRoomNames = new Set();
-        meetings.forEach(meeting => {
-            if (!meeting.room || String(meeting.status).toUpperCase() === "CANCELLED") return;
-            const start = Date.parse(meeting.startTime);
-            const end = Date.parse(meeting.endTime);
-            if (Number.isFinite(start) && Number.isFinite(end) && start < query.end && end > query.start) {
-                busyRoomNames.add(meeting.room.trim().toLocaleLowerCase("vi"));
-            }
-        });
-
+        const {busyRoomNames} = await window.RoomAvailability.check(query);
+        if (request !== availabilitySequence) return;
+        if (getAvailabilityQuery()?.key !== query.key) return;
         availabilitySnapshot = { key: query.key, busyRoomNames };
         const rooms = getStoredRooms();
         const availableCount = rooms.filter(room => !busyRoomNames.has(room.name.trim().toLocaleLowerCase("vi"))).length;
@@ -100,12 +78,13 @@ async function checkRoomAvailability() {
         availabilityMessage.className = `availability-message${availableCount ? "" : " is-error"}`;
         renderRoomTable();
     } catch (error) {
+        if (request !== availabilitySequence) return;
         availabilitySnapshot = null;
         availabilityMessage.textContent = error.message || "Không thể kiểm tra phòng trống.";
         availabilityMessage.className = "availability-message is-error";
         renderRoomTable();
     } finally {
-        checkAvailabilityButton.disabled = false;
+        if (request === availabilitySequence) checkAvailabilityButton.disabled = false;
     }
 }
 
@@ -117,17 +96,7 @@ function normalizeRoom(room) {
     };
 }
 
-function getStoredRooms() {
-    try {
-        const raw = localStorage.getItem(ROOM_STORAGE_KEY);
-        const list = raw ? JSON.parse(raw) : [];
-        const rooms = Array.isArray(list) && list.length ? list : [...defaultRooms];
-        return rooms.map(normalizeRoom);
-    } catch (error) {
-        console.warn("Không thể đọc phòng từ localStorage:", error);
-        return defaultRooms.map(normalizeRoom);
-    }
-}
+function getStoredRooms() { return window.RoomAvailability.getRooms(); }
 
 function saveRooms(rooms) {
     localStorage.setItem(ROOM_STORAGE_KEY, JSON.stringify(rooms));
@@ -197,18 +166,29 @@ function validateRoom({ name, location, capacity, devices }) {
 
 function renderRoomTable() {
     const rooms = getStoredRooms();
-    roomCount.textContent = String(rooms.length);
+    const total = rooms.length;
+    const search = document.getElementById('roomSearch').value.trim().toLocaleLowerCase('vi');
+    let count;
+    try { count = window.RoomAvailability.participantCount(document.getElementById('filterCapacity').value); }
+    catch (error) { availabilityMessage.textContent = error.message; availabilityMessage.className = 'availability-message is-error'; roomTableBody.replaceChildren(); roomCount.textContent = '0/' + total; return; }
+    const device = document.getElementById('filterDevice').value;
+    const currentSnapshot = availabilitySnapshot && getAvailabilityQuery()?.key === availabilitySnapshot.key;
+    const status = currentSnapshot ? document.getElementById('filterStatus').value : '';
+    const filtered = rooms.filter(room => (room.name + ' ' + room.location).toLocaleLowerCase('vi').includes(search)
+        && room.capacity >= count && (!device || room.devices.includes(device))
+        && (!status || getRoomAvailability(room).state === status)).sort((a,b) => a.capacity-b.capacity);
+    roomCount.textContent = filtered.length + '/' + total;
 
-    if (!rooms.length) {
+    if (!filtered.length) {
         roomTableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="empty-state">Chưa có phòng nào. Hãy thêm phòng mới.</td>
+                <td colspan="6" class="empty-state">${total ? "Không có phòng phù hợp. Hãy thay đổi bộ lọc hoặc khung giờ." : "Chưa có phòng nào. Hãy thêm phòng mới."}</td>
             </tr>
         `;
         return;
     }
 
-    roomTableBody.innerHTML = rooms.map(room => {
+    roomTableBody.innerHTML = filtered.map(room => {
         const devices = Array.isArray(room.devices) && room.devices.length ? room.devices : ["Chưa có thiết bị"];
         return `
             <tr>
@@ -227,6 +207,7 @@ function renderRoomTable() {
                 <td><span class="availability-pill is-${getRoomAvailability(room).state}">${getRoomAvailability(room).label}</span></td>
                 <td>
                     <div class="actions">
+                        <button class="btn btn-secondary" type="button" data-action="select" data-id="${escapeHtml(room.id)}" ${getRoomAvailability(room).state !== "free" ? 'disabled' : ''} title="Kiểm tra khung giờ trước khi chọn">Chọn phòng</button>
                         <button class="icon-btn details" type="button" data-action="details" data-id="${room.id}" title="Xem chi tiết phòng" aria-label="Xem chi tiết phòng">
                             <i class="fa-regular fa-eye"></i>
                         </button>
@@ -304,6 +285,17 @@ function handleTableActions(event) {
     const action = button.dataset.action;
     const rooms = getStoredRooms();
 
+    if (action === "select") {
+        const room = rooms.find(item => Number(item.id) === roomId);
+        const query = getAvailabilityQuery();
+        if (!room || !query || getRoomAvailability(room).state !== 'free') return;
+        let count;
+        try { count = window.RoomAvailability.participantCount(document.getElementById('filterCapacity').value); }
+        catch (error) { showError(error.message); return; }
+        if (room.capacity < count) { showError('Phòng không đủ sức chứa. Vui lòng chọn lại.'); renderRoomTable(); return; }
+        window.location.href = window.RoomAvailability.selectionUrl(room, query, count);
+        return;
+    }
     if (action === "details") {
         const room = rooms.find(item => Number(item.id) === roomId);
         if (!room) {
@@ -363,6 +355,7 @@ roomDetailsDialog.addEventListener("click", event => {
 checkAvailabilityButton.addEventListener("click", checkRoomAvailability);
 [availabilityDate, availabilityStart, availabilityEnd].forEach(input => {
     input.addEventListener("input", () => {
+        ++availabilitySequence; checkAvailabilityButton.disabled = false;
         if (availabilitySnapshot && getAvailabilityQuery()?.key !== availabilitySnapshot.key) {
             availabilityMessage.textContent = "Khung giờ đã thay đổi. Hãy kiểm tra lại để cập nhật tình trạng phòng.";
             availabilityMessage.className = "availability-message";
@@ -371,7 +364,19 @@ checkAvailabilityButton.addEventListener("click", checkRoomAvailability);
     });
 });
 
-renderRoomTable();
+const roomNavigation = new URLSearchParams(window.location.search);
+const incomingRange = window.RoomAvailability.range(roomNavigation.get('date') || '', roomNavigation.get('startTime') || '', roomNavigation.get('endTime') || '');
+if (incomingRange) {
+    availabilityDate.value = incomingRange.date;
+    availabilityStart.value = incomingRange.startTime;
+    availabilityEnd.value = incomingRange.endTime;
+}
+try {
+    const incomingCount = roomNavigation.get('participantCount');
+    if (incomingCount !== null) document.getElementById('filterCapacity').value = window.RoomAvailability.participantCount(incomingCount, false);
+} catch (_) {}
+if (incomingRange) checkRoomAvailability();
+else renderRoomTable();
 resetForm();
 
 window.meetingRoomOptions = () => getStoredRooms().map(room => ({
@@ -381,3 +386,11 @@ window.meetingRoomOptions = () => getStoredRooms().map(room => ({
     capacity: room.capacity,
     devices: room.devices || []
 }));
+
+['roomSearch','filterCapacity','filterDevice','filterStatus'].forEach(id => document.getElementById(id).addEventListener('input', renderRoomTable));
+document.getElementById('clearRoomFilters').addEventListener('click', () => {
+    ['roomSearch','filterCapacity','filterDevice'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('filterStatus').value = 'free';
+    renderRoomTable();
+});
+window.addEventListener('storage', event => { if (event.key === ROOM_STORAGE_KEY || event.key === window.RoomAvailability.DEMO_KEY || event.key === null) { ++availabilitySequence; availabilitySnapshot = null; checkAvailabilityButton.disabled = false; availabilityMessage.textContent = 'Danh sách phòng đã thay đổi. Vui lòng kiểm tra lại.'; renderRoomTable(); } });

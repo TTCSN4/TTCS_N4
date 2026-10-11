@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản trị phòng họp</title>
+    <title>Danh sách phòng trống - Meeting</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -670,6 +670,8 @@
             }
         }
     </style>
+  <link rel="stylesheet" href="../static/css/room-selection.css" th:href="@{/css/room-selection.css}">
+  <script src="../static/js/room-availability.js" th:src="@{/js/room-availability.js}" defer></script>
 </head>
 <body>
     <div class="app-container">
@@ -730,7 +732,7 @@
                 <div class="page-title">
                     <div class="title-icon"><i class="fa-solid fa-building"></i></div>
                     <div>
-                        <h1>Quản trị phòng họp</h1>
+                        <h1>Danh sách phòng trống</h1>
                     </div>
                     <a class="home-link" href="dashboard.html">
                         <i class="fa-solid fa-house"></i>
@@ -784,7 +786,7 @@
 
                     <section class="card">
                         <div class="table-header">
-                            <h3>Danh sách phòng</h3>
+                            <h3>Phòng phù hợp với cuộc họp</h3>
                             <span class="badge" id="roomCount">0</span>
                         </div>
 
@@ -810,6 +812,15 @@
                             <p class="availability-message" id="availabilityMessage" role="status" aria-live="polite">Chọn ngày và giờ để xem phòng trống.</p>
                         </div>
 
+                        <p class="availability-message">Demo frontend, không cần API: A1 bận 09:00–10:00 và B2 bận 14:00–15:00 trên ngày đã chọn. Kiểm tra phòng dựa trên lịch mẫu và các lịch bạn tạo thử. Chưa đặt phòng thật.</p>
+                        <div class="room-filters">
+                          <label>Tìm phòng<input id="roomSearch" type="search" placeholder="Tên phòng hoặc vị trí"></label>
+                          <label>Số người<input id="filterCapacity" type="number" min="1" max="200" step="1" placeholder="Sức chứa tối thiểu"></label>
+                          <label>Thiết bị<select id="filterDevice"><option value="">Tất cả</option><option>Máy chiếu</option><option>TV</option><option>Bảng trắng</option><option>Micro</option><option>Camera</option><option>Wi‑Fi</option></select></label>
+                          <label>Trạng thái<select id="filterStatus"><option value="">Tất cả</option><option value="free" selected>Còn trống</option><option value="busy">Đã được đặt</option></select></label>
+                          <button id="clearRoomFilters" class="btn btn-secondary" type="button">Xóa bộ lọc</button>
+                        </div>
+                        <p class="availability-message">Ưu tiên phòng đủ sức chứa từ nhỏ đến lớn. Chỉ chọn được phòng đã kiểm tra và còn trống.</p>
                         <table>
                             <thead>
                                 <tr>
@@ -817,7 +828,7 @@
                                     <th>Vị trí</th>
                                     <th>Sức chứa</th>
                                     <th>Thiết bị</th>
-                                    <th>Khung giờ</th>
+                                    <th>Trạng thái phòng</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>

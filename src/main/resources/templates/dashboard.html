@@ -643,6 +643,8 @@
       .header-cta { flex-direction: column; align-items: flex-start; }
     }
   </style>
+  <link rel="stylesheet" href="../static/css/dashboard-rooms.css" th:href="@{/css/dashboard-rooms.css}">
+  <script src="../static/js/room-availability.js" th:src="@{/js/room-availability.js}" defer></script>
 </head>
 <body>
   <div class="app">
@@ -730,15 +732,12 @@
             </div>
           </div>
 
-          <div class="mini-card green">
+          <a class="mini-card green" href="rooms.html" style="color:inherit;text-decoration:none;">
             <div class="mini-icon"><i class="fa-solid fa-check"></i></div>
             <div>
               <div class="mini-title">Phòng trống</div>
               <div class="mini-sub">Xem danh sách phòng</div>
-            </div>
-          </div>
-
-          <div class="mini-card purple">
+            </div></a><div class="mini-card purple">
             <div class="mini-icon"><i class="fa-regular fa-clock"></i></div>
             <div>
               <div class="mini-title">Lịch cá nhân</div>
@@ -764,41 +763,14 @@
           </section>
 
           <aside class="rooms-panel">
-            <div class="side-title">Phòng họp</div>
-
-            <div class="room-item">
-              <div class="room-main">
-                <div class="room-icon"><i class="fa-regular fa-building"></i></div>
-                <div>
-                  <div class="room-name">Phòng họp A1</div>
-                  <div class="room-meta">3:00 - 15:00</div>
-                </div>
-              </div>
-              <span class="state free">Trống</span>
-            </div>
-
-            <div class="room-item">
-              <div class="room-main">
-                <div class="room-icon"><i class="fa-regular fa-building"></i></div>
-                <div>
-                  <div class="room-name">Phòng họp B2</div>
-                  <div class="room-meta">3:00 - 15:00</div>
-                </div>
-              </div>
-              <span class="state free">Trống</span>
-            </div>
-
-            <div class="room-item">
-              <div class="room-main">
-                <div class="room-icon"><i class="fa-regular fa-building"></i></div>
-                <div>
-                  <div class="room-name">Phòng họp C1</div>
-                  <div class="room-meta">Sức chứa: 6 người</div>
-                </div>
-              </div>
-              <span class="state busy">Bận</span>
-            </div>
-
+            <div class="side-title">Phòng trống phù hợp</div>
+            <p class="quick-room-status">Demo frontend: A1 bận 09:00–10:00, B2 bận 14:00–15:00 trên ngày bạn chọn. Các lịch bạn tạo thử cũng được tính. Không gọi API.</p>
+            <form id="quickRoomForm" class="quick-room-form" novalidate>
+              <label>Ngày họp<input id="quickRoomDate" type="date" required></label><label>Số người<input id="quickRoomCount" type="number" value="1" min="1" max="200" step="1" required></label>
+              <label>Giờ bắt đầu<input id="quickRoomStart" type="time" required></label><label>Giờ kết thúc<input id="quickRoomEnd" type="time" required></label>
+              <button id="quickRoomCheck" type="submit">Kiểm tra phòng trống</button>
+            </form>
+            <p id="quickRoomStatus" class="quick-room-status" role="status" aria-live="polite">Chọn ngày giờ để kiểm tra (UTC+7).</p><div id="quickRoomList"></div><a class="quick-room-all" href="rooms.html">Xem danh sách và bộ lọc phòng →</a>
             <div class="equipment-box">
               <div class="side-title">Thiết bị sẵn có</div>
               <div class="equipment-list">
@@ -854,7 +826,7 @@
         if (!timeline) return;
 
         try {
-          const response = await fetch('/api/meetings', {
+          const response = window.RoomAvailability.demo ? {ok: true, json: async () => window.RoomAvailability.demoMeetings(new Intl.DateTimeFormat('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date())).map(meeting => ({...meeting, title: meeting.title || 'Lịch mẫu – ' + meeting.room}))} : await fetch('/api/meetings', {
             headers: { 'Accept': 'application/json' }
           });
           if (!response.ok) {
@@ -953,5 +925,6 @@
       }
     });
   </script>
+  <script src="../static/js/dashboard-rooms.js" th:src="@{/js/dashboard-rooms.js}" defer></script>
 </body>
 </html>
