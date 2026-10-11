@@ -1,0 +1,12 @@
+target/
+*.class
+.idea/
+*.iml
+out/
+.env
+application-local.properties
+*.log
+.DS_Store
+Thumbs.db
+~$*.docx
+~$*.xlsx

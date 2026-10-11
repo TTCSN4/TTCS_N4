@@ -1,18 +1,38 @@
-# Meeting Management API
+# Meeting Management
 
-Spring Boot 3 / Java 17 API for editing and cancelling meetings stored in MySQL.
+Module Spring Boot cho phép nhân viên xem, chỉnh sửa và hủy lịch họp. Backend kiểm tra người thao tác có phải người tổ chức và cuộc họp còn ở trạng thái cho phép trước khi cập nhật.
 
-## Business rules
+## Công nghệ
 
-- Only the meeting organizer (`organizer_id`) may edit or cancel a meeting.
-- Only a future meeting with status `SCHEDULED` may be edited or cancelled.
-- Cancelling is a soft delete: status changes to `CANCELLED`.
-- Edit data must contain a title and future start/end times; end time must be after start time.
-- Rows are locked while an edit/cancel transaction is running to avoid concurrent updates.
+- Java 21
+- Spring Boot 3.3.4
+- Spring Web, Spring Data JPA và Bean Validation
+- MySQL 8
+- HTML, CSS và JavaScript
+- Maven
 
-## Run with MySQL
+## Quy tắc nghiệp vụ
 
-Create a MySQL user if needed, then set these environment variables:
+- Chỉ nhân viên có mã trùng `organizer_id` được sửa hoặc hủy cuộc họp.
+- Mã nhân viên gồm chữ và số thứ tự, ví dụ `NV001`.
+- Chỉ cuộc họp `SCHEDULED` và chưa bắt đầu được thao tác.
+- Hủy là thao tác mềm: trạng thái chuyển thành `CANCELLED`.
+- Thời gian kết thúc phải sau thời gian bắt đầu.
+- Backend khóa bản ghi trong transaction để tránh hai yêu cầu cập nhật đồng thời.
+
+## Chuẩn bị MySQL
+
+Chạy script `database/init.sql` bằng MySQL Workbench hoặc dòng lệnh:
+
+```bash
+mysql -u root -p < database/init.sql
+```
+
+Script tạo database `meeting_management`, bảng `meetings` và hai cuộc họp mẫu trong tương lai. Nếu không chạy script, Hibernate vẫn có thể tự tạo database và bảng nhưng chưa có dữ liệu mẫu.
+
+## Cấu hình và chạy
+
+Thiết lập biến môi trường:
 
 ```text
 DB_URL=jdbc:mysql://localhost:3306/meeting_management?createDatabaseIfNotExist=true&serverTimezone=UTC
@@ -20,20 +40,24 @@ DB_USERNAME=root
 DB_PASSWORD=your_password
 ```
 
-Run the application with Maven:
+Ví dụ PowerShell:
 
-```text
+```powershell
+$env:DB_USERNAME="root"
+$env:DB_PASSWORD="your_password"
 mvn spring-boot:run
 ```
 
-Hibernate creates or updates the `meetings` table from the `Meeting` entity.
-The meeting management interface is available at `http://localhost:8080/`.
+Mở giao diện tại `http://localhost:8080/`.
 
 ## API
 
-Until the authentication module is integrated, the authenticated user ID is passed in the required `X-User-Id` header. A production gateway or security filter must set this header; it must not be accepted directly from an untrusted public client.
+```http
+GET /api/meetings
+GET /api/meetings/{meetingId}
+```
 
-### Edit a meeting
+Chỉnh sửa:
 
 ```http
 PUT /api/meetings/1
@@ -43,25 +67,41 @@ Content-Type: application/json
 {
   "title": "Sprint planning",
   "description": "Planning for Sprint 2",
-  "startTime": "2026-10-01T09:00:00+07:00",
-  "endTime": "2026-10-01T10:00:00+07:00"
+  "startTime": "2030-10-01T09:00:00+07:00",
+  "endTime": "2030-10-01T10:00:00+07:00"
 }
 ```
 
-Returns `200 OK` with the updated meeting.
-
-### Cancel a meeting
+Hủy:
 
 ```http
 DELETE /api/meetings/1
 X-User-Id: NV001
 ```
 
-Returns `204 No Content` and stores status `CANCELLED`.
+## Mã lỗi
 
-## Error responses
+- `400 Bad Request`: ID, mã nhân viên hoặc dữ liệu nhập không hợp lệ.
+- `403 Forbidden`: nhân viên không phải người tổ chức.
+- `404 Not Found`: cuộc họp không tồn tại.
+- `409 Conflict`: cuộc họp đã bắt đầu hoặc không còn `SCHEDULED`.
 
-- `400 Bad Request`: invalid ID, missing/invalid fields, invalid time range.
-- `403 Forbidden`: the user is not the organizer.
-- `404 Not Found`: the meeting does not exist.
-- `409 Conflict`: the meeting is no longer scheduled or has already started.
+## Kiểm thử
+
+```bash
+mvn clean test
+```
+
+Bộ test bao phủ luồng thành công, kiểm tra quyền, trạng thái, thời gian và mã lỗi HTTP.
+
+## Cấu trúc chính
+
+```text
+src/main/java/                   Backend Spring Boot
+src/main/resources/static/       Giao diện HTML CSS JavaScript
+src/test/java/                   Unit test và controller test
+database/init.sql                Khởi tạo MySQL và dữ liệu mẫu
+pom.xml                          Cấu hình Maven và Java 21
+```
+
+`X-User-Id` hiện mô phỏng mã nhân viên đã xác thực. Khi tích hợp đăng nhập, mã này nên được lấy từ token hoặc security context thay vì nhận trực tiếp từ client công khai.
