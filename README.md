@@ -20,7 +20,7 @@ Ví dụ body:
 }
 ```
 
-Chạy bằng Java 21, Spring Boot 4.0.8 và Maven. Ứng dụng dùng database MySQL riêng `meeting_management_us25` và mở tại `http://localhost:8094`.
+Chạy bằng Java 21, Spring Boot 4.0.8 và Maven. Ứng dụng dùng chung database MySQL `meeting_management` với các module US16, US18 và US28, mặc định mở tại `http://localhost:8080`. Có thể đổi cổng bằng biến môi trường `PORT`.
 
 ## Bật chế độ AI
 
@@ -38,7 +38,7 @@ Nếu không có API key, key không hợp lệ hoặc API tạm thời lỗi, h
 
 ## Dữ liệu mẫu để chạy thử
 
-Dữ liệu mẫu được tự động thêm khi ứng dụng khởi động và không bị tạo trùng:
+Dữ liệu mẫu mặc định **không được thêm** để tránh ghi các bản ghi người dùng thiếu thông tin vào database dùng chung. Chỉ bật trên database thử nghiệm riêng bằng biến môi trường `DEMO_DATA_ENABLED=true`:
 
 - Người tổ chức: `user-001` (Nguyễn Văn An).
 - Người tham dự: `user-002`, `user-003`, `user-004`.
@@ -46,4 +46,4 @@ Dữ liệu mẫu được tự động thêm khi ứng dụng khởi động v�
 - Phòng: `ROOM-A` (6 người), `ROOM-B` (12 người), `ROOM-C` (30 người), `ROOM-D` (100 người/online).
 - `ROOM-A` có lịch mẫu từ 09:00 đến 10:00 ngày kế tiếp để thử chức năng phát hiện trùng lịch.
 
-Không cần Gemini API key để thử chế độ hỏi từng bước. Mở `http://localhost:8094`, nhập `user-001`, sau đó dùng `user-002,user-003` ở bước người tham dự. Có thể tắt hoàn toàn dữ liệu mẫu bằng biến môi trường `DEMO_DATA_ENABLED=false`.
+Không cần Gemini API key để thử chế độ hỏi từng bước. Sau khi bật dữ liệu mẫu trên database thử nghiệm, mở `http://localhost:8080`, nhập `user-001`, sau đó dùng `user-002,user-003` ở bước người tham dự. Không bật dữ liệu mẫu trên database dùng chung hoặc database production.
