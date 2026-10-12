@@ -3,6 +3,7 @@ package com.ttcs.meetingmanagement.controller;
 
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -26,13 +27,16 @@ import java.util.UUID;
 public class MeetingController {
 
     private final MeetingRepository meetings;
+    private final RoomBookingPermissionService permissionService;
     private final NamedParameterJdbcTemplate jdbc;
 
     public MeetingController(
             MeetingRepository meetings,
+            RoomBookingPermissionService permissionService,
             NamedParameterJdbcTemplate jdbc) {
 
         this.meetings = meetings;
+        this.permissionService = permissionService;
         this.jdbc = jdbc;
     }
 
@@ -413,6 +417,10 @@ public class MeetingController {
         // Kiem tra quyen truoc khi dat phong
         if (roomId != null) {
 
+            permissionService.assertCanBook(
+                    organizerId,
+                    roomId
+            );
 
             long conflicts = meetings.countRoomConflicts(
                     roomId,
