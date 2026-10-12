@@ -3,6 +3,10 @@
 -- Core ERD tables must already exist; this does not replace existing data.
 ALTER TABLE `user` ADD COLUMN password_hash VARCHAR(255) NULL;
 CREATE UNIQUE INDEX uk_user_email ON `user` (email);
+-- Existing US21 queries use these optional scopes in addition to ERD's user_id.
+ALTER TABLE room_restriction
+    ADD COLUMN role_id VARCHAR(255) NULL,
+    ADD COLUMN department_id VARCHAR(255) NULL;
 CREATE TABLE IF NOT EXISTS department (
     department_id VARCHAR(50) NOT NULL PRIMARY KEY,
     department_name VARCHAR(255),
