@@ -1,69 +1,64 @@
-﻿"use strict";
-(() => {
-  const $ = (id) => document.getElementById(id),
-    KEY = "meeting.login.identifier";
-  function message(text) {
-    $("loginStatus").hidden = false;
-    $("loginStatus").textContent = text;
+'use strict';
+
+const loginForm = document.getElementById('login-form');
+const identity = document.getElementById('identity');
+const password = document.getElementById('login-password');
+const loginStatus = document.getElementById('login-status');
+const previewLink = document.getElementById('preview-link');
+
+function validate(input, errorId, message) {
+  const valid = input === password ? Boolean(input.value) : Boolean(input.value.trim());
+  const error = document.getElementById(errorId);
+  error.textContent = valid ? '' : message;
+  error.hidden = valid;
+  input.setAttribute('aria-invalid', String(!valid));
+  return valid;
+}
+
+function showStatus(message) {
+  loginStatus.textContent = message;
+  loginStatus.hidden = false;
+}
+
+loginForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const identityValid = validate(identity, 'identity-error', 'Vui l├▓ng nhß║¡p t├¬n ─æ─âng nhß║¡p hoß║╖c email.');
+  const passwordValid = validate(password, 'password-error', 'Vui l├▓ng nhß║¡p mß║¡t khß║⌐u.');
+  previewLink.hidden = true;
+  if (!identityValid || !passwordValid) {
+    loginStatus.hidden = true;
+    (!identityValid ? identity : password).focus();
+    return;
   }
-  try {
-    const identifier = localStorage.getItem(KEY);
-    if (identifier) {
-      $("loginName").value = identifier;
-      $("remember").checked = true;
-    }
-  } catch (_) {}
-  $("togglePassword").addEventListener("click", () => {
-    const visible = $("loginPassword").type === "password";
-    $("loginPassword").type = visible ? "text" : "password";
-    $("togglePassword").setAttribute("aria-label", visible ? "Ẩn mật khẩu" : "Hiện mật khẩu");
-    $("togglePassword").setAttribute("aria-pressed", String(visible));
-  });
-  $("loginForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const identifier = $("loginName").value.trim(),
-      password = $("loginPassword").value;
-    const errors = {
-      loginName: identifier ? "" : "Vui lòng nhập tên đăng nhập hoặc email.",
-      loginPassword: password ? "" : "Vui lòng nhập mật khẩu.",
-    };
-    for (const id of Object.keys(errors)) {
-      $(id + "Error").textContent = errors[id];
-      $(id).setAttribute("aria-invalid", String(!!errors[id]));
-      $(id).closest(".field").classList.toggle("invalid", !!errors[id]);
-    }
-    const first = Object.keys(errors).find((id) => errors[id]);
-    if (first) {
-      $(first).focus();
-      return;
-    }
-    try {
-      $("remember").checked ? localStorage.setItem(KEY, identifier) : localStorage.removeItem(KEY);
-    } catch (_) {}
-    message(
-      "Trang đăng nhập chưa được nối API xác thực. Tài khoản chưa được đăng nhập; vui lòng liên hệ quản trị viên.",
-    );
-  });
-  ["loginName", "loginPassword"].forEach((id) =>
-    $(id).addEventListener("input", () => {
-      $("loginStatus").hidden = true;
-      $(id + "Error").textContent = "";
-      $(id).removeAttribute("aria-invalid");
-      $(id).closest(".field").classList.remove("invalid");
-    }),
-  );
-  $("forgot").addEventListener("click", () =>
-    message(
-      "Liên hệ quản trị viên để được hỗ trợ đặt lại mật khẩu. Chức năng khôi phục mật khẩu chưa được tích hợp.",
-    ),
-  );
-  document
-    .querySelectorAll("[data-provider]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        message(
-          "Đăng nhập bằng " + button.dataset.provider + " chưa được cấu hình trong hệ thống.",
-        ),
-      ),
-    );
-})();
+  showStatus('Giao diß╗çn ─æ─âng nhß║¡p ch╞░a ─æ╞░ß╗úc kß║┐t nß╗æi vß╗¢i API x├íc thß╗▒c. Bß║ín c├│ thß╗â xem giao diß╗çn quß║ún trß╗ï qua li├¬n kß║┐t b├¬n d╞░ß╗¢i.');
+  previewLink.hidden = false;
+});
+
+identity.addEventListener('input', () => {
+  validate(identity, 'identity-error', 'Vui l├▓ng nhß║¡p t├¬n ─æ─âng nhß║¡p hoß║╖c email.');
+  loginStatus.hidden = true;
+  previewLink.hidden = true;
+});
+password.addEventListener('input', () => {
+  validate(password, 'password-error', 'Vui l├▓ng nhß║¡p mß║¡t khß║⌐u.');
+  loginStatus.hidden = true;
+  previewLink.hidden = true;
+});
+
+document.getElementById('password-toggle').addEventListener('click', event => {
+  const button = event.currentTarget;
+  const visible = password.type === 'password';
+  password.type = visible ? 'text' : 'password';
+  button.setAttribute('aria-pressed', String(visible));
+  button.setAttribute('aria-label', visible ? 'ß║¿n mß║¡t khß║⌐u' : 'Hiß╗çn mß║¡t khß║⌐u');
+  button.querySelector('use').setAttribute('href', visible ? '#eye' : '#eye-off');
+});
+
+document.getElementById('forgot-password').addEventListener('click', () => {
+  previewLink.hidden = true;
+  showStatus('Chß╗⌐c n─âng kh├┤i phß╗Ñc mß║¡t khß║⌐u ch╞░a ─æ╞░ß╗úc kß║┐t nß╗æi. Vui l├▓ng li├¬n hß╗ç quß║ún trß╗ï vi├¬n ─æß╗â ─æ╞░ß╗úc hß╗ù trß╗ú.');
+});
+document.getElementById('google-login').addEventListener('click', () => {
+  previewLink.hidden = true;
+  showStatus('─É─âng nhß║¡p Google ch╞░a ─æ╞░ß╗úc cß║Ñu h├¼nh trong hß╗ç thß╗æng.');
+});
