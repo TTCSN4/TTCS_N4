@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Đăng nhập · Meeting Management</title>
+    <link rel="stylesheet" href="/css/login.css" />
+    <script src="/js/login.js" defer></script>
+  </head>
+  <body>
+    <section class="hero">
+      <a class="brand" href="/templates/login.html"
+        ><span class="logo"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="3" />
+            <path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2m-8 3h2m4 0h2" /></svg></span
+        ><strong>Meeting<br />Management</strong></a
+      >
+      <div class="hero-copy">
+        <h1>Quản lý cuộc họp<br />dễ dàng và hiệu quả</h1>
+        <p>
+          Hệ thống giúp bạn đặt phòng, quản lý lịch họp,<br />theo dõi cuộc họp và tối ưu quy trình
+          làm việc.
+        </p>
+      </div>
+      <div class="features">
+        <article>
+          <b
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="5" width="18" height="16" rx="3" />
+              <path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2m-8 3h2m4 0h2" /></svg
+          ></b>
+          <div>
+            <strong>Đặt phòng họp nhanh chóng</strong
+            ><small>Kiểm tra phòng trống, đặt lịch dễ dàng.</small>
+          </div>
+        </article>
+        <article>
+          <b
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="7" r="4" />
+              <path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg
+          ></b>
+          <div>
+            <strong>Quản lý lịch họp thông minh</strong
+            ><small>Theo dõi và quản lý tất cả cuộc họp.</small>
+          </div>
+        </article>
+        <article>
+          <b
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 21v-9h3v9m3 0V4h3v17m3 0V9h3v12" /></svg
+          ></b>
+          <div>
+            <strong>Báo cáo và thống kê</strong
+            ><small>Tổng hợp dữ liệu, hỗ trợ ra quyết định.</small>
+          </div>
+        </article>
+      </div>
+      <svg
+        class="room-scene"
+        viewBox="0 0 800 430"
+        preserveAspectRatio="xMidYMax slice"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="wall" x2="1" y2="1">
+            <stop stop-color="#182a40" />
+            <stop offset="1" stop-color="#9b806b" />
+          </linearGradient>
+          <linearGradient id="glass" x2=".8" y2="1">
+            <stop stop-color="#a9d5f5" />
+            <stop offset="1" stop-color="#4a799f" />
+          </linearGradient>
+          <linearGradient id="desk" x2="1" y2="1">
+            <stop stop-color="#d7bca0" />
+            <stop offset="1" stop-color="#705542" />
+          </linearGradient>
+          <linearGradient id="floor" x2="1" y2="1">
+            <stop stop-color="#a5a8aa" />
+            <stop offset="1" stop-color="#26364a" />
+          </linearGradient>
+        </defs>
+        <rect width="800" height="430" fill="url(#wall)" />
+        <path d="M0 0h800v55L470 113 0 62Z" fill="#57677a" />
+        <path d="m0 41 466 80 334-63" fill="none" stroke="#ffe1ac" stroke-width="5" />
+        <path d="M0 62 470 113v210L0 354Z" fill="url(#glass)" />
+        <g fill="#bcd8eb" opacity=".5">
+          <path
+            d="M15 246h29v78H15Zm36-24h37v101H51Zm65 20h45v78h-45Zm82-66h43v143h-43Zm73 32h32v108h-32Zm63 10h35v93h-35Zm76 20h37v69h-37Z"
+          />
+        </g>
+        <g stroke="#172a3e" stroke-width="10">
+          <path d="M8 64v287M99 79v263M192 95v239M285 107v220M379 118v203M470 114v209" />
+        </g>
+        <path d="m0 354 470-31 330-12v119H0Z" fill="url(#floor)" />
+        <rect
+          x="536"
+          y="113"
+          width="198"
+          height="119"
+          rx="5"
+          fill="#0a1d36"
+          stroke="#202e40"
+          stroke-width="7"
+        />
+        <rect x="547" y="124" width="176" height="96" fill="#154888" />
+        <rect x="557" y="136" width="69" height="9" rx="4" fill="#a7c9ff" />
+        <rect x="557" y="155" width="130" height="4" rx="2" fill="#5695e1" />
+        <g fill="#367ee2">
+          <rect x="557" y="175" width="35" height="29" rx="4" />
+          <rect x="601" y="175" width="35" height="29" rx="4" />
+          <rect x="645" y="175" width="35" height="29" rx="4" />
+        </g>
+        <path
+          d="m137 306 399-38 191 70-442 59Z"
+          fill="url(#desk)"
+          stroke="#614c3e"
+          stroke-width="3"
+        />
+        <path d="M280 396v34m372-81v81" stroke="#283748" stroke-width="20" />
+        <g fill="#152637" stroke="#526578" stroke-width="3">
+          <rect x="38" y="295" width="90" height="86" rx="12" transform="rotate(-10 38 295)" />
+          <rect x="118" y="362" width="100" height="89" rx="12" transform="rotate(-10 118 362)" />
+          <rect x="531" y="338" width="98" height="95" rx="12" transform="rotate(12 531 338)" />
+          <rect x="685" y="310" width="78" height="82" rx="12" transform="rotate(12 685 310)" />
+        </g>
+        <path d="m358 293 54-3-11 38-55 4Z" fill="#1c3042" stroke="#596f7f" stroke-width="3" />
+        <path d="m346 331 55-4 20 11-68 7Z" fill="#7893a5" />
+        <path
+          d="M492 285v-52m0 30q-24-13-21-31 28 0 21 31m0-6q25-8 25-29-26 1-25 29"
+          stroke="#53866d"
+          stroke-width="5"
+          fill="#7da578"
+        />
+        <path d="M476 275h33l-5 29h-22Z" fill="#c5b493" />
+      </svg>
+    </section>
+    <main>
+      <section class="login-card">
+        <div class="card-brand">
+          <span class="logo"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="5" width="18" height="16" rx="3" />
+              <path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2m-8 3h2m4 0h2" /></svg
+          ></span>
+          <div>
+            <h2>Meeting<br />Management</h2>
+            <p>Đăng nhập vào hệ thống</p>
+          </div>
+        </div>
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="loginName">Tên đăng nhập hoặc Email</label>
+            <div class="input-wrap">
+              <span
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="7" r="4" />
+                  <path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg></span
+              ><input
+                id="loginName"
+                autocomplete="username"
+                maxlength="254"
+                placeholder="Nhập tên đăng nhập hoặc email"
+                aria-describedby="loginNameError"
+              />
+            </div>
+            <small id="loginNameError" class="error"></small>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Mật khẩu</label>
+            <div class="input-wrap">
+              <span
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="5" y="10" width="14" height="11" rx="2" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span
+              ><input
+                id="loginPassword"
+                type="password"
+                autocomplete="current-password"
+                maxlength="72"
+                placeholder="Nhập mật khẩu"
+                aria-describedby="loginPasswordError"
+              /><button
+                id="togglePassword"
+                type="button"
+                aria-label="Hiện mật khẩu"
+                aria-pressed="false"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="m3 3 18 18" />
+                </svg>
+              </button>
+            </div>
+            <small id="loginPasswordError" class="error"></small>
+          </div>
+          <div class="options">
+            <label><input id="remember" type="checkbox" /> Ghi nhớ đăng nhập</label
+            ><button id="forgot" type="button" class="text-link">Quên mật khẩu?</button>
+          </div>
+          <p id="loginStatus" role="status" hidden></p>
+          <button class="submit" type="submit">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="7" r="4" />
+              <path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg
+            ><span>Đăng nhập</span>
+          </button>
+        </form>
+        <div class="divider"><span>hoặc</span></div>
+        <div class="social">
+          <button type="button" data-provider="Google">
+            <b class="google">G</b> Đăng nhập với Google
+          </button>
+        </div>
+        <p class="signup">
+          Chưa có tài khoản? <a href="/templates/create-user.html">Tạo tài khoản mới</a>
+        </p>
+      </section>
+      <p class="copyright">© 2026 Meeting Management. Tất cả quyền được bảo lưu.</p>
+    </main>
+  </body>
+</html>
