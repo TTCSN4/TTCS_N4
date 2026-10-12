@@ -11,56 +11,67 @@ public class Meeting {
     // Ma cuoc hop - String theo ERD
     @Id
     @Column(name = "meeting_id", length = 50)
-    private String meetingId;
+    public String meetingId;
 
     // Nguoi to chuc
     @Column(name = "organizer_id", nullable = false, length = 50)
-    private String organizerId;
+    public String organizerId;
 
     // Phong duoc dat
     @Column(name = "room_id", length = 50)
-    private String roomId;
+    public String roomId;
 
     @Column(name = "title", nullable = false, length = 255)
-    private String title;
+    public String title;
 
     @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    public String description;
 
     // Thoi gian hop
     @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    public LocalDateTime startTime;
 
     @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    public LocalDateTime endTime;
 
     // Trang thai cuoc hop
     @Column(name = "status", nullable = false, length = 50)
-    private String status;
+    public String status;
 
     // Lich hop dinh ky
     @Column(name = "is_recurring")
-    private Boolean isRecurring = false;
+    public Boolean isRecurring = false;
 
     @Column(name = "recurrence_rule", length = 255)
-    private String recurrenceRule;
+    public String recurrenceRule;
 
     @Column(name = "recurrence_series_id", length = 50)
-    private String recurrenceSeriesId;
+    public String recurrenceSeriesId;
 
     // Huy cuoc hop
     @Column(name = "cancel_reason", length = 255)
-    private String cancelReason;
+    public String cancelReason;
 
     @Column(name = "cancelled_at")
-    private LocalDateTime cancelledAt;
+    public LocalDateTime cancelledAt;
 
     // Thoi gian tao va cap nhat
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public LocalDateTime updatedAt;
+
+    @PrePersist
+    void initialize() {
+        if (meetingId == null) meetingId = java.util.UUID.randomUUID().toString();
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (status == null) status = "SCHEDULED";
+    }
+
+    @PreUpdate
+    void updateTimestamp() { updatedAt = LocalDateTime.now(); }
 
     public Meeting() {
     }

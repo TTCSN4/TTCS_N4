@@ -36,7 +36,7 @@ public class RoomUsageRepository {
 
         String sql = """
             SELECT room_id, room_name
-            FROM `ROOM`
+            FROM `room`
             """;
 
         if (roomId != null) {
@@ -78,8 +78,8 @@ public class RoomUsageRepository {
                 m.room_id,
                 m.start_time,
                 m.end_time
-            FROM `MEETING` m
-            INNER JOIN `ROOM` r
+            FROM `meeting` m
+            INNER JOIN `room` r
                 ON r.room_id = m.room_id
             WHERE m.start_time < ?
               AND m.end_time > ?

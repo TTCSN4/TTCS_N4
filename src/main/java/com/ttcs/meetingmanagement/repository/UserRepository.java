@@ -32,4 +32,8 @@ public interface UserRepository
             @Param("id") String id);
 
     long countByRole_RoleId(String roleId);
+    boolean existsByEmailIgnoreCase(String email);
+    Optional<User> findByEmailIgnoreCase(String email);
+    Optional<User> findByHrmCode(String code);
+    java.util.List<User> findByHrmCodeIsNotNull();
 }

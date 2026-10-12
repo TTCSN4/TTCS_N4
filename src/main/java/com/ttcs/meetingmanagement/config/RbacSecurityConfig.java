@@ -16,12 +16,27 @@ import org.springframework.security.web.SecurityFilterChain;
 public class RbacSecurityConfig {
 
     @Bean
+    @org.springframework.core.annotation.Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            RbacAccess rbacAccess
+            RbacAccess rbacAccess,
+            org.springframework.beans.factory.ObjectProvider<org.springframework.security.oauth2.jwt.JwtDecoder> decoders
     ) throws Exception {
 
+        http.csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
+        var decoder = decoders.getIfAvailable();
+        if (decoder != null) http.oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.decoder(decoder)));
         http.authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/integrations/hrm/webhook", "/api/integrations/hrm/sync").permitAll()
+            .requestMatchers("/api/users", "/api/roles", "/api/departments", "/api/integrations/**", "/api/reminders/dispatch")
+            .access((authentication, context) -> new AuthorizationDecision(rbacAccess.isAdmin(authentication.get())))
+            .requestMatchers(HttpMethod.GET, "/api/meetings/**", "/api/participants", "/api/equipment/**")
+            .access((authentication, context) -> new AuthorizationDecision(rbacAccess.canAttend(authentication.get())))
+            .requestMatchers("/api/chatbot/**", "/api/availability", "/api/meetings/**", "/api/equipment/bookings", "/api/equipment/bookings/**")
+            .access((authentication, context) -> new AuthorizationDecision(rbacAccess.canBook(authentication.get())))
+            .requestMatchers("/api/equipment/**")
+            .access((authentication, context) -> new AuthorizationDecision(rbacAccess.isAdmin(authentication.get())))
 
             // US20: Chi Admin duoc quan ly vai tro
             .requestMatchers("/api/admin/**")
