@@ -3,7 +3,10 @@
   const defaults = [
     {id: 1, name: "Phòng họp A1", location: "Tầng 2, khu A", capacity: 8, devices: ["Máy chiếu", "TV", "Bảng trắng"]},
     {id: 2, name: "Phòng họp B2", location: "Tầng 3, khu B", capacity: 12, devices: ["Máy chiếu", "Micro", "Camera", "Wi‑Fi"]},
-    {id: 3, name: "Phòng họp C1", location: "Tầng 1, khu C", capacity: 6, devices: ["TV", "Bảng trắng"]}
+    {id: 3, name: "Phòng họp C1", location: "Tầng 1, khu C", capacity: 6, devices: ["TV", "Bảng trắng"]},
+    {id: 4, name: "Phòng họp Ocean", location: "Tầng 3, khu A", capacity: 20, devices: ["Máy chiếu", "Camera", "Wi-Fi"]},
+    {id: 5, name: "Phòng họp Sakura", location: "Tầng 2, khu B", capacity: 16, devices: ["Máy chiếu", "Bảng trắng", "Wi-Fi"]},
+    {id: 6, name: "Phòng hội nghị", location: "Tầng 1, khu A", capacity: 30, devices: ["Máy chiếu", "TV", "Wi-Fi"]}
   ];
   const nameKey = name => name.trim().toLocaleLowerCase("vi");
   function getRooms(storage = root.localStorage) {
