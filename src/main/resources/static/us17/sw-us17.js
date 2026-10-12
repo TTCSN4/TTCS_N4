@@ -1,5 +1,5 @@
 "use strict";
-const CACHE = "meeting-us17-mobile-us17-v5";
+const CACHE = "meeting-us17-mobile-us17-v6";
 const BASE = new URL("./", self.location.href);
 const SHELL = ["mobile-meetings.html", "css/mobile-meetings.css", "js/mobile-meetings.js", "manifest-us17.webmanifest", "icons/meeting-192.png", "icons/meeting-512.png"].map(path => new URL(path, BASE).href);
 const PAGE = SHELL[0];
