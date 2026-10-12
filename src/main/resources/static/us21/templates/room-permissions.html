@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>
+            Phân quyền đặt phòng · Meeting Management
+        </title>
+        <link rel="stylesheet" href="../css/room-permissions.css?v=7">
+        <script src="../js/room-permissions.js?v=9" defer>
+        </script>
+    </head>
+    <body class="rp-page">
+        <aside class="rp-sidebar">
+            <a class="rp-brand" href="room-permissions.html"><b>M</b><span>Meeting<small>Meeting Management</small></span></a>
+            <nav aria-label="Điều hướng">
+
+<details class="rp-calendar-group" open>
+    <summary><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18"/></svg><span>Lịch họp</span><span class="rp-chevron">⌄</span></summary>
+    <div class="rp-calendar-submenu">
+        <button type="button" data-menu-pending="Tạo lịch họp"><i></i><span>Tạo lịch họp</span></button>
+        <button type="button" data-menu-pending="Quản lý lịch họp"><i></i><span>Quản lý lịch họp</span></button>
+    </div>
+</details>
+
+                <button disabled><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18M8 9h13m-5 5v2"/></svg><span>Danh sách phòng</span></button>
+                <a href="../../us17/mobile-meetings.html"><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg><span>Lịch họp của tôi</span></a>
+                <button disabled><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m7 12 3 3 7-7"/></svg><span>Duyệt cuộc họp</span></button>
+                <a href="../../us22/templates/room-usage-report.html"><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V11h4v10m2 0V3h4v18m2 0V7h4v14"/></svg><span>Báo cáo sử dụng phòng</span></a>
+                <button disabled><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-1 3-3 1v4l-2 1 2 2v4l3 1 1 2h6l1-2 3-1v-4l2-2-2-1V7l-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg><span>Quản trị hệ thống</span></button>
+                <button disabled><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m0-17a3 3 0 0 1 0 6m2 4a6 6 0 0 1 4 5v2"/></svg><span>Quản lý người dùng</span></button>
+                <a href="room-permissions.html" aria-current="page"><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 6v6c0 6 9 10 9 10s9-4 9-10V6Z"/><path d="m8 12 3 3 5-6"/></svg><span>Phân quyền đặt phòng</span></a>
+                <button disabled><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-1 3-3 1v4l-2 1 2 2v4l3 1 1 2h6l1-2 3-1v-4l2-2-2-1V7l-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg><span>Cài đặt hệ thống</span></button>
+            <button type="button" data-menu-pending="Người tham gia"><svg class="rp-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m0-17a3 3 0 0 1 0 6m2 4a6 6 0 0 1 4 5v2"/></svg><span>Người tham gia</span></button></nav>
+            <div class="rp-profile">
+                <b>
+                    A
+                </b>
+                <span>
+                    Nguyễn Văn A
+                    <small>
+                        Quản trị viên dùng thử
+                    </small>
+                </span>
+            </div>
+        </aside>
+        <div class="rp-workspace">
+            <header>
+                <button id="menu-toggle" class="rp-menu-toggle" aria-label="Ẩn hoặc hiện menu">
+                    ☰
+                </button>
+                <input id="header-search" class="rp-header-search" type="search" placeholder="Tìm kiếm phòng họp…" aria-label="Tìm kiếm phòng họp">
+                <div class="rp-header-profile">
+                    <button id="notifications" class="rp-notification" aria-label="Thông báo">
+                        ♧
+                        <i>
+                            3
+                        </i>
+                    </button>
+                    <span class="rp-header-avatar">
+                        A
+                    </span>
+                    <span>
+                        <strong>
+                            Nguyễn Văn A
+                        </strong>
+                        <small>
+                            Quản trị viên
+                        </small>
+                    </span>
+                </div>
+            </header>
+            <main>
+                <p class="rp-breadcrumb">
+                    Trang chủ / Quản trị hệ thống / Phân quyền đặt phòng
+                </p>
+                <div class="rp-heading">
+                    <span class="rp-title-icon">
+                        ♙
+                    </span>
+                    <div>
+                        <span class="rp-eyebrow">
+                            QUẢN TRỊ HỆ THỐNG · US21
+                        </span>
+                        <h1>
+                            Phân quyền đặt phòng họp
+                        </h1>
+                        <p>
+                            Cấu hình quyền theo vai trò; xem quyền người dùng được kế thừa.
+                        </p>
+                    </div>
+                </div>
+                <section class="rp-stats" aria-label="Thống kê quyền">
+                    <article>
+                        <span>
+                            Tổng số phòng
+                        </span>
+                        <strong id="kpi-total">
+                            —
+                        </strong>
+                    </article>
+                    <article>
+                        <span>
+                            Cho phép đặt
+                        </span>
+                        <strong id="kpi-open">
+                            —
+                        </strong>
+                    </article>
+                    <article>
+                        <span>
+                            Hạn chế đặt
+                        </span>
+                        <strong id="kpi-restricted">
+                            —
+                        </strong>
+                    </article>
+                    <article>
+                        <span>
+                            Không cho đặt
+                        </span>
+                        <strong id="kpi-blocked">
+                            —
+                        </strong>
+                    </article>
+                </section>
+                <div class="rp-layout">
+                    <div>
+                        <section class="rp-card">
+                            <h2>
+                                Quản lý quyền đặt phòng
+                            </h2>
+                            <div class="rp-tabs" role="tablist" aria-label="Cách xem quyền">
+                                <button id="tab-rooms" role="tab" aria-selected="true" aria-controls="panel-rooms" data-tab="rooms">
+                                    Theo phòng họp
+                                </button>
+                                <button id="tab-roles" role="tab" aria-selected="false" aria-controls="panel-roles" data-tab="roles">
+                                    Theo vai trò
+                                </button>
+                                <button id="tab-users" role="tab" aria-selected="false" aria-controls="panel-users" data-tab="users">
+                                    Theo người dùng
+                                </button>
+                            </div>
+                            <section id="panel-rooms" role="tabpanel" aria-labelledby="tab-rooms">
+                                <div class="rp-filters">
+                                    <input id="search" type="search" placeholder="Tìm theo tên phòng…" aria-label="Tên phòng">
+                                    <select id="status-filter" aria-label="Trạng thái">
+                                        <option value="all">
+                                            Tất cả trạng thái
+                                        </option>
+                                        <option value="open">
+                                            Cho phép đặt
+                                        </option>
+                                        <option value="restricted">
+                                            Hạn chế đặt
+                                        </option>
+                                        <option value="blocked">
+                                            Không cho đặt
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="rp-table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    STT
+                                                </th>
+                                                <th>
+                                                    Tên phòng
+                                                </th>
+                                                <th>
+                                                    Sức chứa
+                                                </th>
+                                                <th>
+                                                    Quyền đặt phòng
+                                                </th>
+                                                <th>
+                                                    Trạng thái
+                                                </th>
+                                                <th>
+                                                    Thao tác
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="room-rows">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="empty" class="rp-empty" hidden>
+                                    Không tìm thấy phòng phù hợp. Thử đổi từ khóa hoặc bộ lọc.
+                                </div>
+                                <p id="list-note" class="rp-helper" role="status">
+                                </p>
+                            </section>
+                            <section id="panel-roles" role="tabpanel" aria-labelledby="tab-roles" hidden>
+                                <div id="role-summary" class="rp-count-grid">
+                                </div>
+                            </section>
+                            <section id="panel-users" role="tabpanel" aria-labelledby="tab-users" hidden>
+                                <div id="user-summary" class="rp-count-grid">
+                                </div>
+                                <p class="rp-helper">
+                                    Bản dùng thử kế thừa quyền từ vai trò; chưa cấu hình ngoại lệ riêng cho từng người.
+                                </p>
+                            </section>
+                        </section>
+                    </div>
+                    <div class="rp-right">
+                        <section class="rp-card">
+                            <h2>
+                                Quy định phân quyền
+                            </h2>
+                            <div class="rp-rule">
+                                <strong>
+                                    Quản trị viên
+                                </strong>
+                                <p>
+                                    Được quản lý cấu hình. Quyền đặt phòng vẫn tuân theo chính sách được cấp.
+                                </p>
+                            </div>
+                            <div class="rp-rule">
+                                <strong>
+                                    Nhân viên
+                                </strong>
+                                <p>
+                                    Chỉ được đặt các phòng được cấp quyền nhân viên.
+                                </p>
+                            </div>
+                            <div class="rp-rule">
+                                <strong>
+                                    Khách
+                                </strong>
+                                <p>
+                                    Chỉ được đặt phòng khi được cấp quyền khách.
+                                </p>
+                            </div>
+                            <p class="rp-helper">
+                                Đây là quy tắc mô phỏng, cần thống nhất với máy chủ khi tích hợp.
+                            </p>
+                        </section>
+                        <section class="rp-card rp-history-card">
+                            <h2>
+                                Lịch sử thay đổi
+                            </h2>
+                            <p class="rp-helper">
+                                Cấu hình và lịch sử được lưu trên trình duyệt này; chưa tích hợp máy chủ.
+                            </p>
+                            <ul id="history" class="rp-history">
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+                <div class="rp-bottom-preview">
+                    <section class="rp-card">
+                        <h2>
+                            ◉ Xem trước thông báo khi không có quyền đặt
+                        </h2>
+                        <p class="rp-helper">
+                            Kiểm tra quyền đặt theo cấu hình đã lưu.
+                        </p>
+                        <form id="check-form">
+                            <label>
+                                Vai trò dùng thử
+                                <select id="check-role">
+                                    <option value="USER">
+                                        Nhân viên
+                                    </option>
+                                    <option value="ADMIN">
+                                        Quản trị viên
+                                    </option>
+                                    <option value="GUEST">
+                                        Khách
+                                    </option>
+                                </select>
+                            </label>
+                            <label>
+                                Phòng họp
+                                <select id="check-room">
+                                </select>
+                            </label>
+                            <button id="check-button" class="rp-primary rp-full" type="submit">
+                                Kiểm tra quyền đặt
+                            </button>
+                        </form>
+                        <div id="decision" class="rp-decision" role="status" hidden>
+                            <strong id="decision-title">
+                            </strong>
+                            <p id="decision-reason">
+                            </p>
+                            <p id="decision-help">
+                            </p>
+                            <button id="choose-allowed-room" type="button" hidden>Chọn phòng được phép đặt</button>
+                        </div>
+                    </section>
+                    <section class="rp-card">
+                        <h2>
+                            ▣ Đặt lịch họp dùng thử
+                        </h2>
+                        <p class="rp-helper">
+                            Dùng vai trò đã chọn để kiểm tra quyền trước khi lưu lịch. Chưa kiểm tra lịch trống.
+                        </p>
+                        <form id="booking-form"><label>
+                            Phòng họp
+                        </label>
+                        <select id="booking-preview" class="rp-booking-preview" aria-label="Phòng họp muốn đặt"></select>
+                        <p id="booking-preview-reason" class="rp-helper">
+                        </p>
+<label for="booking-title">Tên cuộc họp</label><input id="booking-title" required maxlength="150">
+<label for="booking-start">Bắt đầu</label><input id="booking-start" type="datetime-local" required>
+<label for="booking-end">Kết thúc</label><input id="booking-end" type="datetime-local" required>
+<button id="book-button" class="rp-primary rp-full" type="submit" disabled>Lưu lịch họp</button>
+<p id="booking-result" role="status"></p></form>
+                    </section>
+                </div>
+
+            </main>
+        </div>
+        <div id="toast" class="rp-toast" role="status" hidden>
+        </div>
+    </body>
+</html>
