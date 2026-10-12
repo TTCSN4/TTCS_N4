@@ -6,6 +6,7 @@ import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import com.ttcs.meetingmanagement.room.RoomRepository;
+import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,16 @@ public class RoomBookingService {
 
     private final MeetingRepository meetingRepository;
     private final RoomRepository roomRepository;
+    private final RoomBookingPermissionService permissionService;
 
     public RoomBookingService(
             MeetingRepository meetingRepository,
-            RoomRepository roomRepository) {
+            RoomRepository roomRepository,
+            RoomBookingPermissionService permissionService) {
 
         this.meetingRepository = meetingRepository;
         this.roomRepository = roomRepository;
+        this.permissionService = permissionService;
     }
 
     // US08 + US21: Dat phong va kiem tra quyen
@@ -83,8 +87,10 @@ public class RoomBookingService {
             );
         }
 
-        // TODO US21: Bo sung kiem tra quyen theo USER, ROLE, DEPARTMENT
+        // 5. US21: Kiem tra quyen theo USER, ROLE, DEPARTMENT
+        String userId = meeting.getOrganizerId();
 
+        permissionService.assertCanBook(userId, roomId);
 
         // 6. US08: Kiem tra trung lich
         long conflicts = meetingRepository.countRoomConflicts(
