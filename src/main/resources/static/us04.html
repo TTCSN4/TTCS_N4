@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US04 - Quản lý người tham dự</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f5f9;
+    margin: 0;
+    padding: 35px 15px;
+    color: #273247;
+}
+.container {
+    max-width: 950px;
+    margin: auto;
+}
+h1 { color: #2455a4; }
+.card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px #00000012;
+}
+input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+    margin: 8px 0 14px;
+}
+button {
+    border: 0;
+    border-radius: 6px;
+    padding: 11px 16px;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    margin: 4px;
+}
+button:hover { opacity: .85; }
+.green { background: #16a34a; }
+.red { background: #dc2626; }
+.gray { background: #64748b; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+th, td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px;
+    text-align: left;
+    word-break: break-word;
+}
+th { background: #eef2ff; }
+.status {
+    background: #fff7d6;
+    padding: 3px 8px;
+    border-radius: 5px;
+}
+#message {
+    white-space: pre-wrap;
+    margin: 15px 0;
+    font-weight: bold;
+}
+.actions { min-width: 225px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>US04 - Mời người tham dự</h1>
+    <p>Meeting Management System - Backend localhost:8080</p>
+
+    <div class="card">
+        <h2>Thông tin cuộc họp</h2>
+        <label>Meeting ID</label>
+        <input id="meetingId"
+          value="b7ec8c61-932c-455a-9906-fb9493f10854">
+        <button onclick="loadParticipants()">
+            Xem danh sách người tham dự
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Mời người tham dự</h2>
+        <label>User ID</label>
+        <input id="userId" placeholder="Nhập user_id từ MySQL">
+        <button class="green" onclick="invite()">
+            + Gửi lời mời
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Danh sách người tham dự</h2>
+        <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Trạng thái</th>
+                        <th>Phản hồi lúc</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="participantList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Kết quả API</h3>
+        <div id="message">Sẵn sàng kiểm tra US04.</div>
+    </div>
+</div>
+
+<script>
+function apiUrl() {
+    const id = document.getElementById("meetingId").value.trim();
+    if (!id) throw new Error("Chưa nhập Meeting ID");
+    return "/api/meetings/" + encodeURIComponent(id) + "/participants";
+}
+
+function notify(text, error = false) {
+    const element = document.getElementById("message");
+    element.textContent = text;
+    element.style.color = error ? "#dc2626" : "#15803d";
+}
+
+async function request(url, method = "GET", data = null) {
+    const options = { method };
+    if (data !== null) {
+        options.headers = { "Content-Type": "application/json" };
+        options.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(url, options);
+    const raw = await response.text();
+    let result;
+
+    try {
+        result = raw ? JSON.parse(raw) : null;
+    } catch {
+        result = raw;
+    }
+
+    if (!response.ok) {
+        const detail = result && typeof result === "object"
+            ? (result.detail || result.message || result.error || "")
+            : String(result || "");
+        throw new Error("HTTP " + response.status + ": " + detail);
+    }
+
+    return result;
+}
+
+async function loadParticipants() {
+    const table = document.getElementById("participantList");
+    table.replaceChildren();
+
+    try {
+        const data = await request(apiUrl());
+
+        for (const p of data) {
+            const row = document.createElement("tr");
+
+            for (const value of [
+                p.userId,
+                p.status,
+                p.respondedAt || "Chưa phản hồi"
+            ]) {
+                const cell = document.createElement("td");
+                cell.textContent = value ?? "";
+                row.appendChild(cell);
+            }
+
+            const actions = document.createElement("td");
+            actions.className = "actions";
+
+            if (p.status === "PENDING") {
+                actions.appendChild(makeButton(
+                    "Đồng ý", "green",
+                    () => respond(p.userId, "ACCEPTED")
+                ));
+                actions.appendChild(makeButton(
+                    "Từ chối", "gray",
+                    () => respond(p.userId, "DECLINED")
+                ));
+            }
+
+            actions.appendChild(makeButton(
+                "Xóa", "red",
+                () => removeParticipant(p.userId)
+            ));
+
+            row.appendChild(actions);
+            table.appendChild(row);
+        }
+
+        notify("GET thành công. Có " + data.length + " người tham dự.");
+    } catch (e) {
+        notify(e.message, true);
+    }
+}
+
+function makeButton(label, css, action) {
+    const button = document.createElement("button");
+    button.textContent = label;
+    button.className = css;
+    button.onclick = action;
+    return button;
+}
+
+async function invite() {
+    const userId = document.getElementById("userId").value.trim();
+
+    if (!userId) {
+        notify("Vui lòng nhập User ID", true);
+        return;
+    }
+
+    try {
+        await request(apiUrl(), "POST", { userId });
+        await loadParticipants();
+        notify("Đã gửi lời mời cho " + userId);
+    } catch (e) {
+        notify(e.message, true);
+    }
+}
+
+async function respond(userId, status) {
+    try {
+        await request(
+            apiUrl() + "/" + encodeURIComponent(userId) + "/status",
+            "PATCH",
+            { status }
+        );
+        await loadParticipants();
+        notify("Đã cập nhật lời mời: " + status);
+    } catch (e) {
+        notify(e.message, true);
+    }
+}
+
+async function removeParticipant(userId) {
+    if (!confirm("Xóa người tham dự " + userId + "?")) return;
+
+    try {
+        await request(
+            apiUrl() + "/" + encodeURIComponent(userId),
+            "DELETE"
+        );
+        await loadParticipants();
+        notify("Đã xóa người tham dự " + userId);
+    } catch (e) {
+        notify(e.message, true);
+    }
+}
+
+loadParticipants();
+</script>
+</body>
+</html>
