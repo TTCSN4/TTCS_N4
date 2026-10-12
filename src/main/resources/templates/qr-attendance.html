@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QR Check-in / Check-out · Meeting M</title>
+  <link rel="stylesheet" href="../static/css/qr-attendance.css">
+  <script src="../static/js/qr-attendance.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar"><a class="brand" href="qr-attendance.html"><span>▦</span><div>Meeting M<small>Hệ thống quản lý cuộc họp</small></div></a><nav><a class="active" href="qr-attendance.html" aria-current="page">▧ QR Check-in / Check-out</a></nav><div class="sidebar-footer">Meeting Management · US27</div></aside>
+  <div class="workspace"><header><button id="menu" class="icon" aria-label="Đóng/mở menu" type="button">☰</button><div class="profile"><span>NA</span><div>Nguyễn Văn A<small>Người tham gia</small></div></div></header><main>
+    <div class="breadcrumb">US27 › Điểm danh cuộc họp</div>
+    <div class="heading"><div class="heading-icon">▧</div><div><h1>Check-in / Check-out bằng QR</h1><p>Quét mã cuộc họp để xác nhận tham gia và ghi nhận thời gian rời họp.</p></div></div>
+    <div class="demo">Giao diện mô phỏng, không gọi API. Điểm danh chỉ được giữ trong phiên và mất khi tải lại trang.</div>
+    <div class="metrics"><section class="metric"><span>▦</span><div>Cuộc họp mẫu<strong>3</strong></div></section><section class="metric"><span>✓</span><div>Đã check-in<strong id="inCount">0</strong></div></section><section class="metric"><span>↗</span><div>Đã check-out<strong id="outCount">0</strong></div></section></div>
+    <div class="layout"><section class="card"><h2>▧ Quét mã điểm danh</h2><p class="muted">Chọn cuộc họp và thao tác trước khi quét mã.</p>
+      <label for="meeting">Cuộc họp <b>*</b></label><select id="meeting"><option value="M01">Họp triển khai dự án — Phòng A1</option><option value="M02">Họp báo cáo tuần — Phòng B2</option><option value="M03">Đánh giá tiến độ — Phòng C1</option></select>
+      <fieldset class="modes"><legend>Thao tác điểm danh</legend><label><input type="radio" name="mode" value="in" checked> Check-in</label><label><input type="radio" name="mode" value="out"> Check-out</label></fieldset>
+      <div class="camera"><video id="video" autoplay muted playsinline hidden></video><div id="cameraPlaceholder"><div class="scan-symbol">▧</div><strong>Đưa mã QR vào khung quét</strong><p>Bật camera hoặc nhập mã bên dưới</p></div><div class="scan-frame"></div></div>
+      <div class="camera-actions"><button id="startCamera" class="primary" type="button">▣ Bật camera</button><button id="stopCamera" type="button" disabled>Dừng camera</button></div><p id="cameraStatus" class="muted" role="status">Camera chưa được bật.</p>
+      <form id="codeForm" novalidate><label for="code">Nhập mã QR thủ công</label><div class="code-row"><input id="code" placeholder="VD: US27:M01" maxlength="100" autocomplete="off"><button class="primary" type="submit" id="confirm">Xác nhận check-in</button></div><small>Mã mẫu tương ứng: <strong id="sampleCode">US27:M01</strong></small><div id="codeError" class="error" role="alert"></div></form>
+    </section><div class="right"><section class="card"><h2>Thông tin cuộc họp</h2><div class="meeting-title" id="meetingTitle"></div><dl><dt>Phòng họp</dt><dd id="room"></dd><dt>Thời gian mẫu</dt><dd>09:00 – 10:30</dd><dt>Người tổ chức</dt><dd>Nguyễn Văn A</dd><dt>Người điểm danh</dt><dd>Nguyễn Văn A (tài khoản mẫu)</dd></dl><div id="attendanceBadge" class="badge">Chưa check-in</div></section><section class="card result-card"><h2>Kết quả điểm danh</h2><div id="result" role="status"><div class="result-icon">○</div><strong>Chưa có thao tác</strong><p>Kết quả check-in/check-out sẽ hiển thị tại đây.</p></div></section><section class="card help"><h2>ⓘ Hướng dẫn</h2><ol><li>Chọn cuộc họp cần điểm danh.</li><li>Chọn Check-in hoặc Check-out.</li><li>Quét QR chứa mã mẫu hoặc nhập mã thủ công.</li><li>Check-out sau khi đã check-in. Mỗi thao tác chỉ ghi nhận một lần.</li></ol><p>Camera cần trình duyệt hỗ trợ đọc QR và môi trường HTTPS hoặc localhost. Nhập mã thủ công luôn có sẵn.</p></section></div></div>
+    <section class="card history"><div class="history-heading"><h2>◷ Lịch sử điểm danh trong phiên</h2><select id="filter" aria-label="Lọc thao tác"><option value="all">Tất cả thao tác</option><option value="in">Check-in</option><option value="out">Check-out</option></select></div><div class="table-wrap"><table><thead><tr><th>Cuộc họp</th><th>Phòng</th><th>Thao tác</th><th>Thời gian</th><th>Kết quả</th></tr></thead><tbody id="history"></tbody></table></div></section>
+  </main></div>
+</body>
+</html>
