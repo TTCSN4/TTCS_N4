@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tß║ío t├ái khoß║ún mß╗¢i ┬╖ Meeting Management</title>
+  <link rel="stylesheet" href="../css/create-account.css">
+  <script src="../js/create-account.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="../index.html"><span class="brand-icon"><i data-icon="calendar"></i></span><span>Meeting<br>Management</span></a>
+    <nav aria-label="─Éiß╗üu h╞░ß╗¢ng ch├¡nh">
+      <a class="nav-item" href="../index.html"><i data-icon="home"></i>Trang chß╗º</a>
+      <a class="nav-item" href="../../../../us01/templates/create-meeting.html"><i data-icon="calendar"></i>─Éß║╖t ph├▓ng hß╗ìp</a>
+      <a class="nav-item" href="../index.html?view=rooms"><i data-icon="rooms"></i>Danh s├ích ph├▓ng</a>
+      <a class="nav-item" href="../index.html"><i data-icon="calendar"></i>Lß╗ïch hß╗ìp cß╗ºa t├┤i</a>
+      <a class="nav-item" href="../../../../us04.html"><i data-icon="check-circle"></i>Duyß╗çt cuß╗Öc hß╗ìp</a>
+      <a class="nav-item" href="../../../../us17/mobile-meetings.html"><i data-icon="chart"></i>B├ío c├ío sß╗¡ dß╗Ñng ph├▓ng</a>
+      <button class="nav-item section-active" id="admin-toggle" aria-expanded="true" aria-controls="admin-menu"><i data-icon="settings"></i>Quß║ún trß╗ï hß╗ç thß╗æng<i data-icon="chevron" class="nav-chevron"></i></button>
+      <div id="admin-menu">
+        <button class="nav-item" data-unavailable="Quß║ún l├╜ ng╞░ß╗¥i d├╣ng"><i data-icon="users"></i>Quß║ún l├╜ ng╞░ß╗¥i d├╣ng</button>
+        <a class="nav-item active" href="create-account.html" aria-current="page"><i data-icon="user-plus"></i>Tß║ío t├ái khoß║ún mß╗¢i</a>
+      </div>
+      <button class="nav-item" data-unavailable="C├ái ─æß║╖t"><i data-icon="settings"></i>C├ái ─æß║╖t</button>
+    </nav>
+    <a class="nav-item logout" href="login.html"><i data-icon="logout"></i>─É─âng xuß║Ñt</a>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <button class="icon-button menu-button" id="menu-toggle" aria-label="ß║¿n hoß║╖c hiß╗çn menu" aria-controls="sidebar" aria-expanded="true"><i data-icon="menu"></i></button>
+      <label class="search"><i data-icon="search"></i><input type="search" id="site-search" placeholder="T├¼m kiß║┐m ph├▓ng hß╗ìp, cuß╗Öc hß╗ìp..." aria-label="T├¼m kiß║┐m ph├▓ng hß╗ìp, cuß╗Öc hß╗ìp"></label>
+      <div class="header-account">
+        <button class="icon-button notification" id="notifications" aria-label="Th├┤ng b├ío, 3 th├┤ng b├ío mß╗¢i" aria-expanded="false"><i data-icon="bell"></i><span>3</span></button>
+        <button class="profile" id="profile-button" aria-expanded="false"><span class="avatar" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#c7d5e4"/><path d="M9 48c0-13 5-17 15-17s15 4 15 17" fill="#49627c"/><path d="M15 21c-3-19 22-19 19 0l-3 12H18z" fill="#172335"/><ellipse cx="24" cy="25" rx="9" ry="12" fill="#8a949f"/><path d="M15 21c-2-17 20-17 19 0l-6-9-13 5" fill="#182333"/></svg></span><span class="profile-copy"><strong>Admin</strong><small>Quß║ún trß╗ï vi├¬n</small></span><i data-icon="chevron"></i></button>
+      </div>
+      <div class="header-popover" id="header-popover" hidden></div>
+    </header>
+    <main>
+      <nav class="breadcrumb" aria-label="─É╞░ß╗¥ng dß║½n"><a href="../index.html" aria-label="Trang chß╗º"><i data-icon="home"></i></a><i data-icon="right"></i><a href="../index.html">Trang chß╗º</a><i data-icon="right"></i><span>Quß║ún trß╗ï hß╗ç thß╗æng</span><i data-icon="right"></i><strong>Tß║ío t├ái khoß║ún mß╗¢i</strong></nav>
+      <div class="page-heading"><span class="heading-icon"><i data-icon="user-plus"></i></span><div><h1>Tß║ío t├ái khoß║ún mß╗¢i</h1><p>Th├¬m t├ái khoß║ún ng╞░ß╗¥i d├╣ng mß╗¢i v├áo hß╗ç thß╗æng Meeting Management.</p></div></div>
+      <div class="content-grid">
+        <section class="card account-card" aria-labelledby="form-heading">
+          <h2 id="form-heading">Th├┤ng tin t├ái khoß║ún</h2><p class="card-subtitle">Vui l├▓ng nhß║¡p ─æß║ºy ─æß╗º v├á ch├¡nh x├íc c├íc th├┤ng tin b├¬n d╞░ß╗¢i.</p>
+          <form id="account-form" novalidate>
+            <div class="fields">
+              <div class="field"><label for="fullName">Hß╗ì v├á t├¬n <em>*</em></label><div class="input-wrap"><i data-icon="user"></i><input id="fullName" name="fullName" placeholder="Nhß║¡p hß╗ì v├á t├¬n" autocomplete="name" required aria-describedby="fullName-error"></div><p class="error" id="fullName-error"><i data-icon="user"></i><span>Vui l├▓ng nhß║¡p hß╗ì v├á t├¬n.</span></p></div>
+              <div class="field"><label for="email">Email <em>*</em></label><div class="input-wrap"><i data-icon="mail"></i><input id="email" name="email" type="email" placeholder="example@gmail.com" autocomplete="email" required aria-describedby="email-error"></div><p class="error" id="email-error"><i data-icon="user"></i><span>Vui l├▓ng nhß║¡p email.</span></p></div>
+              <div class="field"><label for="username">T├¬n ─æ─âng nhß║¡p <em>*</em></label><div class="input-wrap"><i data-icon="user"></i><input id="username" name="username" placeholder="Nhß║¡p t├¬n ─æ─âng nhß║¡p" autocomplete="username" required aria-describedby="username-error"></div><p class="error" id="username-error"><i data-icon="user"></i><span>Vui l├▓ng nhß║¡p t├¬n ─æ─âng nhß║¡p.</span></p></div>
+              <div class="field"><label for="role">Vai tr├▓ t├ái khoß║ún <em>*</em></label><div class="input-wrap"><i data-icon="shield"></i><select id="role" name="role" required aria-describedby="role-error"><option value="USER">Ng╞░ß╗¥i d├╣ng (USER)</option><option value="ADMIN">Quß║ún trß╗ï vi├¬n (ADMIN)</option></select><i data-icon="chevron" class="select-chevron"></i></div><p class="error" id="role-error"><i data-icon="user"></i><span>Vui l├▓ng chß╗ìn vai tr├▓.</span></p></div>
+              <div class="field"><label for="password">Mß║¡t khß║⌐u <em>*</em></label><div class="input-wrap"><i data-icon="lock"></i><input id="password" name="password" type="password" placeholder="Tß╗æi thiß╗âu 8 k├╜ tß╗▒" autocomplete="new-password" minlength="8" required aria-describedby="password-error"><button class="password-toggle icon-button" type="button" data-password="password" aria-label="Hiß╗çn mß║¡t khß║⌐u" aria-pressed="false"><i data-icon="eye-off"></i></button></div><p class="error" id="password-error"><i data-icon="user"></i><span>Mß║¡t khß║⌐u phß║úi c├│ ├¡t nhß║Ñt 8 k├╜ tß╗▒.</span></p></div>
+              <div class="field"><label for="confirmPassword">X├íc nhß║¡n mß║¡t khß║⌐u <em>*</em></label><div class="input-wrap"><i data-icon="lock"></i><input id="confirmPassword" name="confirmPassword" type="password" placeholder="Nhß║¡p lß║íi mß║¡t khß║⌐u" autocomplete="new-password" required aria-describedby="confirmPassword-error"><button class="password-toggle icon-button" type="button" data-password="confirmPassword" aria-label="Hiß╗çn mß║¡t khß║⌐u x├íc nhß║¡n" aria-pressed="false"><i data-icon="eye-off"></i></button></div><p class="error" id="confirmPassword-error"><i data-icon="user"></i><span>Mß║¡t khß║⌐u x├íc nhß║¡n kh├┤ng khß╗¢p.</span></p></div>
+            </div>
+            <div class="notice"><i data-icon="info"></i><div><strong>L╞░u ├╜</strong><ul><li>Mß║¡t khß║⌐u phß║úi c├│ ├¡t nhß║Ñt 8 k├╜ tß╗▒.</li><li>T├¬n ─æ─âng nhß║¡p kh├┤ng ─æ╞░ß╗úc chß╗⌐a khoß║úng trß║»ng.</li><li>Email v├á t├¬n ─æ─âng nhß║¡p phß║úi l├á duy nhß║Ñt trong hß╗ç thß╗æng.</li></ul></div></div>
+            <p id="form-status" role="status" aria-live="polite" hidden></p>
+            <div class="actions"><button class="button secondary" type="reset"><i data-icon="refresh"></i>L├ám mß╗¢i</button><button class="button primary" type="submit"><i data-icon="user-plus"></i>Tß║ío t├ái khoß║ún</button></div>
+          </form>
+        </section>
+        <aside class="card guide-card" aria-labelledby="guide-heading">
+          <span class="guide-icon"><i data-icon="user-plus"></i></span><h2 id="guide-heading">Tß║ío t├ái khoß║ún ng╞░ß╗¥i d├╣ng</h2><p>T├ái khoß║ún mß╗¢i sß║╜ ─æ╞░ß╗úc th├¬m v├áo hß╗ç thß╗æng vß╗¢i vai tr├▓ v├á quyß╗ün t╞░╞íng ß╗⌐ng.</p><hr><h3>Vai tr├▓ t├ái khoß║ún</h3>
+          <div class="role-card"><span class="role-icon user-role"><i data-icon="user"></i></span><div><strong>Ng╞░ß╗¥i d├╣ng (USER)</strong><p>C├│ thß╗â ─æß║╖t ph├▓ng hß╗ìp, xem lß╗ïch hß╗ìp cß╗ºa m├¼nh v├á tham gia c├íc cuß╗Öc hß╗ìp.</p></div></div>
+          <div class="role-card"><span class="role-icon admin-role"><i data-icon="shield"></i></span><div><strong>Quß║ún trß╗ï vi├¬n (ADMIN)</strong><p>C├│ to├án quyß╗ün quß║ún l├╜ hß╗ç thß╗æng, duyß╗çt cuß╗Öc hß╗ìp, quß║ún l├╜ ng╞░ß╗¥i d├╣ng v├á ph├▓ng hß╗ìp.</p></div></div>
+          <div class="security notice"><i data-icon="shield-check"></i><div><strong>Bß║úo mß║¡t th├┤ng tin</strong><ul><li>Mß║¡t khß║⌐u ─æ╞░ß╗úc m├ú h├│a v├á l╞░u trß╗» an to├án.</li><li>Kh├┤ng chia sß║╗ t├ái khoß║ún vß╗¢i ng╞░ß╗¥i kh├íc.</li><li>T├ái khoß║ún chß╗ë ─æ╞░ß╗úc tß║ío khi th├┤ng tin hß╗úp lß╗ç.</li></ul></div></div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
