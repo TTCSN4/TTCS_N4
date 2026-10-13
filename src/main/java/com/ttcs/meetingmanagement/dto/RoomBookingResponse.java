@@ -9,6 +9,8 @@ public class RoomBookingResponse {
     private OffsetDateTime startTime;
     private OffsetDateTime endTime;
     private String message;
+    private String cancelReason;
+    private OffsetDateTime cancelledAt;
 
     public RoomBookingResponse() {
     }
@@ -20,11 +22,25 @@ public class RoomBookingResponse {
             OffsetDateTime endTime,
             String message) {
 
+        this(meetingId, roomId, startTime, endTime, message, null, null);
+    }
+
+    public RoomBookingResponse(
+            Long meetingId,
+            String roomId,
+            OffsetDateTime startTime,
+            OffsetDateTime endTime,
+            String message,
+            String cancelReason,
+            OffsetDateTime cancelledAt) {
+
         this.meetingId = meetingId;
         this.roomId = roomId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.message = message;
+        this.cancelReason = cancelReason;
+        this.cancelledAt = cancelledAt;
     }
 
     public Long getMeetingId() {
@@ -65,5 +81,21 @@ public class RoomBookingResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
+    }
+
+    public OffsetDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(OffsetDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 }

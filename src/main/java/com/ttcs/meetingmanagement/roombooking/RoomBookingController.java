@@ -1,5 +1,6 @@
 package com.ttcs.meetingmanagement.roombooking;
 
+import com.ttcs.meetingmanagement.dto.CancelRoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,10 +41,19 @@ public class RoomBookingController {
     // US09 - Hủy đặt phòng
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<RoomBookingResponse> cancelRoomBooking(
-            @PathVariable Long meetingId) {
+            @PathVariable Long meetingId,
+            @RequestParam(name = "reason", required = false) String reasonParam,
+            @RequestBody(required = false) CancelRoomBookingRequest request) {
+
+        String cancelReason = null;
+        if (request != null && request.getCancelReason() != null && !request.getCancelReason().isBlank()) {
+            cancelReason = request.getCancelReason().trim();
+        } else if (reasonParam != null && !reasonParam.isBlank()) {
+            cancelReason = reasonParam.trim();
+        }
 
         RoomBookingResponse response =
-                roomBookingService.cancelRoomBooking(meetingId);
+                roomBookingService.cancelRoomBooking(meetingId, cancelReason);
 
         return ResponseEntity.ok(response);
     }

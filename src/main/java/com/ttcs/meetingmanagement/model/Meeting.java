@@ -54,6 +54,12 @@ public class Meeting {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
+
+    @Column(name = "cancelled_at")
+    private OffsetDateTime cancelledAt;
+
     @ElementCollection
     @CollectionTable(name = "meeting_participants", joinColumns = @JoinColumn(name = "meeting_id"))
     @Column(name = "participant", nullable = false, length = 320)
@@ -85,4 +91,8 @@ public class Meeting {
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
     public List<String> getParticipants() { return participants; }
     public void setParticipants(List<String> participants) { this.participants = participants; }
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
+    public OffsetDateTime getCancelledAt() { return cancelledAt; }
+    public void setCancelledAt(OffsetDateTime cancelledAt) { this.cancelledAt = cancelledAt; }
 }
