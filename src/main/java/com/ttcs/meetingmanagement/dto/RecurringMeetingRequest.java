@@ -4,7 +4,7 @@ import java.time.*;
 import java.util.List;
 import com.ttcs.meetingmanagement.recurrence.RecurrenceFrequency;
 public record RecurringMeetingRequest(
- Long organizerId,
+ @NotBlank String organizerId,
  @NotBlank String roomId,
  @NotBlank @Size(min=3,max=120) String title,
  @Size(max=2000) String description,

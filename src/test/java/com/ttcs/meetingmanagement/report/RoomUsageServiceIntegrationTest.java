@@ -11,7 +11,27 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@org.springframework.transaction.annotation.Transactional
 class RoomUsageServiceIntegrationTest {
+    @Autowired private com.ttcs.meetingmanagement.room.RoomRepository rooms;
+    @Autowired private com.ttcs.meetingmanagement.repository.MeetingRepository meetings;
+
+    @org.junit.jupiter.api.BeforeEach
+    void createFixture() {
+        for (String id : java.util.List.of("R001", "R002", "R003")) {
+            var room = new com.ttcs.meetingmanagement.room.Room();
+            room.setRoomId(id); room.setRoomName(id); room.setCapacity(10); room.setStatus("AVAILABLE");
+            rooms.save(room);
+        }
+        for (int i = 0; i < 4; i++) {
+            var m = new com.ttcs.meetingmanagement.model.Meeting();
+            m.organizerId = "REPORT-USER"; m.roomId = i < 3 ? "R001" : "R002"; m.title = "Report fixture";
+            m.startTime = java.time.LocalDateTime.of(2026, 10, i < 3 ? i + 1 : 1, 9, 0);
+            m.endTime = m.startTime.plusMinutes(i < 3 ? 90 : 120); m.status = "SCHEDULED";
+            meetings.save(m);
+        }
+        meetings.flush();
+    }
 
     @Autowired
     private RoomUsageService service;

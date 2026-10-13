@@ -153,7 +153,7 @@ public class MeetingController {
     // 4. CAP NHAT CUOC HOP
     // ==========================================
 
-    @PutMapping("/{id}")
+    // US02 owns the update route and validates the authenticated organizer.
     @Transactional
     public Meeting update(
             @PathVariable String id,
@@ -204,7 +204,7 @@ public class MeetingController {
     // 5. HUY CUOC HOP
     // ==========================================
 
-    @DeleteMapping("/{id}")
+    // US02 owns the cancellation route and releases equipment reservations.
     @Transactional
     public void cancel(@PathVariable String id) {
 

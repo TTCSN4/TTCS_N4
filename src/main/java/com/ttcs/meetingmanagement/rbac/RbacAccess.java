@@ -58,12 +58,12 @@ public class RbacAccess {
 
         // Identity must come from trusted authentication.
         // Do not trust a client-provided userId.
-        if (!(authentication.getPrincipal()
-                instanceof AuthenticatedUserIdentity identity)) {
-            return false;
-        }
-
-        String userId = identity.getUserId();
+        String userId;
+        if (authentication.getPrincipal() instanceof AuthenticatedUserIdentity identity)
+            userId = identity.getUserId();
+        else if (authentication.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt jwt)
+            userId = jwt.getSubject();
+        else return false;
 
         if (userId == null || userId.isBlank()) {
             return false;
