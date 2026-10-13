@@ -181,23 +181,7 @@ function render() {
 }
 
 function openCreate() {
-    form.reset();
-    selectedMeetingEquipmentIds.clear();
-    fields.id.value = '';
-    fields.repeatCount.value = '3';
-    document.querySelector('#dialog-title').textContent = 'Tạo cuộc họp';
-    document.querySelector('#save-meeting').textContent = 'Lưu cuộc họp';
-    document.querySelector('#repeat-count-wrap').hidden = true;
-    document.querySelector('#suggestions').replaceChildren();
-    document.querySelector('#form-error').textContent = '';
-    const start = new Date(Date.now() + 60 * 60 * 1000);
-    start.setMinutes(Math.ceil(start.getMinutes() / 30) * 30, 0, 0);
-    const end = new Date(start.getTime() + 60 * 60 * 1000);
-    fields.start.value = toLocalInput(start);
-    fields.end.value = toLocalInput(end);
-    document.querySelector('#meeting-equipment-section').hidden = false;
-    refreshMeetingEquipment();
-    dialog.showModal();
+    window.location.href = 'create-meeting.html';
 }
 
 function toLocalInput(date) {
