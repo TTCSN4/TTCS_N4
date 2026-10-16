@@ -2,7 +2,7 @@ package com.ttcs.meetingmanagement.service;
 
 import com.ttcs.meetingmanagement.dto.CreateMeetingRequest;
 import com.ttcs.meetingmanagement.dto.MeetingResponse;
-import com.ttcs.meetingmanagement.entity.Meeting;
+import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.exception.MeetingException;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 
