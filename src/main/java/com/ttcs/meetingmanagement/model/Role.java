@@ -4,15 +4,15 @@ package com.ttcs.meetingmanagement.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "`ROLE`")
+@Table(name = "`role`")
 public class Role {
 
     @Id
     @Column(name = "role_id")
-    private String roleId;
+    public String roleId;
 
     @Column(name = "role_name")
-    private String roleName;
+    public String roleName;
 
     public Role() {
     }
