@@ -164,24 +164,40 @@ public class RoomService {
     }
 
 
-    // =========================
-    // US10 - SỨC CHỨA PHÒNG
-    // =========================
+    // ==========================================
+    // US10 - SỨC CHỨA PHÒNG & TRẠNG THÁI PHÒNG
+    // ==========================================
+
+    public List<Room> filterRooms(Integer participantCount, String status) {
+
+        if (participantCount != null && participantCount <= 0) {
+            throw new RoomException("Số người tham dự phải lớn hơn 0");
+        }
+
+        boolean hasCapacity = participantCount != null;
+        boolean hasStatus = status != null && !status.isBlank();
+
+        if (hasCapacity && hasStatus) {
+            return roomRepository.findByCapacityGreaterThanEqualAndStatusIgnoreCaseOrderByCapacityAsc(
+                    participantCount,
+                    status.trim()
+            );
+        } else if (hasCapacity) {
+            return roomRepository.findByCapacityGreaterThanEqualOrderByCapacityAsc(
+                    participantCount
+            );
+        } else if (hasStatus) {
+            return roomRepository.findByStatusIgnoreCaseOrderByCapacityAsc(
+                    status.trim()
+            );
+        } else {
+            return roomRepository.findAll();
+        }
+    }
 
     public List<Room> filterByParticipantCount(
             Integer participantCount) {
 
-        if (participantCount == null ||
-                participantCount <= 0) {
-
-            throw new RoomException(
-                    "Số người tham dự phải lớn hơn 0"
-            );
-        }
-
-        return roomRepository
-                .findByCapacityGreaterThanEqualOrderByCapacityAsc(
-                        participantCount
-                );
+        return filterRooms(participantCount, null);
     }
 }

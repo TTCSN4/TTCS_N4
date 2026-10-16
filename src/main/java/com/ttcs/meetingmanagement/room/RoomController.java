@@ -19,21 +19,14 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    // GET - lấy tất cả phòng
+    // GET - lấy danh sách phòng (hỗ trợ lọc theo sức chứa và trạng thái phòng)
     @GetMapping
-    public ResponseEntity<List<Room>> getAllRooms() {
-        return ResponseEntity.ok(
-                roomService.getAllRooms()
-        );
-    }
-
-    // US10 - lọc phòng theo số người tham gia
-    @GetMapping(params = "participants")
-    public ResponseEntity<List<Room>> filterRoomsByParticipants(
-            @RequestParam Integer participants) {
+    public ResponseEntity<List<Room>> getRooms(
+            @RequestParam(name = "participants", required = false) Integer participants,
+            @RequestParam(name = "status", required = false) String status) {
 
         return ResponseEntity.ok(
-                roomService.filterByParticipantCount(participants)
+                roomService.filterRooms(participants, status)
         );
     }
 
