@@ -38,12 +38,12 @@ class MeetingServiceTest {
     void setUp() {
         meetingService = new MeetingService(meetingRepository, Clock.fixed(NOW, ZoneOffset.UTC));
         meeting = new Meeting();
-        meeting.setId(1L);
+        meeting.setId("M1");
         meeting.setOrganizerId("NV001");
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setStartTime(OffsetDateTime.ofInstant(NOW, ZoneOffset.UTC).plusHours(2));
         meeting.setEndTime(OffsetDateTime.ofInstant(NOW, ZoneOffset.UTC).plusHours(3));
-        lenient().when(meetingRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(meeting));
+        lenient().when(meetingRepository.findByIdForUpdate("M1")).thenReturn(Optional.of(meeting));
     }
 
     @Test
@@ -51,11 +51,11 @@ class MeetingServiceTest {
         UpdateMeetingRequest request = new UpdateMeetingRequest(
                 "  Updated title  ", "New details", meeting.getStartTime().plusDays(1), meeting.getEndTime().plusDays(1));
 
-        var response = meetingService.updateMeeting(1L, "NV001", request);
+        var response = meetingService.updateMeeting("M1", "NV001", request);
 
         assertEquals("Updated title", response.title());
         assertEquals("New details", response.description());
-        verify(meetingRepository).findByIdForUpdate(1L);
+        verify(meetingRepository).findByIdForUpdate("M1");
         verify(meetingRepository).saveAndFlush(meeting);
     }
 
@@ -64,19 +64,19 @@ class MeetingServiceTest {
         UpdateMeetingRequest request = new UpdateMeetingRequest(
                 "Updated title", null, meeting.getStartTime().plusDays(1), meeting.getEndTime().plusDays(1));
 
-        assertThrows(MeetingForbiddenException.class, () -> meetingService.updateMeeting(1L, "NV099", request));
+        assertThrows(MeetingForbiddenException.class, () -> meetingService.updateMeeting("M1", "NV099", request));
     }
 
     @Test
     void cancelMeetingRejectsMeetingThatIsNotScheduled() {
         meeting.setStatus(MeetingStatus.CANCELLED);
 
-        assertThrows(MeetingConflictException.class, () -> meetingService.cancelMeeting(1L, "NV001"));
+        assertThrows(MeetingConflictException.class, () -> meetingService.cancelMeeting("M1", "NV001"));
     }
 
     @Test
     void cancelMeetingMarksScheduledMeetingAsCancelled() {
-        meetingService.cancelMeeting(1L, "NV001");
+        meetingService.cancelMeeting("M1", "NV001");
 
         assertEquals(MeetingStatus.CANCELLED, meeting.getStatus());
         verify(meetingRepository).saveAndFlush(meeting);
@@ -86,7 +86,7 @@ class MeetingServiceTest {
     void cancelMeetingRejectsMeetingThatHasAlreadyStarted() {
         meeting.setStartTime(OffsetDateTime.ofInstant(NOW, ZoneOffset.UTC).minusMinutes(1));
 
-        assertThrows(MeetingConflictException.class, () -> meetingService.cancelMeeting(1L, "NV001"));
+        assertThrows(MeetingConflictException.class, () -> meetingService.cancelMeeting("M1", "NV001"));
     }
 
     @Test
@@ -95,7 +95,7 @@ class MeetingServiceTest {
         UpdateMeetingRequest request = new UpdateMeetingRequest(
                 "Updated title", null, meeting.getStartTime().plusDays(1), meeting.getEndTime().plusDays(1));
 
-        assertThrows(MeetingConflictException.class, () -> meetingService.updateMeeting(1L, "NV001", request));
+        assertThrows(MeetingConflictException.class, () -> meetingService.updateMeeting("M1", "NV001", request));
     }
 
     @Test
@@ -104,18 +104,18 @@ class MeetingServiceTest {
         UpdateMeetingRequest request = new UpdateMeetingRequest(
                 "Updated title", null, meeting.getStartTime().plusDays(1), meeting.getEndTime().plusDays(1));
 
-        assertThrows(MeetingConflictException.class, () -> meetingService.updateMeeting(1L, "NV001", request));
+        assertThrows(MeetingConflictException.class, () -> meetingService.updateMeeting("M1", "NV001", request));
     }
 
     @Test
     void cancelMeetingRejectsNonOrganizer() {
-        assertThrows(MeetingForbiddenException.class, () -> meetingService.cancelMeeting(1L, "NV099"));
+        assertThrows(MeetingForbiddenException.class, () -> meetingService.cancelMeeting("M1", "NV099"));
     }
 
     @Test
     void getMeetingRejectsUnknownId() {
-        when(meetingRepository.findById(99L)).thenReturn(Optional.empty());
+        when(meetingRepository.findById("M99")).thenReturn(Optional.empty());
 
-        assertThrows(MeetingNotFoundException.class, () -> meetingService.getMeeting(99L));
+        assertThrows(MeetingNotFoundException.class, () -> meetingService.getMeeting("M99"));
     }
 }

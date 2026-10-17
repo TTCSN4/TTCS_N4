@@ -28,7 +28,7 @@ public class MeetingService {
     }
 
     @Transactional(readOnly = true)
-    public MeetingResponse getMeeting(Long meetingId) {
+    public MeetingResponse getMeeting(String meetingId) {
         return meetingRepository.findById(meetingId)
                 .map(MeetingResponse::from)
                 .orElseThrow(() -> new MeetingNotFoundException(meetingId));
@@ -42,7 +42,7 @@ public class MeetingService {
     }
 
     @Transactional
-    public MeetingResponse updateMeeting(Long meetingId, String actorId, UpdateMeetingRequest request) {
+    public MeetingResponse updateMeeting(String meetingId, String actorId, UpdateMeetingRequest request) {
         Meeting meeting = getMeetingForUpdate(meetingId);
         verifyOrganizer(meeting, actorId);
         verifyScheduled(meeting);
@@ -55,7 +55,7 @@ public class MeetingService {
             if(room!=null&&!room.isBlank()&&meetingRepository.countRoomConflicts(room,target.getId(),start,end)>0)throw new MeetingConflictException("Room is already booked");
             target.setTitle(request.title().trim());target.setDescription(request.description());target.setStartTime(start);target.setEndTime(end);target.setRoom(room==null||room.isBlank()?null:room);
             if(request.participantIds()!=null)target.setParticipantIds(request.participantIds());
-            if(request.equipment()!=null)target.setEquipment(request.equipment().stream().map(e->new MeetingEquipment(e.type().trim(),e.quantity())).toList());
+            if(request.equipment()!=null)target.setEquipment(request.equipment().stream().map(e->new MeetingEquipment(e.equipmentId().trim(),e.quantity())).toList());
             if(request.recurrenceRule()!=null)target.setRecurrenceRule(request.recurrenceRule().isBlank()?null:request.recurrenceRule().trim());meetingRepository.save(target);}
         meetingRepository.saveAndFlush(meeting);
         return MeetingResponse.from(meeting);
@@ -67,15 +67,16 @@ public class MeetingService {
     }
 
     @Transactional
-    public void cancelMeeting(Long meetingId, String actorId) {
+    public void cancelMeeting(String meetingId, String actorId) {
         Meeting meeting = getMeetingForUpdate(meetingId);
         verifyOrganizer(meeting, actorId);
         verifyScheduled(meeting);
         meeting.setStatus(MeetingStatus.CANCELLED);
+        meeting.setCancelledAt(OffsetDateTime.now(clock));
         meetingRepository.saveAndFlush(meeting);
     }
 
-    private Meeting getMeetingForUpdate(Long meetingId) {
+    private Meeting getMeetingForUpdate(String meetingId) {
         return meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new MeetingNotFoundException(meetingId));
     }

@@ -2,7 +2,7 @@ package com.example.meetingmanagement.exception;
 
 public class MeetingNotFoundException extends RuntimeException {
 
-    public MeetingNotFoundException(Long meetingId) {
+    public MeetingNotFoundException(Object meetingId) {
         super("Meeting " + meetingId + " was not found");
     }
 }

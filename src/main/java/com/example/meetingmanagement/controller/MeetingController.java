@@ -4,7 +4,6 @@ import com.example.meetingmanagement.dto.MeetingResponse;
 import com.example.meetingmanagement.dto.UpdateMeetingRequest;
 import com.example.meetingmanagement.service.MeetingService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +27,7 @@ public class MeetingController {
     }
 
     @GetMapping("/{meetingId}")
-    public MeetingResponse getMeeting(@PathVariable @Positive Long meetingId) {
+    public MeetingResponse getMeeting(@PathVariable String meetingId) {
         return meetingService.getMeeting(meetingId);
     }
 
@@ -39,7 +38,7 @@ public class MeetingController {
 
     @PutMapping("/{meetingId}")
     public MeetingResponse updateMeeting(
-            @PathVariable @Positive Long meetingId,
+            @PathVariable String meetingId,
             @RequestHeader("X-User-Id")
             @Pattern(regexp = "[A-Za-z]+[0-9]+", message = "must contain letters followed by a sequence number")
             String actorId,
@@ -49,7 +48,7 @@ public class MeetingController {
 
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<Void> cancelMeeting(
-            @PathVariable @Positive Long meetingId,
+            @PathVariable String meetingId,
             @RequestHeader("X-User-Id")
             @Pattern(regexp = "[A-Za-z]+[0-9]+", message = "must contain letters followed by a sequence number")
             String actorId) {

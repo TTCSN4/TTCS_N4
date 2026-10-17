@@ -42,7 +42,7 @@ class MeetingControllerTest {
     @Test
     void updateMeetingReturnsUpdatedMeeting() throws Exception {
         MeetingResponse response = new MeetingResponse(
-                1L, "Sprint review", null, startTime, endTime, "NV001",
+                "M1", "Sprint review", null, startTime, endTime, "NV001",
                 MeetingStatus.SCHEDULED, null, startTime.minusDays(1), startTime.minusHours(1));
         meetingService.updateResponse = response;
 
@@ -51,7 +51,7 @@ class MeetingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value("M1"))
                 .andExpect(jsonPath("$.title").value("Sprint review"))
                 .andExpect(jsonPath("$.status").value("SCHEDULED"));
     }
@@ -84,7 +84,7 @@ class MeetingControllerTest {
 
     @Test
     void cancelMeetingReturnsNotFoundForUnknownMeeting() throws Exception {
-        meetingService.cancelException = new MeetingNotFoundException(999L);
+        meetingService.cancelException = new MeetingNotFoundException("M999");
 
         mockMvc.perform(delete("/api/meetings/999").header("X-User-Id", "NV001"))
                 .andExpect(status().isNotFound());
@@ -111,7 +111,7 @@ class MeetingControllerTest {
         }
 
         @Override
-        public MeetingResponse updateMeeting(Long meetingId, String actorId, UpdateMeetingRequest request) {
+        public MeetingResponse updateMeeting(String meetingId, String actorId, UpdateMeetingRequest request) {
             if (updateException != null) {
                 throw updateException;
             }
@@ -119,7 +119,7 @@ class MeetingControllerTest {
         }
 
         @Override
-        public void cancelMeeting(Long meetingId, String actorId) {
+        public void cancelMeeting(String meetingId, String actorId) {
             if (cancelException != null) {
                 throw cancelException;
             }

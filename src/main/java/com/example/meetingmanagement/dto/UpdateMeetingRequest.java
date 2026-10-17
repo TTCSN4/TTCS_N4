@@ -23,7 +23,7 @@ public record UpdateMeetingRequest(
     public UpdateMeetingRequest(String title,String description,OffsetDateTime startTime,OffsetDateTime endTime){
         this(title,description,startTime,endTime,null,null,null,null,UpdateScope.INSTANCE);
     }
-    public record EquipmentRequest(@NotBlank String type,@Min(1) int quantity){}
+    public record EquipmentRequest(@NotBlank String equipmentId,@Min(1) int quantity){}
     public enum UpdateScope { INSTANCE, SERIES }
 
     @AssertTrue(message = "endTime must be after startTime")

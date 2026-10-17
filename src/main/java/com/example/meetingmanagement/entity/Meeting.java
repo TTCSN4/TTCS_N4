@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,12 +20,12 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 @Entity
-@Table(name = "meetings")
+@Table(name = "meeting")
 public class Meeting {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name="meeting_id",length=255)
+    private String id;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -37,7 +39,7 @@ public class Meeting {
     @Column(name = "end_time", nullable = false)
     private OffsetDateTime endTime;
 
-    @Column(name = "organizer_id", nullable = false, length = 30)
+    @Column(name = "organizer_id", nullable = false, length = 255)
     private String organizerId;
 
     @Enumerated(EnumType.STRING)
@@ -45,13 +47,16 @@ public class Meeting {
     private MeetingStatus status = MeetingStatus.SCHEDULED;
 
     @Column(name = "recurrence_series_id")
-    private Long recurrenceSeriesId;
+    private String recurrenceSeriesId;
 
-    @Column(length = 120) private String room;
+    @Column(name="room_id",length = 255) private String room;
+    @Column(name="is_recurring") private Boolean recurring=false;
+    @Column(name="cancel_reason",columnDefinition="TEXT") private String cancelReason;
+    @Column(name="cancelled_at") private OffsetDateTime cancelledAt;
     @Column(name="recurrence_rule",length=255) private String recurrenceRule;
-    @ElementCollection @CollectionTable(name="meeting_participants",joinColumns=@JoinColumn(name="meeting_id"))
-    @Column(name="user_id",length=50) private Set<String> participantIds=new LinkedHashSet<>();
-    @ElementCollection @CollectionTable(name="meeting_equipment",joinColumns=@JoinColumn(name="meeting_id"))
+    @OneToMany(mappedBy="meeting",cascade=CascadeType.ALL,orphanRemoval=true)
+    private Set<MeetingParticipant> participants=new LinkedHashSet<>();
+    @OneToMany(mappedBy="meeting",cascade=CascadeType.ALL,orphanRemoval=true)
     private List<MeetingEquipment> equipment=new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -62,6 +67,7 @@ public class Meeting {
 
     @PrePersist
     void onCreate() {
+        if(id==null)id=UUID.randomUUID().toString();
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         createdAt = now;
         updatedAt = now;
@@ -72,11 +78,11 @@ public class Meeting {
         updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -128,17 +134,21 @@ public class Meeting {
         this.status = status;
     }
 
-    public Long getRecurrenceSeriesId() {
+    public String getRecurrenceSeriesId() {
         return recurrenceSeriesId;
     }
 
-    public void setRecurrenceSeriesId(Long recurrenceSeriesId) {
+    public void setRecurrenceSeriesId(String recurrenceSeriesId) {
         this.recurrenceSeriesId = recurrenceSeriesId;
     }
     public String getRoom(){return room;} public void setRoom(String room){this.room=room;}
     public String getRecurrenceRule(){return recurrenceRule;} public void setRecurrenceRule(String value){recurrenceRule=value;}
-    public Set<String> getParticipantIds(){return participantIds;} public void setParticipantIds(Collection<String> values){participantIds.clear();if(values!=null)participantIds.addAll(values);}
-    public List<MeetingEquipment> getEquipment(){return equipment;} public void setEquipment(Collection<MeetingEquipment> values){equipment.clear();if(values!=null)equipment.addAll(values);}
+    public Set<String> getParticipantIds(){return participants.stream().map(MeetingParticipant::getUserId).collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));}
+    public void setParticipantIds(Collection<String> values){participants.clear();if(values!=null)values.forEach(v->participants.add(new MeetingParticipant(this,v)));}
+    public List<MeetingEquipment> getEquipment(){return equipment;} public void setEquipment(Collection<MeetingEquipment> values){equipment.clear();if(values!=null)values.forEach(v->{v.setMeeting(this);equipment.add(v);});}
+    public Boolean getRecurring(){return recurring;} public void setRecurring(Boolean value){recurring=value;}
+    public String getCancelReason(){return cancelReason;} public void setCancelReason(String value){cancelReason=value;}
+    public OffsetDateTime getCancelledAt(){return cancelledAt;} public void setCancelledAt(OffsetDateTime value){cancelledAt=value;}
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;

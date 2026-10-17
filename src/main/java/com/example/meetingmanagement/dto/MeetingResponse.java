@@ -7,14 +7,14 @@ import java.util.*;
 import com.example.meetingmanagement.entity.MeetingEquipment;
 
 public record MeetingResponse(
-        Long id,
+        String id,
         String title,
         String description,
         OffsetDateTime startTime,
         OffsetDateTime endTime,
         String organizerId,
         MeetingStatus status,
-        Long recurrenceSeriesId,
+        String recurrenceSeriesId,
         String room,
         Set<String> participantIds,
         List<MeetingEquipment> equipment,
@@ -22,8 +22,8 @@ public record MeetingResponse(
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {
 
-    public MeetingResponse(Long id,String title,String description,OffsetDateTime startTime,OffsetDateTime endTime,
-            String organizerId,MeetingStatus status,Long recurrenceSeriesId,OffsetDateTime createdAt,OffsetDateTime updatedAt){
+    public MeetingResponse(String id,String title,String description,OffsetDateTime startTime,OffsetDateTime endTime,
+            String organizerId,MeetingStatus status,String recurrenceSeriesId,OffsetDateTime createdAt,OffsetDateTime updatedAt){
         this(id,title,description,startTime,endTime,organizerId,status,recurrenceSeriesId,null,Set.of(),List.of(),null,createdAt,updatedAt);
     }
 
