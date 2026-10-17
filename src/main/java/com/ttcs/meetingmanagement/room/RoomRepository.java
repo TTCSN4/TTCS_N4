@@ -18,8 +18,10 @@ public interface RoomRepository extends JpaRepository<Room, String> {
                 SELECT COUNT(*)
                 FROM meeting
                 WHERE room_id = :roomId
+                  AND end_time >= NOW()
+                  AND status NOT IN ('CANCELLED', 'CANCELED', 'COMPLETED', 'FINISHED', 'ENDED')
                 """,
         nativeQuery = true
     )
-    long countMeetingsByRoomId(@Param("roomId") String roomId);
+    long countActiveMeetingsByRoomId(@Param("roomId") String roomId);
 }
