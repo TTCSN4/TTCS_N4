@@ -416,6 +416,36 @@ public class MeetingController {
 
         // Kiem tra quyen truoc khi dat phong
         if (roomId != null) {
+            String roomStatus = null;
+            Integer roomCapacity = null;
+            try {
+                var row = jdbc.queryForMap(
+                        "SELECT status, capacity FROM room WHERE room_id = :roomId FOR UPDATE",
+                        new MapSqlParameterSource("roomId", roomId)
+                );
+                roomStatus = (String) row.get("status");
+                Object capObj = row.get("capacity");
+                if (capObj instanceof Number num) {
+                    roomCapacity = num.intValue();
+                }
+            } catch (Exception e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found");
+            }
+
+            if (!com.ttcs.meetingmanagement.room.RoomService.isRoomBookable(roomStatus)) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Room is under maintenance or unavailable"
+                );
+            }
+
+            int attendeeCount = participants.size() + (participants.contains(organizerId) ? 0 : 1);
+            if (roomCapacity != null && attendeeCount > roomCapacity) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Room capacity exceeded"
+                );
+            }
 
             permissionService.assertCanBook(
                     organizerId,

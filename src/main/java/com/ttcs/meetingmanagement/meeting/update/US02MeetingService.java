@@ -3,7 +3,9 @@ package com.ttcs.meetingmanagement.meeting.update;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
 import com.ttcs.meetingmanagement.repository.*;
+import com.ttcs.meetingmanagement.room.Room;
 import com.ttcs.meetingmanagement.room.RoomRepository;
+import com.ttcs.meetingmanagement.room.RoomService;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +19,21 @@ public class US02MeetingService {
     private final RoomRepository rooms;
     private final EquipmentBookingRepository equipment;
     private final RoomBookingPermissionService permissions;
+    private final MeetingParticipantRepository participantRepository;
+
+    public US02MeetingService(MeetingRepository meetings, RoomRepository rooms,
+            EquipmentBookingRepository equipment, RoomBookingPermissionService permissions,
+            MeetingParticipantRepository participantRepository) {
+        this.meetings = meetings;
+        this.rooms = rooms;
+        this.equipment = equipment;
+        this.permissions = permissions;
+        this.participantRepository = participantRepository;
+    }
+
     public US02MeetingService(MeetingRepository meetings, RoomRepository rooms,
             EquipmentBookingRepository equipment, RoomBookingPermissionService permissions) {
-        this.meetings = meetings; this.rooms = rooms; this.equipment = equipment; this.permissions = permissions;
+        this(meetings, rooms, equipment, permissions, null);
     }
 
     @Transactional(readOnly = true)
@@ -33,7 +47,30 @@ public class US02MeetingService {
             throw error(HttpStatus.BAD_REQUEST, "Meeting must have a valid future time range");
         String room = request.roomId() == null ? m.roomId : request.roomId().trim();
         if (room != null && !room.isBlank()) {
-            rooms.findLockedById(room).orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Room not found"));
+            Room targetRoom = rooms.findLockedById(room).orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Room not found"));
+            if (!RoomService.isRoomBookable(targetRoom.getStatus())) {
+                throw error(HttpStatus.CONFLICT, "Room is under maintenance or unavailable");
+            }
+            if (targetRoom.getCapacity() != null && targetRoom.getCapacity() > 0 && participantRepository != null) {
+                java.util.Set<String> attendeeIds = new java.util.HashSet<>();
+                if (m.organizerId != null && !m.organizerId.isBlank()) {
+                    attendeeIds.add(m.organizerId.trim());
+                }
+                var participants = participantRepository.findByMeetingId(id);
+                if (participants != null) {
+                    for (var p : participants) {
+                        if (p.getUserId() != null && !p.getUserId().isBlank()) {
+                            String st = p.getStatus() != null ? p.getStatus().trim().toUpperCase() : "";
+                            if (!"DECLINED".equals(st) && !"REMOVED".equals(st)) {
+                                attendeeIds.add(p.getUserId().trim());
+                            }
+                        }
+                    }
+                }
+                if (attendeeIds.size() > targetRoom.getCapacity()) {
+                    throw error(HttpStatus.CONFLICT, "Room capacity exceeded");
+                }
+            }
             permissions.assertCanBook(actor, room);
             if (meetings.countRoomConflicts(room, id, request.startTime(), request.endTime()) > 0)
                 throw error(HttpStatus.CONFLICT, "Room is already booked");

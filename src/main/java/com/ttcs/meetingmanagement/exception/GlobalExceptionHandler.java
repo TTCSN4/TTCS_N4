@@ -17,13 +17,16 @@ public class GlobalExceptionHandler {
     // ROOM EXCEPTION
     // =========================
     @ExceptionHandler(RoomException.class)
-    public ResponseEntity<Map<String, String>> handleRoomException(RoomException ex) {
+    public ResponseEntity<Map<String, Object>> handleRoomException(RoomException ex) {
 
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.BAD_REQUEST;
+        response.put("status", status.value());
+        response.put("error", status.getReasonPhrase());
         response.put("message", ex.getMessage());
 
         return ResponseEntity
-                .badRequest()
+                .status(status)
                 .body(response);
     }
 
