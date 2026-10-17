@@ -17,6 +17,33 @@ public class MeetingResponse {
     private String recurrenceSeriesId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String roomStatus;
+    private java.util.List<String> participants;
+    private java.util.List<String> equipmentIds;
+
+    public String getRoomStatus() {
+        return roomStatus;
+    }
+
+    public void setRoomStatus(String roomStatus) {
+        this.roomStatus = roomStatus;
+    }
+
+    public java.util.List<String> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(java.util.List<String> participants) {
+        this.participants = participants;
+    }
+
+    public java.util.List<String> getEquipmentIds() {
+        return equipmentIds;
+    }
+
+    public void setEquipmentIds(java.util.List<String> equipmentIds) {
+        this.equipmentIds = equipmentIds;
+    }
 
     public String getMeetingId() {
         return meetingId;

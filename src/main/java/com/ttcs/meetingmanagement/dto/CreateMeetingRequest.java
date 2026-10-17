@@ -26,6 +26,10 @@ public class CreateMeetingRequest {
 
     private String recurrenceRule;
 
+    private java.util.List<String> participants;
+
+    private java.util.List<String> equipmentIds;
+
     public String getOrganizerId() {
         return organizerId;
     }
@@ -88,5 +92,21 @@ public class CreateMeetingRequest {
 
     public void setRecurrenceRule(String recurrenceRule) {
         this.recurrenceRule = recurrenceRule;
+    }
+
+    public java.util.List<String> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(java.util.List<String> participants) {
+        this.participants = participants;
+    }
+
+    public java.util.List<String> getEquipmentIds() {
+        return equipmentIds;
+    }
+
+    public void setEquipmentIds(java.util.List<String> equipmentIds) {
+        this.equipmentIds = equipmentIds;
     }
 }

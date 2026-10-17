@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public class RoomBookingRequest {
 
     @NotNull(message = "meetingId is required")
-    private Long meetingId;
+    private String meetingId;
 
     @NotBlank(message = "roomId is required")
     private String roomId;
@@ -14,11 +14,16 @@ public class RoomBookingRequest {
     public RoomBookingRequest() {
     }
 
-    public Long getMeetingId() {
+    public RoomBookingRequest(String meetingId, String roomId) {
+        this.meetingId = meetingId;
+        this.roomId = roomId;
+    }
+
+    public String getMeetingId() {
         return meetingId;
     }
 
-    public void setMeetingId(Long meetingId) {
+    public void setMeetingId(String meetingId) {
         this.meetingId = meetingId;
     }
 

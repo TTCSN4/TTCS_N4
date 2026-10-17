@@ -19,9 +19,7 @@ public class RoomBookingController {
 
     private final RoomBookingService roomBookingService;
 
-    public RoomBookingController(
-            RoomBookingService roomBookingService) {
-
+    public RoomBookingController(RoomBookingService roomBookingService) {
         this.roomBookingService = roomBookingService;
     }
 
@@ -30,20 +28,16 @@ public class RoomBookingController {
     public ResponseEntity<RoomBookingResponse> bookRoom(
             @Valid @RequestBody RoomBookingRequest request) {
 
-        RoomBookingResponse response =
-                roomBookingService.bookRoom(request);
-
+        RoomBookingResponse response = roomBookingService.bookRoom(request);
         return ResponseEntity.ok(response);
     }
 
     // US09 - Hủy đặt phòng
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<RoomBookingResponse> cancelRoomBooking(
-            @PathVariable Long meetingId) {
+            @PathVariable String meetingId) {
 
-        RoomBookingResponse response =
-                roomBookingService.cancelRoomBooking(meetingId);
-
+        RoomBookingResponse response = roomBookingService.cancelRoomBooking(meetingId);
         return ResponseEntity.ok(response);
     }
 }

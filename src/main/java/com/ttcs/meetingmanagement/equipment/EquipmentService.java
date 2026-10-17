@@ -3,6 +3,7 @@ package com.ttcs.meetingmanagement.equipment;
 import com.ttcs.meetingmanagement.dto.CreateEquipmentRequest;
 import com.ttcs.meetingmanagement.dto.UpdateEquipmentRequest;
 import com.ttcs.meetingmanagement.exception.EquipmentException;
+import com.ttcs.meetingmanagement.room.RoomRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,18 +16,20 @@ import java.util.UUID;
 public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
+    private final RoomRepository roomRepository;
 
     public EquipmentService(
-            EquipmentRepository equipmentRepository) {
+            EquipmentRepository equipmentRepository,
+            RoomRepository roomRepository) {
 
         this.equipmentRepository = equipmentRepository;
+        this.roomRepository = roomRepository;
     }
 
     // ==============================
     // LẤY DANH SÁCH THIẾT BỊ
     // ==============================
     public List<Equipment> getAllEquipment() {
-
         return equipmentRepository.findAll();
     }
 
@@ -34,7 +37,6 @@ public class EquipmentService {
     // LẤY THIẾT BỊ THEO ID
     // ==============================
     public Equipment getEquipmentById(String id) {
-
         return equipmentRepository.findById(id)
                 .orElseThrow(() ->
                         new EquipmentException(
@@ -48,34 +50,23 @@ public class EquipmentService {
     // THÊM THIẾT BỊ
     // ==============================
     @Transactional
-    public Equipment createEquipment(
-            CreateEquipmentRequest request) {
+    public Equipment createEquipment(CreateEquipmentRequest request) {
+
+        String roomId = request.getRoomId() != null ? request.getRoomId().trim() : null;
+        if (roomId != null && !roomId.isBlank() && !roomRepository.existsById(roomId)) {
+            throw new EquipmentException(
+                    "Phòng không tồn tại: " + roomId,
+                    HttpStatus.NOT_FOUND
+            );
+        }
 
         Equipment equipment = new Equipment();
-
-        equipment.setEquipmentId(
-                "EQ-" + UUID.randomUUID()
-        );
-
-        equipment.setRoomId(
-                request.getRoomId()
-        );
-
-        equipment.setEquipmentName(
-                request.getEquipmentName().trim()
-        );
-
-        equipment.setType(
-                request.getType().trim()
-        );
-
-        equipment.setTotalQuantity(
-                request.getTotalQuantity()
-        );
-
-        equipment.setStatus(
-                request.getStatus().trim()
-        );
+        equipment.setEquipmentId("EQ-" + UUID.randomUUID());
+        equipment.setRoomId(roomId);
+        equipment.setEquipmentName(request.getEquipmentName().trim());
+        equipment.setType(request.getType().trim());
+        equipment.setTotalQuantity(request.getTotalQuantity());
+        equipment.setStatus(request.getStatus().trim());
 
         return equipmentRepository.save(equipment);
     }
@@ -84,39 +75,30 @@ public class EquipmentService {
     // SỬA THIẾT BỊ
     // ==============================
     @Transactional
-    public Equipment updateEquipment(
-            String id,
-            UpdateEquipmentRequest request) {
+    public Equipment updateEquipment(String id, UpdateEquipmentRequest request) {
 
         Equipment equipment = getEquipmentById(id);
 
         if (isBooked(id)) {
-
             throw new EquipmentException(
                     "Không thể sửa thiết bị vì thiết bị đang được đặt.",
                     HttpStatus.CONFLICT
             );
         }
 
-        equipment.setRoomId(
-                request.getRoomId()
-        );
+        String roomId = request.getRoomId() != null ? request.getRoomId().trim() : null;
+        if (roomId != null && !roomId.isBlank() && !roomRepository.existsById(roomId)) {
+            throw new EquipmentException(
+                    "Phòng không tồn tại: " + roomId,
+                    HttpStatus.NOT_FOUND
+            );
+        }
 
-        equipment.setEquipmentName(
-                request.getEquipmentName().trim()
-        );
-
-        equipment.setType(
-                request.getType().trim()
-        );
-
-        equipment.setTotalQuantity(
-                request.getTotalQuantity()
-        );
-
-        equipment.setStatus(
-                request.getStatus().trim()
-        );
+        equipment.setRoomId(roomId);
+        equipment.setEquipmentName(request.getEquipmentName().trim());
+        equipment.setType(request.getType().trim());
+        equipment.setTotalQuantity(request.getTotalQuantity());
+        equipment.setStatus(request.getStatus().trim());
 
         return equipmentRepository.save(equipment);
     }
@@ -130,7 +112,6 @@ public class EquipmentService {
         Equipment equipment = getEquipmentById(id);
 
         if (isBooked(id)) {
-
             throw new EquipmentException(
                     "Không thể xóa thiết bị vì thiết bị đang được đặt.",
                     HttpStatus.CONFLICT
@@ -144,10 +125,7 @@ public class EquipmentService {
     // KIỂM TRA ĐANG ĐƯỢC ĐẶT
     // ==============================
     public boolean isBooked(String equipmentId) {
-
         getEquipmentById(equipmentId);
-
-        return equipmentRepository
-                .countActiveBookings(equipmentId) > 0;
+        return equipmentRepository.countActiveBookings(equipmentId) > 0;
     }
 }

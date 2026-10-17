@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface EquipmentBookingRepository extends JpaRepository<EquipmentBooking, Long> {
     List<EquipmentBooking> findAllByEquipment_EquipmentId(String equipmentId);
-    List<EquipmentBooking> findAllByMeetingId(Long meetingId);
+    List<EquipmentBooking> findAllByMeetingId(String meetingId);
 }

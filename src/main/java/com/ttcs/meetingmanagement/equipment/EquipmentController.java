@@ -4,7 +4,6 @@ import com.ttcs.meetingmanagement.model.EquipmentAvailabilityStatus;
 import com.ttcs.meetingmanagement.model.EquipmentBooking;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
 import com.ttcs.meetingmanagement.model.Meeting;
-import com.ttcs.meetingmanagement.model.MeetingStatus;
 import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import com.ttcs.meetingmanagement.dto.CreateEquipmentRequest;
@@ -31,17 +30,23 @@ public class EquipmentController {
     private final EquipmentRepository equipmentRepository;
     private final EquipmentBookingRepository bookingRepository;
     private final MeetingRepository meetingRepository;
+    private final com.ttcs.meetingmanagement.repository.MeetingEquipmentRepository meetingEquipmentRepository;
+    private final com.ttcs.meetingmanagement.room.RoomRepository roomRepository;
 
     public EquipmentController(
             EquipmentService equipmentService,
             EquipmentRepository equipmentRepository,
             EquipmentBookingRepository bookingRepository,
-            MeetingRepository meetingRepository
+            MeetingRepository meetingRepository,
+            com.ttcs.meetingmanagement.repository.MeetingEquipmentRepository meetingEquipmentRepository,
+            com.ttcs.meetingmanagement.room.RoomRepository roomRepository
     ) {
         this.equipmentService = equipmentService;
         this.equipmentRepository = equipmentRepository;
         this.bookingRepository = bookingRepository;
         this.meetingRepository = meetingRepository;
+        this.meetingEquipmentRepository = meetingEquipmentRepository;
+        this.roomRepository = roomRepository;
     }
 
     @GetMapping
@@ -109,7 +114,12 @@ public class EquipmentController {
         if (room.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng cung cấp phòng cần tra cứu.");
         }
-        return equipmentRepository.findByRoomIdIgnoreCaseOrderByEquipmentNameAsc(room.trim()).stream()
+        String targetRoomId = room.trim();
+        var resolved = roomRepository.findByRoomIdOrRoomNameFuzzy(targetRoomId);
+        if (resolved.isPresent()) {
+            targetRoomId = resolved.get().getRoomId();
+        }
+        return equipmentRepository.findByRoomIdIgnoreCaseOrderByEquipmentNameAsc(targetRoomId).stream()
                 .map(equipment -> statusAt(equipment, at))
                 .toList();
     }
@@ -133,6 +143,22 @@ public class EquipmentController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy lượt đặt thiết bị."));
         booking.setStatus(EquipmentBookingStatus.CANCELLED);
         bookingRepository.save(booking);
+
+        Equipment equipment = booking.getEquipment();
+        if (equipment != null) {
+            long activeBookings = bookingRepository.findAllByEquipment_EquipmentId(equipment.getEquipmentId()).stream()
+                    .filter(b -> b.getStatus() == EquipmentBookingStatus.BOOKED || b.getStatus() == EquipmentBookingStatus.MAINTENANCE)
+                    .filter(b -> !b.getId().equals(id))
+                    .count();
+            if (activeBookings == 0) {
+                equipment.setStatus("AVAILABLE");
+                equipmentRepository.save(equipment);
+            }
+            if (booking.getMeetingId() != null && !booking.getMeetingId().isBlank()) {
+                meetingEquipmentRepository.deleteById(new com.ttcs.meetingmanagement.model.MeetingEquipmentId(booking.getMeetingId(), equipment.getEquipmentId()));
+            }
+        }
+
         return ResponseEntity.noContent().build();
     }
 
@@ -140,11 +166,16 @@ public class EquipmentController {
         validateReservation(request);
         Equipment equipment = equipmentRepository.findByIdForUpdate(request.equipmentId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thiết bị."));
+
+        if ("BROKEN".equalsIgnoreCase(equipment.getStatus()) || "MAINTENANCE".equalsIgnoreCase(equipment.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiết bị không khả dụng để đặt (đang hỏng hoặc bảo trì).");
+        }
+
         String room = request.room().trim();
         if (equipment.getRoomId() == null || !equipment.getRoomId().equalsIgnoreCase(room)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiết bị không thuộc phòng được yêu cầu.");
         }
-        if (request.meetingId() != null) {
+        if (request.meetingId() != null && !request.meetingId().isBlank()) {
             validateMeeting(request, room);
         }
         ensureCapacity(equipment, request, status);
@@ -157,6 +188,18 @@ public class EquipmentController {
         reservation.setStartTime(request.startTime());
         reservation.setEndTime(request.endTime());
         reservation.setStatus(status);
+
+        // Cập nhật trạng thái thiết bị thành IN_USE trong database
+        equipment.setStatus("IN_USE");
+        equipmentRepository.save(equipment);
+
+        // Lưu vào bảng meeting_equipment theo sơ đồ ERD nếu có meetingId
+        if (request.meetingId() != null && !request.meetingId().isBlank()) {
+            com.ttcs.meetingmanagement.model.MeetingEquipment me =
+                    new com.ttcs.meetingmanagement.model.MeetingEquipment(request.meetingId(), equipment.getEquipmentId(), request.quantity() != null ? request.quantity() : 1);
+            meetingEquipmentRepository.save(me);
+        }
+
         return toResponse(bookingRepository.save(reservation));
     }
 
@@ -175,15 +218,15 @@ public class EquipmentController {
     private void validateMeeting(EquipmentBookingRequest request, String room) {
         Meeting meeting = meetingRepository.findById(request.meetingId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy cuộc họp."));
-        if (meeting.getStatus() != MeetingStatus.SCHEDULED
-                || request.startTime().isBefore(meeting.getStartTime())
-                || request.endTime().isAfter(meeting.getEndTime())) {
+        if (!"SCHEDULED".equalsIgnoreCase(meeting.getStatus())
+                || request.startTime().toLocalDateTime().isBefore(meeting.getStartTime())
+                || request.endTime().toLocalDateTime().isAfter(meeting.getEndTime())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Thời gian đặt thiết bị phải nằm trong cuộc họp đang diễn ra theo lịch."
             );
         }
-        if (meeting.getRoom() != null && !meeting.getRoom().equalsIgnoreCase(room)) {
+        if (meeting.getRoomId() != null && !meeting.getRoomId().equalsIgnoreCase(room)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phòng đặt thiết bị không trùng với phòng cuộc họp.");
         }
     }
@@ -270,7 +313,7 @@ public class EquipmentController {
 
     public record EquipmentBookingRequest(
             String equipmentId,
-            Long meetingId,
+            String meetingId,
             String room,
             Integer quantity,
             OffsetDateTime startTime,
@@ -280,7 +323,7 @@ public class EquipmentController {
     public record BookingResponse(
             Long id,
             String equipmentId,
-            Long meetingId,
+            String meetingId,
             String room,
             int quantity,
             OffsetDateTime startTime,

@@ -22,16 +22,30 @@ public interface RoomRepository extends JpaRepository<Room, String> {
             String roomId
     );
 
-    // US11 - count meetings using this room
-    @Query(
-        value = """
-                SELECT COUNT(*)
-                FROM meeting
-                WHERE room_id = :roomId
-                """,
-        nativeQuery = true
-    )
+    // US11 - count active meetings using this room
+    @Query("""
+           SELECT COUNT(m)
+           FROM Meeting m
+           WHERE m.roomId = :roomId
+             AND m.status <> 'CANCELLED'
+           """)
     long countMeetingsByRoomId(
             @Param("roomId") String roomId
     );
+
+    java.util.Optional<Room> findByRoomNameIgnoreCase(String roomName);
+
+    @Query("""
+           SELECT r FROM Room r
+           WHERE UPPER(r.roomId) = UPPER(:query)
+              OR UPPER(r.roomName) = UPPER(:query)
+              OR UPPER(REPLACE(r.roomName, '.', '')) = UPPER(REPLACE(:query, '.', ''))
+           """)
+    List<Room> searchByRoomIdOrName(@Param("query") String query);
+
+    default java.util.Optional<Room> findByRoomIdOrRoomNameFuzzy(String query) {
+        if (query == null || query.isBlank()) return java.util.Optional.empty();
+        List<Room> list = searchByRoomIdOrName(query.trim());
+        return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
+    }
 }
