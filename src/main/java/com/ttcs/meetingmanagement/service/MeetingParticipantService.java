@@ -4,6 +4,8 @@ package com.ttcs.meetingmanagement.service;
 import com.ttcs.meetingmanagement.dto.*;
 import com.ttcs.meetingmanagement.model.MeetingParticipant;
 import com.ttcs.meetingmanagement.repository.MeetingParticipantRepository;
+import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.service.RoomCapacityValidator;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,13 +23,16 @@ public class MeetingParticipantService {
 
     private final MeetingParticipantRepository repository;
     private final JdbcTemplate jdbcTemplate;
+    private final MeetingRepository meetingRepository;
 
     public MeetingParticipantService(
             MeetingParticipantRepository repository,
-            JdbcTemplate jdbcTemplate
+            JdbcTemplate jdbcTemplate,
+            MeetingRepository meetingRepository
     ) {
         this.repository = repository;
         this.jdbcTemplate = jdbcTemplate;
+        this.meetingRepository = meetingRepository;
     }
 
     // KIEM TRA CUOC HOP TON TAI
@@ -78,7 +83,10 @@ public class MeetingParticipantService {
             AddMeetingParticipantRequest request
     ) {
 
-        validateMeeting(meetingId);
+        var meeting = meetingRepository.findByIdForUpdate(meetingId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Cuoc hop khong ton tai"));
 
         if (request == null
                 || request.userId() == null
@@ -107,6 +115,27 @@ public class MeetingParticipantService {
                     "Nguoi dung da tham gia cuoc hop"
             );
         }
+
+        Integer roomCapacity = jdbcTemplate.queryForObject(
+                """
+                SELECT r.capacity FROM meeting m
+                LEFT JOIN room r ON r.room_id = m.room_id
+                WHERE m.meeting_id = ?
+                """,
+                Integer.class,
+                meetingId
+        );
+        var existing = repository.findByMeetingId(meetingId);
+        MeetingParticipant pending = new MeetingParticipant();
+        pending.setUserId(userId);
+        pending.setStatus("PENDING");
+        existing = new java.util.ArrayList<>(existing);
+        existing.add(pending);
+        int totalParticipants = RoomCapacityValidator
+                .countDistinctActiveDatabaseAttendees(
+                        meeting.getOrganizerId(),
+                        existing);
+        RoomCapacityValidator.validate(roomCapacity, totalParticipants);
 
         MeetingParticipant participant =
                 new MeetingParticipant();

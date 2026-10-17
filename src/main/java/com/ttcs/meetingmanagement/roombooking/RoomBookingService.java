@@ -5,11 +5,14 @@ import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.repository.MeetingParticipantRepository;
 import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
+import com.ttcs.meetingmanagement.service.RoomCapacityValidator;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,15 +24,19 @@ public class RoomBookingService {
     private final MeetingRepository meetingRepository;
     private final RoomRepository roomRepository;
     private final RoomBookingPermissionService permissionService;
+    private final MeetingParticipantRepository participantRepository;
 
+    @Autowired
     public RoomBookingService(
             MeetingRepository meetingRepository,
             RoomRepository roomRepository,
-            RoomBookingPermissionService permissionService) {
+            RoomBookingPermissionService permissionService,
+            MeetingParticipantRepository participantRepository) {
 
         this.meetingRepository = meetingRepository;
         this.roomRepository = roomRepository;
         this.permissionService = permissionService;
+        this.participantRepository = participantRepository;
     }
 
     // US08 + US21: Dat phong va kiem tra quyen
@@ -53,7 +60,7 @@ public class RoomBookingService {
         String roomId = request.getRoomId().trim();
 
         // 1. Kiem tra Meeting
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Meeting not found"
@@ -68,10 +75,19 @@ public class RoomBookingService {
         }
 
         // 3. Kiem tra phong
-        if (!roomRepository.existsById(roomId)) {
+        var room = roomRepository.findLockedById(roomId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room not found"
+                ));
+
+        String roomStatus = room.status == null
+                ? ""
+                : room.status.trim().toUpperCase(java.util.Locale.ROOT);
+        if (!java.util.Set.of("ACTIVE", "AVAILABLE").contains(roomStatus)) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Room not found"
+                    HttpStatus.CONFLICT,
+                    "Room is not available for booking"
             );
         }
 
@@ -107,6 +123,8 @@ public class RoomBookingService {
             );
         }
 
+        RoomCapacityValidator.validate(room.capacity, currentParticipantCount(meeting));
+
         // 7. Luu thong tin dat phong
         meeting.setRoomId(roomId);
         meeting.setUpdatedAt(LocalDateTime.now());
@@ -120,6 +138,12 @@ public class RoomBookingService {
                 saved.getEndTime(),
                 "Room booked successfully"
         );
+    }
+
+    private int currentParticipantCount(Meeting meeting) {
+        return RoomCapacityValidator.countDistinctActiveDatabaseAttendees(
+                meeting.getOrganizerId(),
+                participantRepository.findByMeetingId(meeting.getMeetingId()));
     }
 
     // US09: Huy dat phong

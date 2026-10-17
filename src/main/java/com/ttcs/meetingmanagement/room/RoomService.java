@@ -180,7 +180,8 @@ public class RoomService {
         }
 
         return roomRepository
-                .findByCapacityGreaterThanEqualOrderByCapacityAsc(
+                .findByStatusInAndCapacityGreaterThanEqualOrderByCapacityAsc(
+                        List.of("ACTIVE", "AVAILABLE"),
                         participantCount
                 );
     }

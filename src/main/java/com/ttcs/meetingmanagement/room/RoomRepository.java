@@ -19,6 +19,11 @@ public interface RoomRepository extends JpaRepository<Room, String> {
             Integer capacity
     );
 
+    List<Room> findByStatusInAndCapacityGreaterThanEqualOrderByCapacityAsc(
+            java.util.Collection<String> statuses,
+            Integer capacity
+    );
+
     // US11 - check duplicate room name
     boolean existsByRoomNameIgnoreCase(String roomName);
 

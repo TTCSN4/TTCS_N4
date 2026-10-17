@@ -4,6 +4,7 @@ package com.ttcs.meetingmanagement.controller;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
+import com.ttcs.meetingmanagement.service.RoomCapacityValidator;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -435,6 +436,29 @@ public class MeetingController {
                         "Room already booked"
                 );
             }
+
+            RoomCapacity room = jdbc.queryForObject(
+                    "SELECT capacity, status FROM room WHERE room_id = :roomId",
+                    new MapSqlParameterSource("roomId", roomId),
+                    (rs, rowNum) -> new RoomCapacity(
+                            (Integer) rs.getObject("capacity"),
+                            rs.getString("status"))
+            );
+            String status = room == null || room.status() == null
+                    ? ""
+                    : room.status().trim().toUpperCase(Locale.ROOT);
+            if (!Set.of("ACTIVE", "AVAILABLE").contains(status)) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Room is not available for booking"
+                );
+            }
+            RoomCapacityValidator.validate(
+                    room == null ? null : room.capacity(),
+                    RoomCapacityValidator.countDistinctActiveAttendees(
+                            organizerId,
+                            participants)
+            );
         }
 
         if (hasParticipantConflict(
@@ -448,6 +472,9 @@ public class MeetingController {
                     "Participant already has a meeting"
             );
         }
+    }
+
+    private record RoomCapacity(Integer capacity, String status) {
     }
 
     // ==========================================
