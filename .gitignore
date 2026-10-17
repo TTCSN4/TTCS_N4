@@ -37,3 +37,8 @@ build/
 
 
 data/*
+
+# Preserve the editor folder; keep personal settings ignored.
+!.vscode/
+.vscode/*
+!.vscode/.gitkeep
