@@ -24,20 +24,20 @@ public class MeetingManagementApplication {
 }
 
 @JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.ANY)
-@Entity @Table(name="roles") class Role {
+@Entity @Table(name="`role`") class Role {
     @Id @Column(name="role_id",length=36) String id;
     @Column(name="role_name",nullable=false,unique=true) String name;
     protected Role(){} Role(String id,String name){this.id=id;this.name=name;}
 }
 @JsonAutoDetect(fieldVisibility=JsonAutoDetect.Visibility.ANY)
-@Entity @Table(name="departments",uniqueConstraints=@UniqueConstraint(name="uk_department_hrm_code",columnNames="hrm_code")) class Department {
+@Entity @Table(name="department",uniqueConstraints=@UniqueConstraint(name="uk_department_hrm_code",columnNames="hrm_code")) class Department {
     @Id @Column(name="department_id",length=36) String id;
     @Column(name="department_name",nullable=false) String name;
     @Column(name="hrm_code",length=100) String hrmCode;
     @Column(name="last_synced_at") OffsetDateTime lastSyncedAt;
     protected Department(){} Department(String id,String name){this.id=id;this.name=name;}
 }
-@Entity @Table(name="users",uniqueConstraints={@UniqueConstraint(name="uk_user_hrm_code",columnNames="hrm_code"),@UniqueConstraint(name="uk_user_email",columnNames="email")}) class User {
+@Entity @Table(name="`user`",uniqueConstraints={@UniqueConstraint(name="uk_user_hrm_code",columnNames="hrm_code"),@UniqueConstraint(name="uk_user_email",columnNames="email")}) class User {
     @Id @Column(name="user_id",length=36) String id;
     @Column(name="role_id",nullable=false,length=36) String roleId;
     @Column(name="department_id",length=36) String departmentId;
