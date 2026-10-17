@@ -270,7 +270,7 @@ public class EquipmentController {
 
     public record EquipmentBookingRequest(
             String equipmentId,
-            Long meetingId,
+            String meetingId,
             String room,
             Integer quantity,
             OffsetDateTime startTime,
@@ -280,7 +280,7 @@ public class EquipmentController {
     public record BookingResponse(
             Long id,
             String equipmentId,
-            Long meetingId,
+            String meetingId,
             String room,
             int quantity,
             OffsetDateTime startTime,

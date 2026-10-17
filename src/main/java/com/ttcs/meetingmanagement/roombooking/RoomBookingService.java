@@ -106,11 +106,11 @@ public class RoomBookingService {
         );
     }
     @Transactional
-public RoomBookingResponse cancelRoomBooking(Long meetingId) {
+    public RoomBookingResponse cancelRoomBooking(String meetingId) {
 
-    // 1. Kiểm tra cuộc họp tồn tại
-    Meeting meeting = meetingRepository
-            .findById(meetingId)
+        // 1. Kiểm tra cuộc họp tồn tại
+        Meeting meeting = meetingRepository
+                .findById(meetingId)
             .orElseThrow(() ->
                     new ResponseStatusException(
                             HttpStatus.NOT_FOUND,

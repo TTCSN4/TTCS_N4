@@ -26,6 +26,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.ttcs.meetingmanagement.room.Room;
+import com.ttcs.meetingmanagement.room.RoomRepository;
+import com.ttcs.meetingmanagement.room.RoomAvailabilityService;
+import com.ttcs.meetingmanagement.roombooking.RoomBookingService;
+import com.ttcs.meetingmanagement.dto.AvailableRoomResponse;
+import com.ttcs.meetingmanagement.dto.RoomAvailabilitySummaryResponse;
+import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
+import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
+import com.ttcs.meetingmanagement.dto.RoomScheduleStatusResponse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 @SpringBootTest
 class MeetingmanagementApplicationTests {
     @Autowired
@@ -40,6 +52,15 @@ class MeetingmanagementApplicationTests {
     @Autowired
     private MeetingRepository meetingRepository;
 
+    @Autowired
+    private RoomRepository roomRepository;
+
+    @Autowired
+    private RoomAvailabilityService roomAvailabilityService;
+
+    @Autowired
+    private RoomBookingService roomBookingService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -48,10 +69,11 @@ class MeetingmanagementApplicationTests {
     void meetingQueriesFetchParticipantsBeforeSerialization() {
         OffsetDateTime start = OffsetDateTime.parse("2030-07-10T09:00:00+07:00");
         Meeting meeting = new Meeting();
+        meeting.setMeetingId("MTG-test-01");
         meeting.setTitle("Meeting with participants");
         meeting.setStartTime(start);
         meeting.setEndTime(start.plusHours(1));
-        meeting.setOrganizerId(1L);
+        meeting.setOrganizerId("USR-1");
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setCreatedAt(start.minusDays(1));
         meeting.setUpdatedAt(start.minusDays(1));
@@ -149,5 +171,152 @@ class MeetingmanagementApplicationTests {
         reservation.setEndTime(end);
         reservation.setStatus(status);
         bookingRepository.save(reservation);
+    }
+
+    @Test
+    @Transactional
+    void roomAvailabilityDetectsBusyAndAvailableRooms() {
+        Room roomA = new Room();
+        roomA.setRoomId("P-TEST-A");
+        roomA.setRoomName("Phòng A");
+        roomA.setCapacity(10);
+        roomA.setStatus("AVAILABLE");
+        roomRepository.saveAndFlush(roomA);
+
+        Room roomB = new Room();
+        roomB.setRoomId("P-TEST-B");
+        roomB.setRoomName("Phòng B");
+        roomB.setCapacity(20);
+        roomB.setStatus("AVAILABLE");
+        roomRepository.saveAndFlush(roomB);
+
+        OffsetDateTime start = OffsetDateTime.parse("2030-08-10T14:00:00+07:00");
+        OffsetDateTime end = start.plusHours(2);
+
+        Meeting meeting = new Meeting();
+        meeting.setMeetingId("MTG-ROOM-A");
+        meeting.setTitle("Meeting Room A");
+        meeting.setRoomId(roomA.getRoomId());
+        meeting.setStartTime(start);
+        meeting.setEndTime(end);
+        meeting.setOrganizerId("USR-1");
+        meeting.setStatus(MeetingStatus.SCHEDULED);
+        meeting.setCreatedAt(start.minusDays(1));
+        meeting.setUpdatedAt(start.minusDays(1));
+        meetingRepository.saveAndFlush(meeting);
+
+        List<AvailableRoomResponse> available = roomAvailabilityService.getAvailableRooms(start, end, null);
+        List<String> roomIds = available.stream().map(AvailableRoomResponse::roomId).toList();
+        assertTrue(roomIds.contains("P-TEST-B"));
+        assertFalse(roomIds.contains("P-TEST-A"));
+    }
+
+    @Test
+    @Transactional
+    void roomBookingAndCancelWorkflow() {
+        Room room = new Room();
+        room.setRoomId("P-TEST-BOOK");
+        room.setRoomName("Phòng Đặt");
+        room.setCapacity(15);
+        room.setStatus("AVAILABLE");
+        roomRepository.saveAndFlush(room);
+
+        OffsetDateTime start = OffsetDateTime.parse("2030-09-10T10:00:00+07:00");
+        OffsetDateTime end = start.plusHours(1);
+
+        Meeting meeting = new Meeting();
+        meeting.setMeetingId("MTG-BOOK-TEST");
+        meeting.setTitle("Meeting Book Test");
+        meeting.setStartTime(start);
+        meeting.setEndTime(end);
+        meeting.setOrganizerId("USR-1");
+        meeting.setStatus(MeetingStatus.SCHEDULED);
+        meeting.setCreatedAt(start.minusDays(1));
+        meeting.setUpdatedAt(start.minusDays(1));
+        meetingRepository.saveAndFlush(meeting);
+
+        RoomBookingResponse bookRes = roomBookingService.bookRoom(new RoomBookingRequest(meeting.getMeetingId(), room.getRoomId()));
+        assertEquals(room.getRoomId(), bookRes.getRoomId());
+
+        Meeting afterBook = meetingRepository.findById(meeting.getMeetingId()).orElseThrow();
+        assertEquals(room.getRoomId(), afterBook.getRoomId());
+
+        RoomBookingResponse cancelRes = roomBookingService.cancelRoomBooking(meeting.getMeetingId());
+        assertEquals("Room booking cancelled successfully", cancelRes.getMessage());
+
+        Meeting afterCancel = meetingRepository.findById(meeting.getMeetingId()).orElseThrow();
+        assertNull(afterCancel.getRoomId());
+    }
+
+    @Test
+    @Transactional
+    void roomAvailabilityOverviewReturnsRealCountsAndDisabledReasons() {
+        OffsetDateTime start = OffsetDateTime.parse("2030-10-15T10:00:00+07:00");
+        OffsetDateTime end = start.plusHours(1);
+
+        // Tạo cuộc họp trên phòng P.101 để tạo xung đột lịch
+        Meeting meeting = new Meeting();
+        meeting.setMeetingId("MTG-US07-CONFLICT");
+        meeting.setTitle("Họp dự án Alpha");
+        meeting.setRoomId("P.101");
+        meeting.setStartTime(start);
+        meeting.setEndTime(end);
+        meeting.setOrganizerId("USR-1");
+        meeting.setStatus(MeetingStatus.SCHEDULED);
+        meeting.setCreatedAt(start.minusDays(1));
+        meeting.setUpdatedAt(start.minusDays(1));
+        meetingRepository.saveAndFlush(meeting);
+
+        // Truy vấn tổng quan phòng trống trong khoảng thời gian trùng lịch
+        OffsetDateTime checkStart = start.plusMinutes(15);
+        OffsetDateTime checkEnd = start.plusMinutes(45);
+        RoomAvailabilitySummaryResponse summary = roomAvailabilityService.getRoomAvailabilityOverview(checkStart, checkEnd, null);
+
+        assertTrue(summary.totalRooms() >= 6, "Tổng số phòng phải ít nhất 6");
+        assertTrue(summary.busyRoomsCount() >= 1, "Phải có ít nhất 1 phòng bận");
+        assertTrue(summary.maintenanceRoomsCount() >= 2, "Phải có ít nhất 2 phòng bảo trì/ngừng sử dụng");
+
+        // Tìm trạng thái chi tiết của từng phòng
+        RoomScheduleStatusResponse p101 = summary.rooms().stream()
+                .filter(r -> "P.101".equals(r.roomId()))
+                .findFirst()
+                .orElseThrow();
+        assertFalse(p101.isAvailable(), "P.101 đã trùng lịch nên không khả dụng");
+        assertEquals("Đã có lịch họp trùng giờ", p101.reason());
+
+        RoomScheduleStatusResponse p301 = summary.rooms().stream()
+                .filter(r -> "P.301".equals(r.roomId()))
+                .findFirst()
+                .orElseThrow();
+        assertFalse(p301.isAvailable(), "P.301 đang bảo trì nên không khả dụng");
+        assertEquals("Phòng đang bảo trì", p301.reason());
+
+        RoomScheduleStatusResponse p302 = summary.rooms().stream()
+                .filter(r -> "P.302".equals(r.roomId()))
+                .findFirst()
+                .orElseThrow();
+        assertFalse(p302.isAvailable(), "P.302 ngừng sử dụng nên không khả dụng");
+        assertEquals("Phòng ngừng sử dụng", p302.reason());
+
+        RoomScheduleStatusResponse p102 = summary.rooms().stream()
+                .filter(r -> "P.102".equals(r.roomId()))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(p102.isAvailable(), "P.102 phải khả dụng và còn trống");
+        assertNull(p102.reason());
+    }
+
+    @Test
+    @Transactional
+    void roomAvailabilityOverviewWithMinCapacity_ExceedsAllRoomsReturnsZero() {
+        OffsetDateTime start = OffsetDateTime.parse("2030-11-20T08:00:00+07:00");
+        OffsetDateTime end = start.plusHours(2);
+
+        // Yêu cầu sức chứa 500 người (vượt quá mọi phòng)
+        RoomAvailabilitySummaryResponse summary = roomAvailabilityService.getRoomAvailabilityOverview(start, end, 500);
+
+        assertEquals(0, summary.availableRoomsCount(), "Không có phòng nào đủ 500 người");
+        boolean allUnavailable = summary.rooms().stream().noneMatch(RoomScheduleStatusResponse::isAvailable);
+        assertTrue(allUnavailable, "Tất cả các phòng phải không khả dụng khi hết phòng phù hợp");
     }
 }

@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 
 public class RoomBookingResponse {
 
-    private Long meetingId;
+    private String meetingId;
     private String roomId;
     private OffsetDateTime startTime;
     private OffsetDateTime endTime;
@@ -14,7 +14,7 @@ public class RoomBookingResponse {
     }
 
     public RoomBookingResponse(
-            Long meetingId,
+            String meetingId,
             String roomId,
             OffsetDateTime startTime,
             OffsetDateTime endTime,
@@ -27,11 +27,11 @@ public class RoomBookingResponse {
         this.message = message;
     }
 
-    public Long getMeetingId() {
+    public String getMeetingId() {
         return meetingId;
     }
 
-    public void setMeetingId(Long meetingId) {
+    public void setMeetingId(String meetingId) {
         this.meetingId = meetingId;
     }
 

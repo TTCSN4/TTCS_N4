@@ -51,17 +51,21 @@ public class MeetingController {
     public Meeting create(@RequestBody MeetingRequest request) {
         validate(request);
         List<String> participants = cleanParticipants(request.participants());
+        String room = cleanRoom(request.room());
         ensureNoConflict(request.startTime(), request.endTime(), participants, null);
+        ensureNoRoomConflict(room, request.startTime(), request.endTime(), null);
 
-        Meeting first = save(request, participants, null, null);
         int repeatCount = Math.clamp(request.repeatCount() == null ? 0 : request.repeatCount(), 0, 12);
         String recurrence = request.recurrence() == null ? "NONE" : request.recurrence().toUpperCase(Locale.ROOT);
         if (repeatCount > 0 && !List.of("WEEKLY", "MONTHLY").contains(recurrence)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tần suất lặp không hợp lệ.");
         }
 
+        Meeting first = save(request, participants, null, null);
         if (repeatCount > 0) {
-            first.setRecurrenceSeriesId(first.getId());
+            first.setRecurrenceSeriesId(first.getMeetingId());
+            first.setIsRecurring(true);
+            first.setRecurrenceRule(recurrence);
             meetings.save(first);
             for (int occurrence = 1; occurrence <= repeatCount; occurrence++) {
                 OffsetDateTime start = recurrence.equals("WEEKLY")
@@ -69,24 +73,31 @@ public class MeetingController {
                         : request.startTime().plusMonths(occurrence);
                 OffsetDateTime end = start.plusSeconds(request.endTime().toEpochSecond() - request.startTime().toEpochSecond());
                 ensureNoConflict(start, end, participants, null);
-                save(request, participants, start, first.getId());
+                ensureNoRoomConflict(room, start, end, null);
+                Meeting occ = save(request, participants, start, first.getMeetingId());
+                occ.setIsRecurring(true);
+                occ.setRecurrenceRule(recurrence);
+                meetings.save(occ);
             }
         }
         return first;
     }
 
     @PutMapping("/{id}")
-    public Meeting update(@PathVariable Long id, @RequestBody MeetingRequest request) {
+    public Meeting update(@PathVariable String id, @RequestBody MeetingRequest request) {
         validate(request);
         Meeting meeting = findMeeting(id);
         List<String> participants = cleanParticipants(request.participants());
+        String room = cleanRoom(request.room());
         ensureNoConflict(request.startTime(), request.endTime(), participants, id);
+        ensureNoRoomConflict(room, request.startTime(), request.endTime(), id);
+
         meeting.setTitle(request.title().trim());
         meeting.setDescription(request.description());
-        meeting.setRoom(cleanRoom(request.room()));
+        meeting.setRoom(room);
         meeting.setStartTime(request.startTime());
         meeting.setEndTime(request.endTime());
-        meeting.setOrganizerId(request.organizerId() == null ? 1L : request.organizerId());
+        meeting.setOrganizerId(request.organizerId() == null || request.organizerId().isBlank() ? "1" : request.organizerId().trim());
         meeting.setParticipants(participants);
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setUpdatedAt(OffsetDateTime.now());
@@ -95,9 +106,11 @@ public class MeetingController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void cancel(@PathVariable Long id) {
+    public void cancel(@PathVariable String id) {
         Meeting meeting = findMeeting(id);
         meeting.setStatus(MeetingStatus.CANCELLED);
+        meeting.setCancelledAt(OffsetDateTime.now());
+        meeting.setCancelReason("Đã hủy bởi người dùng");
         meeting.setUpdatedAt(OffsetDateTime.now());
         meetings.save(meeting);
         for (EquipmentBooking booking : equipmentBookings.findAllByMeetingId(id)) {
@@ -126,16 +139,18 @@ public class MeetingController {
         return available;
     }
 
-    private Meeting save(MeetingRequest request, List<String> participants, OffsetDateTime start, Long seriesId) {
+    private Meeting save(MeetingRequest request, List<String> participants, OffsetDateTime start, String seriesId) {
         OffsetDateTime now = OffsetDateTime.now();
         Meeting meeting = new Meeting();
+        meeting.setMeetingId(String.valueOf(System.currentTimeMillis()) + ((int) (Math.random() * 900) + 100));
         meeting.setTitle(request.title().trim());
         meeting.setDescription(request.description());
         meeting.setRoom(cleanRoom(request.room()));
         meeting.setStartTime(start == null ? request.startTime() : start);
         meeting.setEndTime(start == null ? request.endTime() : start.plusSeconds(request.endTime().toEpochSecond() - request.startTime().toEpochSecond()));
-        meeting.setOrganizerId(request.organizerId() == null ? 1L : request.organizerId());
+        meeting.setOrganizerId(request.organizerId() == null || request.organizerId().isBlank() ? "1" : request.organizerId().trim());
         meeting.setStatus(MeetingStatus.SCHEDULED);
+        meeting.setIsRecurring(seriesId != null);
         meeting.setRecurrenceSeriesId(seriesId);
         meeting.setCreatedAt(now);
         meeting.setUpdatedAt(now);
@@ -165,22 +180,30 @@ public class MeetingController {
         return room == null || room.isBlank() ? null : room.trim();
     }
 
-    private void ensureNoConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, Long ignoredId) {
+    private void ensureNoConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, String ignoredId) {
         if (hasConflict(start, end, participants, ignoredId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Người tham dự đã có lịch trong khoảng thời gian này.");
         }
     }
 
-    private boolean hasConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, Long ignoredId) {
+    private void ensureNoRoomConflict(String room, OffsetDateTime start, OffsetDateTime end, String ignoredId) {
+        if (room == null || room.isBlank()) return;
+        long conflicts = meetings.countRoomConflicts(room, ignoredId, MeetingStatus.CANCELLED, start, end);
+        if (conflicts > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Phòng " + room + " đã có cuộc họp khác trong khoảng thời gian này.");
+        }
+    }
+
+    private boolean hasConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, String ignoredId) {
         if (participants.isEmpty()) return false;
         return meetings.findAll().stream()
-                .filter(meeting -> !meeting.getId().equals(ignoredId))
+                .filter(meeting -> ignoredId == null || !meeting.getMeetingId().equals(ignoredId))
                 .filter(meeting -> meeting.getStatus() == MeetingStatus.SCHEDULED)
                 .filter(meeting -> meeting.getStartTime().isBefore(end) && meeting.getEndTime().isAfter(start))
                 .anyMatch(meeting -> meeting.getParticipants().stream().anyMatch(participants::contains));
     }
 
-    private Meeting findMeeting(Long id) {
+    private Meeting findMeeting(String id) {
         return meetings.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy cuộc họp."));
     }
 
@@ -189,7 +212,7 @@ public class MeetingController {
             String description,
             OffsetDateTime startTime,
             OffsetDateTime endTime,
-            Long organizerId,
+            String organizerId,
             List<String> participants,
             String recurrence,
             Integer repeatCount,

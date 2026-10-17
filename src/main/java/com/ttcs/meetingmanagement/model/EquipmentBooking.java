@@ -26,8 +26,8 @@ public class EquipmentBooking {
     @JoinColumn(name = "equipment_id", nullable = false)
     private Equipment equipment;
 
-    @Column(name = "meeting_id")
-    private Long meetingId;
+    @Column(name = "meeting_id", length = 50)
+    private String meetingId;
 
     @Column(nullable = false, length = 120)
     private String room;
@@ -51,8 +51,8 @@ public class EquipmentBooking {
     public Long getId() { return id; }
     public Equipment getEquipment() { return equipment; }
     public void setEquipment(Equipment equipment) { this.equipment = equipment; }
-    public Long getMeetingId() { return meetingId; }
-    public void setMeetingId(Long meetingId) { this.meetingId = meetingId; }
+    public String getMeetingId() { return meetingId; }
+    public void setMeetingId(String meetingId) { this.meetingId = meetingId; }
     public String getRoom() { return room; }
     public void setRoom(String room) { this.room = room; }
     public int getQuantity() { return quantity; }
