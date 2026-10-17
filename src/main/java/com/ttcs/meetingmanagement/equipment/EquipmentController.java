@@ -212,6 +212,12 @@ public class EquipmentController {
         }
         int totalQuantity = equipment.getTotalQuantity() == null ? 0 : equipment.getTotalQuantity();
         if (peak > totalQuantity) {
+            if (requestedStatus == EquipmentBookingStatus.BOOKED) {
+                int remaining = Math.max(0, totalQuantity - Math.toIntExact(bookingRepository.reservedQuantity(
+                        equipment.getEquipmentId(), request.startTime(), request.endTime())));
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Not enough equipment available; remaining quantity: " + remaining);
+            }
             String message = requestedStatus == EquipmentBookingStatus.MAINTENANCE
                     ? "Số lượng thiết bị bảo trì vượt quá số lượng còn khả dụng trong khung giờ này."
                     : "Không đủ thiết bị khả dụng trong khung giờ này.";
