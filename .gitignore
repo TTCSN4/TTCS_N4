@@ -37,3 +37,8 @@ build/
 
 
 data/*
+
+# Preserve folder structure without publishing editor settings.
+!.vscode/
+.vscode/*
+!.vscode/.gitkeep
