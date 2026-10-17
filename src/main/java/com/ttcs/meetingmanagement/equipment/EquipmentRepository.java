@@ -33,7 +33,10 @@ public interface EquipmentRepository extends JpaRepository<Equipment, String> {
                  FROM equipment_bookings eb
                  WHERE eb.equipment_id = :equipmentId
                    AND eb.end_time >= NOW()
-                   AND eb.status <> 'CANCELLED')
+                   AND eb.status IN ('BOOKED', 'MAINTENANCE')
+                   AND (eb.meeting_id IS NULL OR eb.meeting_id NOT IN (
+                       SELECT me2.meeting_id FROM meeting_equipment me2 WHERE me2.equipment_id = :equipmentId
+                   )))
             )
             """,
         nativeQuery = true
@@ -53,7 +56,7 @@ public interface EquipmentRepository extends JpaRepository<Equipment, String> {
                  FROM equipment_bookings eb
                  WHERE eb.equipment_id = :equipmentId
                    AND eb.end_time >= NOW()
-                   AND eb.status <> 'CANCELLED')
+                   AND eb.status IN ('BOOKED', 'MAINTENANCE'))
             )
             """,
         nativeQuery = true
@@ -74,7 +77,10 @@ public interface EquipmentRepository extends JpaRepository<Equipment, String> {
                  FROM equipment_bookings eb
                  WHERE eb.equipment_id = :equipmentId
                    AND eb.start_time <= NOW() AND eb.end_time >= NOW()
-                   AND eb.status <> 'CANCELLED')
+                   AND eb.status IN ('BOOKED', 'MAINTENANCE')
+                   AND (eb.meeting_id IS NULL OR eb.meeting_id NOT IN (
+                       SELECT me2.meeting_id FROM meeting_equipment me2 WHERE me2.equipment_id = :equipmentId
+                   )))
             )
             """,
         nativeQuery = true

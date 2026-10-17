@@ -27,6 +27,16 @@ public class RoomController {
         );
     }
 
+    // US10 - lọc phòng theo số người tham gia
+    @GetMapping(params = "participants")
+    public ResponseEntity<List<Room>> filterRoomsByParticipants(
+            @RequestParam Integer participants) {
+
+        return ResponseEntity.ok(
+                roomService.filterByParticipantCount(participants)
+        );
+    }
+
     // GET - lấy phòng theo ID
     @GetMapping("/{id}")
     public ResponseEntity<Room> getRoomById(
@@ -37,13 +47,12 @@ public class RoomController {
         );
     }
 
-    // POST - thêm phòng mới
+    // POST - thêm phòng
     @PostMapping
     public ResponseEntity<Room> createRoom(
             @Valid @RequestBody CreateRoomRequest request) {
 
-        Room room =
-                roomService.createRoom(request);
+        Room room = roomService.createRoom(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
