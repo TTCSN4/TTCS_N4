@@ -25,6 +25,11 @@ public class RoleManagementController {
         this.roleService = roleService;
     }
 
+    public record UpdateUserStatusRequest(
+            @NotBlank String status
+    ) {
+    }
+
     public record AssignRoleRequest(
             @NotBlank String roleId
     ) {
@@ -55,5 +60,15 @@ public class RoleManagementController {
             @PathVariable String userId) {
 
         return roleService.revokeRole(userId);
+    }
+
+
+    @PutMapping("/users/{userId}/status")
+    public RoleResult updateUserStatus(
+            @PathVariable String userId,
+            @Valid @RequestBody UpdateUserStatusRequest request) {
+
+        return roleService.updateUserStatus(
+                userId, request.status());
     }
 }

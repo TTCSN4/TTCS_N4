@@ -2,9 +2,11 @@ package com.ttcs.meetingmanagement.meeting.update;
 
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
+import com.ttcs.meetingmanagement.rbac.RbacAccess;
 import com.ttcs.meetingmanagement.repository.*;
 import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
@@ -17,13 +19,28 @@ public class US02MeetingService {
     private final RoomRepository rooms;
     private final EquipmentBookingRepository equipment;
     private final RoomBookingPermissionService permissions;
+    private final RbacAccess rbacAccess;
+
+    @Autowired
+    public US02MeetingService(MeetingRepository meetings, RoomRepository rooms,
+            EquipmentBookingRepository equipment, RoomBookingPermissionService permissions,
+            @Autowired(required = false) RbacAccess rbacAccess) {
+        this.meetings = meetings;
+        this.rooms = rooms;
+        this.equipment = equipment;
+        this.permissions = permissions;
+        this.rbacAccess = rbacAccess;
+    }
+
     public US02MeetingService(MeetingRepository meetings, RoomRepository rooms,
             EquipmentBookingRepository equipment, RoomBookingPermissionService permissions) {
-        this.meetings = meetings; this.rooms = rooms; this.equipment = equipment; this.permissions = permissions;
+        this(meetings, rooms, equipment, permissions, null);
     }
 
     @Transactional(readOnly = true)
-    public Meeting get(String id) { return meetings.findById(id).orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Meeting not found")); }
+    public Meeting get(String id) {
+        return meetings.findById(id).orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Meeting not found"));
+    }
 
     @Transactional
     public Meeting update(String id, String actor, US02MeetingRequest request) {
@@ -41,8 +58,10 @@ public class US02MeetingService {
         // Existing reservations use the old room/time. Release them before rebooking.
         if (!java.util.Objects.equals(room, m.roomId) || !request.startTime().equals(m.startTime) || !request.endTime().equals(m.endTime))
             releaseEquipment(id);
-        m.title = request.title().trim(); m.description = request.description();
-        m.startTime = request.startTime(); m.endTime = request.endTime();
+        m.title = request.title().trim();
+        m.description = request.description();
+        m.startTime = request.startTime();
+        m.endTime = request.endTime();
         m.roomId = room == null || room.isBlank() ? null : room;
         return meetings.saveAndFlush(m);
     }
@@ -50,21 +69,32 @@ public class US02MeetingService {
     @Transactional
     public void cancel(String id, String actor, String reason) {
         Meeting m = locked(id, actor);
-        m.status = "CANCELLED"; m.cancelReason = reason; m.cancelledAt = LocalDateTime.now();
-        releaseEquipment(id); meetings.saveAndFlush(m);
+        m.status = "CANCELLED";
+        m.cancelReason = reason;
+        m.cancelledAt = LocalDateTime.now();
+        releaseEquipment(id);
+        meetings.saveAndFlush(m);
     }
 
     private Meeting locked(String id, String actor) {
         Meeting m = meetings.findByIdForUpdate(id).orElseThrow(() -> error(HttpStatus.NOT_FOUND, "Meeting not found"));
-        if (!m.organizerId.equals(actor)) throw error(HttpStatus.FORBIDDEN, "Only the organizer can modify this meeting");
-        if (!"SCHEDULED".equals(m.status) || !m.startTime.isAfter(LocalDateTime.now()))
+        boolean isAdmin = rbacAccess != null && rbacAccess.isAdmin(actor);
+        if (!m.organizerId.equals(actor) && !isAdmin) {
+            throw error(HttpStatus.FORBIDDEN, "Only the organizer or an administrator can modify this meeting");
+        }
+        if (!"SCHEDULED".equals(m.status) || !m.startTime.isAfter(LocalDateTime.now())) {
             throw error(HttpStatus.CONFLICT, "Only a future scheduled meeting can be modified");
+        }
         return m;
     }
+
     private void releaseEquipment(String id) {
         var bookings = equipment.findAllByMeetingId(id);
         bookings.forEach(b -> b.setStatus(EquipmentBookingStatus.CANCELLED));
         equipment.saveAll(bookings);
     }
-    private static ResponseStatusException error(HttpStatus status, String message) { return new ResponseStatusException(status, message); }
+
+    private static ResponseStatusException error(HttpStatus status, String message) {
+        return new ResponseStatusException(status, message);
+    }
 }

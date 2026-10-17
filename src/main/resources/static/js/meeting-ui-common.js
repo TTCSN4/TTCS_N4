@@ -1,3 +1,16 @@
+// RBAC Dynamic Menu Filtering for US20
+const currentAuthRole = (localStorage.getItem('auth_role') || '').toUpperCase();
+function isStoryAllowed(id) {
+  if (!currentAuthRole || currentAuthRole === 'ADMIN' || currentAuthRole.includes('QUẢN TRỊ')) {
+    return true; // Admin has full access
+  }
+  if (currentAuthRole === 'PM' || currentAuthRole.includes('ĐẶT LỊCH')) {
+    // PM has access to meeting creation, booking, time slots, reminders, chatbot
+    return ['US02','US04','US05','US08','US09','US16','US25','US26'].includes(id);
+  }
+  // Default: Member (Người tham dự)
+  return ['US04','US05','US16','US26'].includes(id);
+}
 /* Shared, dependency-free UI for the user stories in US_list.txt. */
 const STORY = document.body.dataset.story;
 const $ = (s, root = document) => root.querySelector(s);
@@ -23,7 +36,7 @@ const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 const admin = ['US14','US19','US20','US23'].includes(STORY);
 const meta=stories[STORY];
 document.title=`${STORY} · ${meta[0]} | Meeting`;
-document.body.innerHTML=`<aside class="sidebar"><div class="brand"><div class="brand-mark">M</div><div><div class="brand-title">Meeting</div><div class="brand-sub">Meeting Management</div></div></div><nav class="nav-list" aria-label="Điều hướng các chức năng">${Object.entries(stories).map(([id,m])=>`<a class="nav-link ${id===STORY?'active':''}" ${id===STORY?'aria-current="page"':''} href="${pages[id]}.html" data-nav="${id}">${icon(m[2])}<span>${m[0]}</span></a>`).join('')}</nav><div class="profile"><div class="avatar">${admin?'AD':'L'}</div><div><div>${admin?'Quản trị viên':'Lê Minh Anh'}</div><div class="role">${admin?'Quản lý hệ thống':'Nhân viên'}</div></div></div></aside><main class="main"><header class="topbar"><span class="crumb">Meeting / ${meta[0]}</span><div class="top-actions"><button class="icon-button" id="notifications" aria-label="Xem thông báo">${icon('bell')}</button><span class="avatar">${admin?'AD':'L'}</span></div></header><div class="content"><div class="heading"><div class="heading-icon">${icon(meta[2])}</div><div><h1>${meta[0]}</h1><p class="subtitle">${meta[1]}</p></div></div><div class="demo-note">Bản giao diện minh họa · Dữ liệu lưu trong trình duyệt này. Email và đặt phòng chưa được gửi đến hệ thống thực.</div><div id="screen"></div></div></main><div id="layer"></div><div id="toast-root" aria-live="polite"></div>`;
+document.body.innerHTML=`<aside class="sidebar"><div class="brand"><div class="brand-mark">M</div><div><div class="brand-title">Meeting</div><div class="brand-sub">Meeting Management</div></div></div><nav class="nav-list" aria-label="Điều hướng các chức năng">${Object.entries(stories).filter(([id]) => isStoryAllowed(id)).map(([id,m])=>`<a class="nav-link ${id===STORY?'active':''}" ${id===STORY?'aria-current="page"':''} href="${pages[id]}.html" data-nav="${id}">${icon(m[2])}<span>${m[0]}</span></a>`).join('')}</nav><div class="profile"><div class="avatar">${admin?'AD':'L'}</div><div><div>${admin?'Quản trị viên':'Lê Minh Anh'}</div><div class="role">${admin?'Quản lý hệ thống':'Nhân viên'}</div></div></div></aside><main class="main"><header class="topbar"><span class="crumb">Meeting / ${meta[0]}</span><div class="top-actions"><button class="icon-button" id="notifications" aria-label="Xem thông báo">${icon('bell')}</button><span class="avatar">${admin?'AD':'L'}</span></div></header><div class="content"><div class="heading"><div class="heading-icon">${icon(meta[2])}</div><div><h1>${meta[0]}</h1><p class="subtitle">${meta[1]}</p></div></div><div class="demo-note">Bản giao diện minh họa · Dữ liệu lưu trong trình duyệt này. Email và đặt phòng chưa được gửi đến hệ thống thực.</div><div id="screen"></div></div></main><div id="layer"></div><div id="toast-root" aria-live="polite"></div>`;
 const screen=$('#screen');
 if(window.innerWidth<=760){const nav=$('.nav-list'),active=$('.nav-link.active');nav.scrollLeft=Math.max(0,active.offsetLeft-nav.offsetLeft-(nav.clientWidth-active.offsetWidth)/2)}
 // Links point to feature-specific HTML pages in the single project.

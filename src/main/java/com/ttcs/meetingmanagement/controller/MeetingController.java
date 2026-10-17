@@ -11,6 +11,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.ttcs.meetingmanagement.rbac.RbacAccess;
+import com.ttcs.meetingmanagement.security.BackendActor;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -29,15 +31,18 @@ public class MeetingController {
     private final MeetingRepository meetings;
     private final RoomBookingPermissionService permissionService;
     private final NamedParameterJdbcTemplate jdbc;
+    private final RbacAccess rbacAccess;
 
     public MeetingController(
             MeetingRepository meetings,
             RoomBookingPermissionService permissionService,
-            NamedParameterJdbcTemplate jdbc) {
+            NamedParameterJdbcTemplate jdbc,
+            RbacAccess rbacAccess) {
 
         this.meetings = meetings;
         this.permissionService = permissionService;
         this.jdbc = jdbc;
+        this.rbacAccess = rbacAccess;
     }
 
     // ==========================================
@@ -71,7 +76,32 @@ public class MeetingController {
     public Meeting create(
             @RequestBody MeetingRequest request) {
 
-        validate(request);
+        String callerId = BackendActor.requireUserId();
+        String effectiveOrganizerId = request.organizerId() == null || request.organizerId().isBlank()
+                ? callerId
+                : request.organizerId().trim();
+
+        if (!callerId.equals(effectiveOrganizerId) && !rbacAccess.isAdmin(callerId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Cannot create meeting on behalf of another user"
+            );
+        }
+
+        MeetingRequest effectiveRequest = new MeetingRequest(
+                request.title(),
+                request.description(),
+                request.startTime(),
+                request.endTime(),
+                effectiveOrganizerId,
+                request.participants(),
+                request.recurrence(),
+                request.repeatCount(),
+                request.room()
+        );
+
+        validate(effectiveRequest);
+        request = effectiveRequest;
 
         List<String> participants =
                 cleanParticipants(request.participants());
@@ -147,78 +177,6 @@ public class MeetingController {
         }
 
         return first;
-    }
-
-    // ==========================================
-    // 4. CAP NHAT CUOC HOP
-    // ==========================================
-
-    @PutMapping("/{id}")
-    @Transactional
-    public Meeting update(
-            @PathVariable String id,
-            @RequestBody MeetingRequest request) {
-
-        validate(request);
-
-        Meeting meeting = findMeeting(id);
-
-        List<String> participants =
-                cleanParticipants(request.participants());
-
-        String roomId = cleanRoom(request.room());
-
-        checkSchedule(
-                request.organizerId(),
-                roomId,
-                request.startTime(),
-                request.endTime(),
-                participants,
-                id
-        );
-
-        meeting.setTitle(request.title().trim());
-        meeting.setDescription(request.description());
-        meeting.setOrganizerId(
-                request.organizerId().trim()
-        );
-        meeting.setRoomId(roomId);
-        meeting.setStartTime(request.startTime());
-        meeting.setEndTime(request.endTime());
-        meeting.setStatus("SCHEDULED");
-        meeting.setCancelledAt(null);
-        meeting.setCancelReason(null);
-        meeting.setUpdatedAt(LocalDateTime.now());
-
-        Meeting saved = meetings.save(meeting);
-
-        syncParticipants(
-                saved.getMeetingId(),
-                participants
-        );
-
-        return saved;
-    }
-
-    // ==========================================
-    // 5. HUY CUOC HOP
-    // ==========================================
-
-    @DeleteMapping("/{id}")
-    @Transactional
-    public void cancel(@PathVariable String id) {
-
-        Meeting meeting = findMeeting(id);
-
-        meeting.setStatus("CANCELLED");
-        meeting.setCancelledAt(LocalDateTime.now());
-        meeting.setUpdatedAt(LocalDateTime.now());
-
-        meetings.save(meeting);
-
-        // Can dong bo phan huy dat thiet bi
-        // sau khi sua EquipmentBookingRepository
-        // theo meetingId String.
     }
 
     // ==========================================
