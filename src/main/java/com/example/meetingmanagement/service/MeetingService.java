@@ -4,6 +4,7 @@ import com.example.meetingmanagement.dto.MeetingResponse;
 import com.example.meetingmanagement.dto.UpdateMeetingRequest;
 import com.example.meetingmanagement.entity.Meeting;
 import com.example.meetingmanagement.entity.MeetingStatus;
+import com.example.meetingmanagement.entity.MeetingEquipment;
 import com.example.meetingmanagement.exception.MeetingConflictException;
 import com.example.meetingmanagement.exception.MeetingForbiddenException;
 import com.example.meetingmanagement.exception.MeetingNotFoundException;
@@ -11,6 +12,7 @@ import com.example.meetingmanagement.repository.MeetingRepository;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.time.Duration;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,12 +47,23 @@ public class MeetingService {
         verifyOrganizer(meeting, actorId);
         verifyScheduled(meeting);
 
-        meeting.setTitle(request.title().trim());
-        meeting.setDescription(request.description());
-        meeting.setStartTime(request.startTime());
-        meeting.setEndTime(request.endTime());
+        List<Meeting> targets=request.scope()==UpdateMeetingRequest.UpdateScope.SERIES?series(meeting):List.of(meeting);
+        Duration shift=Duration.between(meeting.getStartTime(),request.startTime());
+        Duration duration=Duration.between(request.startTime(),request.endTime());
+        for(Meeting target:targets){OffsetDateTime start=target==meeting?request.startTime():target.getStartTime().plus(shift);OffsetDateTime end=start.plus(duration);
+            String room=request.room()==null?target.getRoom():request.room().trim();
+            if(room!=null&&!room.isBlank()&&meetingRepository.countRoomConflicts(room,target.getId(),start,end)>0)throw new MeetingConflictException("Room is already booked");
+            target.setTitle(request.title().trim());target.setDescription(request.description());target.setStartTime(start);target.setEndTime(end);target.setRoom(room==null||room.isBlank()?null:room);
+            if(request.participantIds()!=null)target.setParticipantIds(request.participantIds());
+            if(request.equipment()!=null)target.setEquipment(request.equipment().stream().map(e->new MeetingEquipment(e.type().trim(),e.quantity())).toList());
+            if(request.recurrenceRule()!=null)target.setRecurrenceRule(request.recurrenceRule().isBlank()?null:request.recurrenceRule().trim());meetingRepository.save(target);}
         meetingRepository.saveAndFlush(meeting);
         return MeetingResponse.from(meeting);
+    }
+
+    private List<Meeting> series(Meeting meeting){
+        if(meeting.getRecurrenceSeriesId()==null)throw new MeetingConflictException("Meeting is not part of a recurring series");
+        return meetingRepository.findByRecurrenceSeriesIdAndStartTimeGreaterThanEqualOrderByStartTimeAsc(meeting.getRecurrenceSeriesId(),meeting.getStartTime());
     }
 
     @Transactional

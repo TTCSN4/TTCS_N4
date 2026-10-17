@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS meetings (
     organizer_id VARCHAR(30) NOT NULL,
     status VARCHAR(20) NOT NULL,
     recurrence_series_id BIGINT NULL,
+    room VARCHAR(120) NULL,
+    recurrence_rule VARCHAR(255) NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
@@ -21,16 +23,12 @@ CREATE TABLE IF NOT EXISTS meetings (
     INDEX idx_meetings_status (status)
 );
 
-INSERT INTO meetings (title, description, start_time, end_time, organizer_id, status,
-                       recurrence_series_id, created_at, updated_at)
-SELECT 'Daily Meeting', 'Họp cập nhật công việc hằng ngày',
-       '2030-09-26 09:00:00', '2030-09-26 10:00:00',
-       'NV001', 'SCHEDULED', NULL, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6)
-WHERE NOT EXISTS (SELECT 1 FROM meetings WHERE title = 'Daily Meeting');
-
-INSERT INTO meetings (title, description, start_time, end_time, organizer_id, status,
-                       recurrence_series_id, created_at, updated_at)
-SELECT 'Review Sprint', 'Đánh giá kết quả Sprint',
-       '2030-09-26 14:00:00', '2030-09-26 15:00:00',
-       'NV002', 'SCHEDULED', NULL, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6)
-WHERE NOT EXISTS (SELECT 1 FROM meetings WHERE title = 'Review Sprint');
+CREATE TABLE IF NOT EXISTS meeting_participants (
+    meeting_id BIGINT NOT NULL, user_id VARCHAR(50) NOT NULL,
+    PRIMARY KEY (meeting_id,user_id), FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS meeting_equipment (
+    meeting_id BIGINT NOT NULL, equipment_type VARCHAR(100) NOT NULL, quantity INT NOT NULL,
+    FOREIGN KEY (meeting_id) REFERENCES meetings(id) ON DELETE CASCADE,
+    CONSTRAINT chk_meeting_equipment_quantity CHECK (quantity > 0)
+);

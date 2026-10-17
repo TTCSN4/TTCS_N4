@@ -7,11 +7,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.*;
 
 @Entity
 @Table(name = "meetings")
@@ -42,6 +46,13 @@ public class Meeting {
 
     @Column(name = "recurrence_series_id")
     private Long recurrenceSeriesId;
+
+    @Column(length = 120) private String room;
+    @Column(name="recurrence_rule",length=255) private String recurrenceRule;
+    @ElementCollection @CollectionTable(name="meeting_participants",joinColumns=@JoinColumn(name="meeting_id"))
+    @Column(name="user_id",length=50) private Set<String> participantIds=new LinkedHashSet<>();
+    @ElementCollection @CollectionTable(name="meeting_equipment",joinColumns=@JoinColumn(name="meeting_id"))
+    private List<MeetingEquipment> equipment=new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -124,6 +135,10 @@ public class Meeting {
     public void setRecurrenceSeriesId(Long recurrenceSeriesId) {
         this.recurrenceSeriesId = recurrenceSeriesId;
     }
+    public String getRoom(){return room;} public void setRoom(String room){this.room=room;}
+    public String getRecurrenceRule(){return recurrenceRule;} public void setRecurrenceRule(String value){recurrenceRule=value;}
+    public Set<String> getParticipantIds(){return participantIds;} public void setParticipantIds(Collection<String> values){participantIds.clear();if(values!=null)participantIds.addAll(values);}
+    public List<MeetingEquipment> getEquipment(){return equipment;} public void setEquipment(Collection<MeetingEquipment> values){equipment.clear();if(values!=null)equipment.addAll(values);}
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
