@@ -87,7 +87,7 @@ public class MeetingController {
     }
 
     @PutMapping("/{id}")
-    public Meeting update(@PathVariable Long id, @RequestBody MeetingRequest request) {
+    public Meeting update(@PathVariable String id, @RequestBody MeetingRequest request) {
         validate(request);
         Meeting meeting = findMeeting(id);
         List<String> participants = cleanParticipants(request.participants());
@@ -97,7 +97,7 @@ public class MeetingController {
         meeting.setRoom(cleanRoom(request.room()));
         meeting.setStartTime(request.startTime());
         meeting.setEndTime(request.endTime());
-        meeting.setOrganizerId(request.organizerId() == null ? 1L : request.organizerId());
+        meeting.setOrganizerId(request.organizerId());
         meeting.setParticipants(participants);
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setUpdatedAt(OffsetDateTime.now());
@@ -106,15 +106,11 @@ public class MeetingController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void cancel(@PathVariable Long id) {
+    public void cancel(@PathVariable String id) {
         Meeting meeting = findMeeting(id);
         meeting.setStatus(MeetingStatus.CANCELLED);
         meeting.setUpdatedAt(OffsetDateTime.now());
         meetings.save(meeting);
-        for (EquipmentBooking booking : equipmentBookings.findAllByMeetingId(id)) {
-            booking.setStatus(EquipmentBookingStatus.CANCELLED);
-            equipmentBookings.save(booking);
-        }
     }
 
     @PostMapping("/suggestions")
@@ -137,15 +133,16 @@ public class MeetingController {
         return available;
     }
 
-    private Meeting save(MeetingRequest request, List<String> participants, OffsetDateTime start, Long seriesId) {
+    private Meeting save(MeetingRequest request, List<String> participants, OffsetDateTime start, String seriesId) {
         OffsetDateTime now = OffsetDateTime.now();
         Meeting meeting = new Meeting();
+        meeting.setId(java.util.UUID.randomUUID().toString());
         meeting.setTitle(request.title().trim());
         meeting.setDescription(request.description());
         meeting.setRoom(cleanRoom(request.room()));
         meeting.setStartTime(start == null ? request.startTime() : start);
         meeting.setEndTime(start == null ? request.endTime() : start.plus(Duration.between(request.startTime(), request.endTime())));
-        meeting.setOrganizerId(request.organizerId() == null ? 1L : request.organizerId());
+        meeting.setOrganizerId(request.organizerId());
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setRecurrenceSeriesId(seriesId);
         meeting.setCreatedAt(now);
@@ -158,6 +155,7 @@ public class MeetingController {
         if (request.title() == null || request.title().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng nhập tiêu đề cuộc họp.");
         }
+        if(request.organizerId()==null||request.organizerId().isBlank())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Organizer ID is required");
         if (request.startTime() == null || request.endTime() == null || !request.endTime().isAfter(request.startTime())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian kết thúc phải sau thời gian bắt đầu.");
         }
@@ -176,13 +174,13 @@ public class MeetingController {
         return room == null || room.isBlank() ? null : room.trim();
     }
 
-    private void ensureNoConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, Long ignoredId) {
+    private void ensureNoConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, String ignoredId) {
         if (hasConflict(start, end, participants, ignoredId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Người tham dự đã có lịch trong khoảng thời gian này.");
         }
     }
 
-    private boolean hasConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, Long ignoredId) {
+    private boolean hasConflict(OffsetDateTime start, OffsetDateTime end, List<String> participants, String ignoredId) {
         if (participants.isEmpty()) return false;
         return meetings.findAll().stream()
                 .filter(meeting -> !meeting.getId().equals(ignoredId))
@@ -191,7 +189,7 @@ public class MeetingController {
                 .anyMatch(meeting -> meeting.getParticipants().stream().anyMatch(participants::contains));
     }
 
-    private Meeting findMeeting(Long id) {
+    private Meeting findMeeting(String id) {
         return meetings.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy cuộc họp."));
     }
 
@@ -217,7 +215,7 @@ public class MeetingController {
             String description,
             OffsetDateTime startTime,
             OffsetDateTime endTime,
-            Long organizerId,
+            String organizerId,
             List<String> participants,
             String recurrence,
             Integer repeatCount,

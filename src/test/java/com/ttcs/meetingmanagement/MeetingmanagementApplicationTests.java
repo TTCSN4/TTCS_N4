@@ -58,10 +58,11 @@ class MeetingmanagementApplicationTests {
     void meetingQueriesFetchParticipantsBeforeSerialization() {
         OffsetDateTime start = OffsetDateTime.parse("2030-07-10T09:00:00+07:00");
         Meeting meeting = new Meeting();
+        meeting.setId("M-participants");
         meeting.setTitle("Meeting with participants");
         meeting.setStartTime(start);
         meeting.setEndTime(start.plusHours(1));
-        meeting.setOrganizerId(1L);
+        meeting.setOrganizerId("U1");
         meeting.setStatus(MeetingStatus.SCHEDULED);
         meeting.setCreatedAt(start.minusDays(1));
         meeting.setUpdatedAt(start.minusDays(1));
@@ -87,19 +88,17 @@ class MeetingmanagementApplicationTests {
 
         OffsetDateTime start = OffsetDateTime.parse("2030-05-10T09:00:00+07:00");
         saveReservation(equipment, room, 1, start, start.plusHours(1), EquipmentBookingStatus.BOOKED);
-        saveReservation(equipment, room, 1, start, start.plusHours(1), EquipmentBookingStatus.MAINTENANCE);
 
         EquipmentController.EquipmentStatusResponse during = equipmentController
                 .status(room, start.plusMinutes(30))
                 .get(0);
         assertEquals(3, during.totalQuantity());
         assertEquals(1, during.bookedQuantity());
-        assertEquals(1, during.maintenanceQuantity());
-        assertEquals(1, during.availableQuantity());
+        assertEquals(0, during.maintenanceQuantity());
+        assertEquals(2, during.availableQuantity());
         assertEquals(List.of(
                 EquipmentAvailabilityStatus.AVAILABLE,
-                EquipmentAvailabilityStatus.BOOKED,
-                EquipmentAvailabilityStatus.MAINTENANCE
+                EquipmentAvailabilityStatus.BOOKED
         ), during.statuses());
 
         EquipmentController.EquipmentStatusResponse after = equipmentController
@@ -117,12 +116,12 @@ class MeetingmanagementApplicationTests {
         String room = "P-booking-conflict";
         Equipment equipment = saveEquipment(room, "One projector", 1);
         OffsetDateTime start = OffsetDateTime.parse("2030-06-10T09:00:00+07:00");
-        saveReservation(equipment, room, 1, start, start.plusHours(1), EquipmentBookingStatus.BOOKED);
+        Meeting bookedMeeting=saveReservation(equipment, room, 1, start, start.plusHours(1), EquipmentBookingStatus.BOOKED);
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class, () ->
                 equipmentController.book(new EquipmentController.EquipmentBookingRequest(
                         equipment.getEquipmentId(),
-                        null,
+                        bookedMeeting.getId(),
                         room,
                         1,
                         start.plusMinutes(15),
@@ -139,7 +138,7 @@ class MeetingmanagementApplicationTests {
 
         assertThrows(ResponseStatusException.class, () -> meetingController.create(
                 new MeetingController.MeetingRequest(
-                        "Atomic meeting", "", start, start.plusHours(1), 1L,
+                        "Atomic meeting", "", start, start.plusHours(1), "U1",
                         List.of(), "WEEKLY", 1, "P-atomic", List.of("missing-equipment")
                 )
         ));
@@ -152,7 +151,7 @@ class MeetingmanagementApplicationTests {
     void recurringMeetingsPreserveExactDuration() {
         OffsetDateTime start = OffsetDateTime.parse("2030-08-10T09:00:00.123456789+07:00");
         Meeting first = meetingController.create(new MeetingController.MeetingRequest(
-                "Precise recurrence", "", start, start.plusMinutes(45).plusNanos(321), 1L,
+                "Precise recurrence", "", start, start.plusMinutes(45).plusNanos(321), "U1",
                 List.of(), "MONTHLY", 1, "P-precision", List.of()
         ));
 
@@ -177,7 +176,7 @@ class MeetingmanagementApplicationTests {
         return equipmentRepository.saveAndFlush(equipment);
     }
 
-    private void saveReservation(
+    private Meeting saveReservation(
             Equipment equipment,
             String room,
             int quantity,
@@ -186,12 +185,11 @@ class MeetingmanagementApplicationTests {
             EquipmentBookingStatus status
     ) {
         EquipmentBooking reservation = new EquipmentBooking();
+        Meeting meeting=new Meeting();meeting.setId("M-"+java.util.UUID.randomUUID());meeting.setTitle("Test");meeting.setRoom(room);meeting.setStartTime(start);meeting.setEndTime(end);meeting.setOrganizerId("U1");meeting.setStatus(MeetingStatus.SCHEDULED);meeting.setCreatedAt(start.minusDays(1));meeting.setUpdatedAt(start.minusDays(1));meetingRepository.save(meeting);
         reservation.setEquipment(equipment);
-        reservation.setRoom(room);
+        reservation.setMeeting(meeting);
         reservation.setQuantity(quantity);
-        reservation.setStartTime(start);
-        reservation.setEndTime(end);
-        reservation.setStatus(status);
         bookingRepository.save(reservation);
+        return meeting;
     }
 }

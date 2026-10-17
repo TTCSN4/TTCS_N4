@@ -10,11 +10,11 @@ import org.springframework.data.repository.query.Param;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public interface MeetingRepository extends JpaRepository<Meeting, Long> {
-    @EntityGraph(attributePaths = "participants")
+public interface MeetingRepository extends JpaRepository<Meeting, String> {
+    @EntityGraph(attributePaths = "participantEntities")
     List<Meeting> findAllByOrderByStartTimeAsc();
 
-    @EntityGraph(attributePaths = "participants")
+    @EntityGraph(attributePaths = "participantEntities")
     List<Meeting> findAllByEndTimeBeforeOrderByStartTimeDesc(OffsetDateTime time);
 
     @Query("""
@@ -28,7 +28,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
            """)
     long countRoomConflicts(
             @Param("roomId") String roomId,
-            @Param("meetingId") Long meetingId,
+            @Param("meetingId") String meetingId,
             @Param("cancelledStatus") MeetingStatus cancelledStatus,
             @Param("startTime") OffsetDateTime startTime,
             @Param("endTime") OffsetDateTime endTime

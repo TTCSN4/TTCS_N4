@@ -123,16 +123,19 @@ public class EquipmentController {
     @PostMapping("/maintenance")
     @Transactional
     public BookingResponse scheduleMaintenance(@RequestBody EquipmentBookingRequest request) {
-        return createReservation(request, EquipmentBookingStatus.MAINTENANCE);
+        if(request==null||request.equipmentId()==null||request.equipmentId().isBlank())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Equipment ID is required");
+        Equipment equipment=equipmentRepository.findByIdForUpdate(request.equipmentId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Equipment not found"));
+        equipment.setStatus("MAINTENANCE");equipmentRepository.save(equipment);
+        return new BookingResponse("maintenance:"+equipment.getEquipmentId(),equipment.getEquipmentId(),null,equipment.getRoomId(),equipment.getTotalQuantity(),request.startTime(),request.endTime(),EquipmentBookingStatus.MAINTENANCE);
     }
 
     @DeleteMapping("/bookings/{id}")
     @Transactional
-    public ResponseEntity<Void> cancelBooking(@PathVariable Long id) {
-        EquipmentBooking booking = bookingRepository.findById(id)
+    public ResponseEntity<Void> cancelBooking(@PathVariable String id) {
+        String[] key=id.split(":",2);if(key.length!=2)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Booking id must be meetingId:equipmentId");
+        EquipmentBooking booking = bookingRepository.findById(new com.ttcs.meetingmanagement.model.EquipmentBookingId(key[0],key[1]))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy lượt đặt thiết bị."));
-        booking.setStatus(EquipmentBookingStatus.CANCELLED);
-        bookingRepository.save(booking);
+        bookingRepository.delete(booking);
         return ResponseEntity.noContent().build();
     }
 
@@ -144,19 +147,14 @@ public class EquipmentController {
         if (equipment.getRoomId() == null || !equipment.getRoomId().equalsIgnoreCase(room)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thiết bị không thuộc phòng được yêu cầu.");
         }
-        if (request.meetingId() != null) {
-            validateMeeting(request, room);
-        }
+        if(request.meetingId()==null||request.meetingId().isBlank())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Meeting ID is required by ERD");
+        Meeting meeting=validateMeeting(request,room);
         ensureCapacity(equipment, request, status);
 
         EquipmentBooking reservation = new EquipmentBooking();
         reservation.setEquipment(equipment);
-        reservation.setMeetingId(request.meetingId());
-        reservation.setRoom(room);
+        reservation.setMeeting(meeting);
         reservation.setQuantity(request.quantity());
-        reservation.setStartTime(request.startTime());
-        reservation.setEndTime(request.endTime());
-        reservation.setStatus(status);
         return toResponse(bookingRepository.save(reservation));
     }
 
@@ -172,7 +170,7 @@ public class EquipmentController {
         }
     }
 
-    private void validateMeeting(EquipmentBookingRequest request, String room) {
+    private Meeting validateMeeting(EquipmentBookingRequest request, String room) {
         Meeting meeting = meetingRepository.findById(request.meetingId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy cuộc họp."));
         if (meeting.getStatus() != MeetingStatus.SCHEDULED
@@ -186,6 +184,7 @@ public class EquipmentController {
         if (meeting.getRoom() != null && !meeting.getRoom().equalsIgnoreCase(room)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phòng đặt thiết bị không trùng với phòng cuộc họp.");
         }
+        return meeting;
     }
 
     private void ensureCapacity(
@@ -253,7 +252,9 @@ public class EquipmentController {
             }
         }
         int totalQuantity = equipment.getTotalQuantity() == null ? 0 : equipment.getTotalQuantity();
-        int available = Math.max(0, totalQuantity - booked - maintenance);
+        boolean administrativelyUnavailable=equipment.getStatus()!=null&&!equipment.getStatus().equalsIgnoreCase("AVAILABLE");
+        if(administrativelyUnavailable)maintenance=Math.max(maintenance,totalQuantity-booked);
+        int available = administrativelyUnavailable?0:Math.max(0,totalQuantity-booked-maintenance);
         List<EquipmentAvailabilityStatus> statuses = new ArrayList<>();
         if (available > 0) statuses.add(EquipmentAvailabilityStatus.AVAILABLE);
         if (booked > 0) statuses.add(EquipmentAvailabilityStatus.BOOKED);
@@ -276,7 +277,7 @@ public class EquipmentController {
 
     public record EquipmentBookingRequest(
             String equipmentId,
-            Long meetingId,
+            String meetingId,
             String room,
             Integer quantity,
             OffsetDateTime startTime,
@@ -284,9 +285,9 @@ public class EquipmentController {
     ) { }
 
     public record BookingResponse(
-            Long id,
+            String id,
             String equipmentId,
-            Long meetingId,
+            String meetingId,
             String room,
             int quantity,
             OffsetDateTime startTime,
