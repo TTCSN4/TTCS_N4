@@ -6,8 +6,13 @@ import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.exception.MeetingException;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 
+import com.ttcs.meetingmanagement.room.RoomRepository;
+import com.ttcs.meetingmanagement.room.RoomService;
+import com.ttcs.meetingmanagement.room.Room;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,11 +21,19 @@ import java.util.UUID;
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
+    private final RoomRepository roomRepository;
 
-    public MeetingService(MeetingRepository meetingRepository) {
+    @Autowired
+    public MeetingService(MeetingRepository meetingRepository, RoomRepository roomRepository) {
         this.meetingRepository = meetingRepository;
+        this.roomRepository = roomRepository;
     }
 
+    public MeetingService(MeetingRepository meetingRepository) {
+        this(meetingRepository, null);
+    }
+
+    @Transactional
     public MeetingResponse createMeeting(CreateMeetingRequest request) {
 
         // 1. Kiểm tra thời gian
@@ -45,14 +58,18 @@ public class MeetingService {
         if (request.getRoomId() != null
                 && !request.getRoomId().isBlank()) {
 
-            // Kiểm tra room tồn tại
-            if (meetingRepository.countRoomById(
-                    request.getRoomId()) == 0) {
-
-                throw new MeetingException(
-                        "Phòng họp không tồn tại",
-                        HttpStatus.NOT_FOUND
-                );
+                        String roomId = request.getRoomId().trim();
+            if (roomRepository != null) {
+                Room room = roomRepository.findLockedById(roomId)
+                        .orElseThrow(() -> new MeetingException("Phòng họp không tồn tại", HttpStatus.NOT_FOUND));
+                if (!RoomService.isRoomBookable(room.getStatus())) {
+                    throw new MeetingException("Phòng đang trong trạng thái bảo trì hoặc không khả dụng để đặt lịch", HttpStatus.CONFLICT);
+                }
+                if (room.getCapacity() != null && room.getCapacity() < 1) {
+                    throw new MeetingException("Phòng không đủ sức chứa", HttpStatus.CONFLICT);
+                }
+            } else if (meetingRepository.countRoomById(roomId) == 0) {
+                throw new MeetingException("Phòng họp không tồn tại", HttpStatus.NOT_FOUND);
             }
 
             // 4. Kiểm tra phòng có bị trùng lịch

@@ -108,6 +108,60 @@ public class MeetingParticipantService {
             );
         }
 
+        // Kiem tra suc chua phong neu cuoc hop da duoc gan phong
+        try {
+            var meetingRows = jdbcTemplate.queryForList(
+                    "SELECT room_id, organizer_id FROM meeting WHERE meeting_id = ?",
+                    meetingId
+            );
+            if (meetingRows != null && !meetingRows.isEmpty()) {
+                String roomId = (String) meetingRows.get(0).get("room_id");
+                String organizerId = (String) meetingRows.get(0).get("organizer_id");
+                if (roomId != null && !roomId.isBlank()) {
+                    var roomRows = jdbcTemplate.queryForList(
+                            "SELECT capacity, status FROM room WHERE room_id = ? FOR UPDATE",
+                            roomId
+                    );
+                    if (roomRows != null && !roomRows.isEmpty()) {
+                        String roomStatus = (String) roomRows.get(0).get("status");
+                        if (!com.ttcs.meetingmanagement.room.RoomService.isRoomBookable(roomStatus)) {
+                            throw new ResponseStatusException(
+                                    HttpStatus.CONFLICT,
+                                    "Room is under maintenance or unavailable"
+                            );
+                        }
+                        Object capObj = roomRows.get(0).get("capacity");
+                        if (capObj instanceof Number capNum && capNum.intValue() > 0) {
+                            int capacity = capNum.intValue();
+                            var curAttendees = jdbcTemplate.queryForObject(
+                                    "SELECT COUNT(DISTINCT user_id) FROM meeting_participant WHERE meeting_id = ? AND status NOT IN ('DECLINED', 'REMOVED')",
+                                    Integer.class,
+                                    meetingId
+                            );
+                            int currentCount = curAttendees != null ? curAttendees : 0;
+                            Integer orgCount = organizerId != null ? jdbcTemplate.queryForObject(
+                                    "SELECT COUNT(*) FROM meeting_participant WHERE meeting_id = ? AND user_id = ? AND status NOT IN ('DECLINED', 'REMOVED')",
+                                    Integer.class,
+                                    meetingId,
+                                    organizerId
+                            ) : 0;
+                            int totalAttendees = currentCount + ((orgCount == null || orgCount == 0) ? 1 : 0);
+                            int additional = (organizerId != null && organizerId.trim().equals(userId)) ? 0 : 1;
+                            if (totalAttendees + additional > capacity) {
+                                throw new ResponseStatusException(
+                                        HttpStatus.CONFLICT,
+                                        "Room capacity exceeded"
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (ResponseStatusException ex) {
+            throw ex;
+        } catch (Exception ignored) {
+        }
+
         MeetingParticipant participant =
                 new MeetingParticipant();
 

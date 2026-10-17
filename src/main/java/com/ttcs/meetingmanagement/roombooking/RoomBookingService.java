@@ -5,6 +5,8 @@ import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.room.Room;
+import com.ttcs.meetingmanagement.room.RoomService;
 import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
@@ -21,15 +23,25 @@ public class RoomBookingService {
     private final MeetingRepository meetingRepository;
     private final RoomRepository roomRepository;
     private final RoomBookingPermissionService permissionService;
+    private final com.ttcs.meetingmanagement.repository.MeetingParticipantRepository participantRepository;
+
+    public RoomBookingService(
+            MeetingRepository meetingRepository,
+            RoomRepository roomRepository,
+            RoomBookingPermissionService permissionService,
+            com.ttcs.meetingmanagement.repository.MeetingParticipantRepository participantRepository) {
+
+        this.meetingRepository = meetingRepository;
+        this.roomRepository = roomRepository;
+        this.permissionService = permissionService;
+        this.participantRepository = participantRepository;
+    }
 
     public RoomBookingService(
             MeetingRepository meetingRepository,
             RoomRepository roomRepository,
             RoomBookingPermissionService permissionService) {
-
-        this.meetingRepository = meetingRepository;
-        this.roomRepository = roomRepository;
-        this.permissionService = permissionService;
+        this(meetingRepository, roomRepository, permissionService, null);
     }
 
     // US08 + US21: Dat phong va kiem tra quyen
@@ -67,12 +79,43 @@ public class RoomBookingService {
             );
         }
 
-        // 3. Kiem tra phong
-        if (!roomRepository.existsById(roomId)) {
+        // 3. Kiem tra phong va trang thai phong
+        Room room = roomRepository.findLockedById(roomId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room not found"
+                ));
+
+        if (!RoomService.isRoomBookable(room.getStatus())) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Room not found"
+                    HttpStatus.CONFLICT,
+                    "Room is under maintenance or unavailable"
             );
+        }
+
+        // Kiem tra suc chua phong voi so nguoi tham du thuc te
+        if (room.getCapacity() != null && room.getCapacity() > 0 && participantRepository != null) {
+            java.util.Set<String> attendeeIds = new java.util.HashSet<>();
+            if (meeting.getOrganizerId() != null && !meeting.getOrganizerId().isBlank()) {
+                attendeeIds.add(meeting.getOrganizerId().trim());
+            }
+            var participants = participantRepository.findByMeetingId(meetingId);
+            if (participants != null) {
+                for (var p : participants) {
+                    if (p.getUserId() != null && !p.getUserId().isBlank()) {
+                        String st = p.getStatus() != null ? p.getStatus().trim().toUpperCase() : "";
+                        if (!"DECLINED".equals(st) && !"REMOVED".equals(st)) {
+                            attendeeIds.add(p.getUserId().trim());
+                        }
+                    }
+                }
+            }
+            if (attendeeIds.size() > room.getCapacity()) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Room capacity exceeded"
+                );
+            }
         }
 
         // 4. Kiem tra thoi gian

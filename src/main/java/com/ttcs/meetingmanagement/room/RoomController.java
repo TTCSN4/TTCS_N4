@@ -5,6 +5,7 @@ import com.ttcs.meetingmanagement.dto.UpdateRoomRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    // GET - lấy tất cả phòng
+    // GET - lay tat ca phong
     @GetMapping
     public ResponseEntity<List<Room>> getAllRooms() {
         return ResponseEntity.ok(
@@ -27,7 +28,7 @@ public class RoomController {
         );
     }
 
-    // US10 - lọc phòng theo số người tham gia
+    // US10 - loc phong theo so nguoi tham gia
     @GetMapping(params = "participants")
     public ResponseEntity<List<Room>> filterRoomsByParticipants(
             @RequestParam Integer participants) {
@@ -37,7 +38,7 @@ public class RoomController {
         );
     }
 
-    // GET - lấy phòng theo ID
+    // GET - lay phong theo ID
     @GetMapping("/{id}")
     public ResponseEntity<Room> getRoomById(
             @PathVariable String id) {
@@ -47,8 +48,9 @@ public class RoomController {
         );
     }
 
-    // POST - thêm phòng
+    // US11.1 - POST: Them phong (Chi Admin)
     @PostMapping
+    @PreAuthorize("@rbacAccess.isAdmin(authentication)")
     public ResponseEntity<Room> createRoom(
             @Valid @RequestBody CreateRoomRequest request) {
 
@@ -59,8 +61,9 @@ public class RoomController {
                 .body(room);
     }
 
-    // PUT - cập nhật phòng
+    // US11.2, US11.3, US11.4 - PUT: Cap nhat phong (Chi Admin)
     @PutMapping("/{id}")
+    @PreAuthorize("@rbacAccess.isAdmin(authentication)")
     public ResponseEntity<Room> updateRoom(
             @PathVariable String id,
             @Valid @RequestBody UpdateRoomRequest request) {
@@ -70,8 +73,9 @@ public class RoomController {
         );
     }
 
-    // DELETE - xóa phòng
+    // DELETE: Xoa phong (Chi Admin)
     @DeleteMapping("/{id}")
+    @PreAuthorize("@rbacAccess.isAdmin(authentication)")
     public ResponseEntity<Void> deleteRoom(
             @PathVariable String id) {
 
