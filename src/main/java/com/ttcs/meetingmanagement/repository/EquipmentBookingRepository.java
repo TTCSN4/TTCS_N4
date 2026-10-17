@@ -1,16 +1,11 @@
 package com.ttcs.meetingmanagement.repository;
-
-import com.ttcs.meetingmanagement.model.EquipmentBooking;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
-import java.time.OffsetDateTime;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-public interface EquipmentBookingRepository extends JpaRepository<EquipmentBooking, Long> {
+import com.ttcs.meetingmanagement.model.*;
+import org.springframework.data.jpa.repository.*;import org.springframework.data.repository.query.Param;
+import java.time.OffsetDateTime;import java.util.List;
+public interface EquipmentBookingRepository extends JpaRepository<EquipmentBooking,EquipmentBookingId>{
     List<EquipmentBooking> findAllByEquipment_EquipmentId(String equipmentId);
-    List<EquipmentBooking> findAllByMeetingId(Long meetingId);
-    @Query("select coalesce(sum(b.quantity),0) from EquipmentBooking b where b.equipment.equipmentId=:equipmentId and b.status<>com.ttcs.meetingmanagement.model.EquipmentBookingStatus.CANCELLED and b.startTime<:endTime and b.endTime>:startTime")
-    long reservedQuantity(@Param("equipmentId") String equipmentId,@Param("startTime") OffsetDateTime startTime,@Param("endTime") OffsetDateTime endTime);
+    List<EquipmentBooking> findAllByMeeting_Id(String meetingId);
+    default List<EquipmentBooking> findAllByMeetingId(String meetingId){return findAllByMeeting_Id(meetingId);}
+    @Query("select coalesce(sum(b.quantity),0) from EquipmentBooking b where b.equipment.equipmentId=:equipmentId and b.meeting.status<>com.ttcs.meetingmanagement.model.MeetingStatus.CANCELLED and b.meeting.startTime<:endTime and b.meeting.endTime>:startTime")
+    long reservedQuantity(@Param("equipmentId")String id,@Param("startTime")OffsetDateTime start,@Param("endTime")OffsetDateTime end);
 }

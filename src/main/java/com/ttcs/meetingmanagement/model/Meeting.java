@@ -1,27 +1,24 @@
 package com.ttcs.meetingmanagement.model;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "meetings")
+@Table(name = "meeting")
 public class Meeting {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name="meeting_id",length=255)
+    private String id;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -29,7 +26,7 @@ public class Meeting {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 120)
+    @Column(name="room_id",length = 255)
     private String room;
 
     @Column(name = "start_time", nullable = false)
@@ -39,14 +36,14 @@ public class Meeting {
     private OffsetDateTime endTime;
 
     @Column(name = "organizer_id", nullable = false)
-    private Long organizerId;
+    private String organizerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MeetingStatus status;
 
     @Column(name = "recurrence_series_id")
-    private Long recurrenceSeriesId;
+    private String recurrenceSeriesId;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
@@ -54,15 +51,14 @@ public class Meeting {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    @ElementCollection
-    @CollectionTable(name = "meeting_participants", joinColumns = @JoinColumn(name = "meeting_id"))
-    @Column(name = "participant", nullable = false, length = 320)
-    private List<String> participants = new ArrayList<>();
+    @OneToMany(mappedBy="meeting",cascade=CascadeType.ALL,orphanRemoval=true,fetch=jakarta.persistence.FetchType.EAGER)
+    private List<MeetingParticipant> participantEntities=new ArrayList<>();
 
     public Meeting() {
     }
 
-    public Long getId() { return id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id=id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }
@@ -73,16 +69,16 @@ public class Meeting {
     public void setStartTime(OffsetDateTime startTime) { this.startTime = startTime; }
     public OffsetDateTime getEndTime() { return endTime; }
     public void setEndTime(OffsetDateTime endTime) { this.endTime = endTime; }
-    public Long getOrganizerId() { return organizerId; }
-    public void setOrganizerId(Long organizerId) { this.organizerId = organizerId; }
+    public String getOrganizerId() { return organizerId; }
+    public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
     public MeetingStatus getStatus() { return status; }
     public void setStatus(MeetingStatus status) { this.status = status; }
-    public Long getRecurrenceSeriesId() { return recurrenceSeriesId; }
-    public void setRecurrenceSeriesId(Long recurrenceSeriesId) { this.recurrenceSeriesId = recurrenceSeriesId; }
+    public String getRecurrenceSeriesId() { return recurrenceSeriesId; }
+    public void setRecurrenceSeriesId(String recurrenceSeriesId) { this.recurrenceSeriesId = recurrenceSeriesId; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
-    public List<String> getParticipants() { return participants; }
-    public void setParticipants(List<String> participants) { this.participants = participants; }
+    public List<String> getParticipants() { return participantEntities.stream().map(MeetingParticipant::getUserId).toList(); }
+    public void setParticipants(List<String> participants) { participantEntities.clear();if(participants!=null)participants.forEach(v->participantEntities.add(new MeetingParticipant(this,v))); }
 }

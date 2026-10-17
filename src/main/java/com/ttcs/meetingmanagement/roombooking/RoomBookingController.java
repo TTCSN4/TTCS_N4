@@ -39,7 +39,7 @@ public class RoomBookingController {
     // US09 - Hủy đặt phòng
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<RoomBookingResponse> cancelRoomBooking(
-            @PathVariable Long meetingId) {
+            @PathVariable String meetingId) {
 
         RoomBookingResponse response =
                 roomBookingService.cancelRoomBooking(meetingId);
