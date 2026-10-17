@@ -1,854 +1,275 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản trị phòng họp</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --navy: #1d2d4d;
-            --navy-soft: #233b63;
-            --bg: #f3f5f8;
-            --panel: #ffffff;
-            --line: #e6ebf2;
-            --text: #111827;
-            --muted: #64748b;
-            --blue: #2563eb;
-            --blue-soft: #eaf2ff;
-            --red: #dc2626;
-            --red-soft: #fee2e2;
-            --green: #16a34a;
-            --green-soft: #dcfce7;
-            --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            margin: 0;
-            min-height: 100%;
-            background: var(--bg);
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-        }
-
-        body {
-            min-height: 100vh;
-        }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: var(--navy);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            padding: 24px 16px;
-            min-height: 100vh;
-            flex-shrink: 0;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #3d8bfd, #214ec8);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 18px;
-            color: #fff;
-            box-shadow: 0 10px 18px rgba(46, 103, 255, 0.35);
-        }
-
-        .brand-text h2 {
-            font-size: 17px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .brand-text span {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        .sidebar-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 11px 16px;
-            color: #94a3b8;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .menu-item:hover,
-        .menu-item.active {
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-        }
-
-        .menu-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .menu-group .sub-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 6px 0 6px 36px;
-        }
-
-        .sub-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 10px;
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .sub-item.active {
-            color: #fff;
-            font-weight: 700;
-        }
-
-        .sub-item .dot {
-            width: 6px;
-            height: 6px;
-            background: #475569;
-            border-radius: 50%;
-        }
-
-        .sub-item.active .dot {
-            background: #7aaefc;
-            box-shadow: 0 0 0 5px rgba(122, 174, 252, 0.18);
-        }
-
-        .user-profile-bottom {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            margin-top: auto;
-        }
-
-        .avatar-circle {
-            width: 36px;
-            height: 36px;
-            background: #fff;
-            color: var(--navy);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        .user-info .name {
-            font-size: 13.5px;
-            font-weight: 700;
-        }
-
-        .user-info .role {
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .content-body {
-            width: min(1200px, calc(100% - 48px));
-            margin: 28px auto;
-        }
-
-        .page-title {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
-        }
-
-        .title-icon {
-            width: 42px;
-            height: 42px;
-            background: #dbeafe;
-            color: #2563eb;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .page-title h1 {
-            margin: 0;
-            font-size: clamp(1.8rem, 2vw, 2.4rem);
-        }
-
-        .page-title p {
-            margin: 4px 0 0;
-            color: var(--muted);
-        }
-
-        .home-link {
-            margin-left: auto;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 13px;
-            border: 1px solid #d5deea;
-            border-radius: 8px;
-            text-decoration: none;
-            color: #315f98;
-            background: #fff;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .room-layout {
-            display: grid;
-            grid-template-columns: 380px minmax(0, 1fr);
-            gap: 24px;
-            align-items: start;
-        }
-
-        .card {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            padding: 22px;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .alert {
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            margin-bottom: 16px;
-            border: 1px solid transparent;
-        }
-
-        .alert.error {
-            background: var(--red-soft);
-            border-color: #fecaca;
-            color: #991b1b;
-        }
-
-        .alert.success {
-            background: var(--green-soft);
-            border-color: #bbf7d0;
-            color: #166534;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .required {
-            color: var(--red);
-        }
-
-        .form-group input {
-            width: 100%;
-            border: 1px solid #dfe7f2;
-            border-radius: 10px;
-            padding: 12px 14px;
-            font-size: 0.98rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            background: #fff;
-        }
-
-        .device-list {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(120px, 1fr));
-            gap: 10px;
-            padding: 12px;
-            border: 1px solid #dfe7f2;
-            border-radius: 10px;
-            background: #f8fbff;
-        }
-
-        .device-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            font-size: 0.9rem;
-            color: #334155;
-        }
-
-        .device-option input {
-            width: 16px;
-            height: 16px;
-            margin: 0;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 18px;
-        }
-
-        .btn {
-            appearance: none;
-            border: none;
-            border-radius: 10px;
-            padding: 11px 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-
-        .btn:hover {
-            opacity: 0.96;
-            transform: translateY(-1px);
-        }
-
-        .btn-primary {
-            background: var(--blue);
-            color: #fff;
-        }
-
-        .btn-secondary {
-            background: #eef4ff;
-            color: #1e3a8a;
-        }
-
-        .table-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .table-header h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        .availability-search {
-            margin-bottom: 18px;
-            padding: 14px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: #f8fafc;
-        }
-
-        .availability-fields {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-            align-items: end;
-            gap: 10px;
-        }
-
-        .availability-fields label {
-            display: grid;
-            gap: 6px;
-            color: #334155;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .availability-fields input {
-            width: 100%;
-            min-width: 0;
-            padding: 9px 10px;
-            border: 1px solid #dfe7f2;
-            border-radius: 8px;
-            background: #fff;
-            font: inherit;
-        }
-
-        .availability-message {
-            margin: 10px 0 0;
-            color: var(--muted);
-            font-size: 0.82rem;
-        }
-
-        .availability-message.is-error {
-            color: #991b1b;
-        }
-
-        .availability-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 9px;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .availability-pill.is-free {
-            color: #166534;
-            background: #dcfce7;
-        }
-
-        .availability-pill.is-busy {
-            color: #991b1b;
-            background: #fee2e2;
-        }
-
-        .availability-pill.is-neutral {
-            color: #475569;
-            background: #e2e8f0;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 32px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: var(--blue-soft);
-            color: var(--blue);
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--line);
-            vertical-align: middle;
-        }
-
-        th {
-            color: var(--muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        tbody tr:hover {
-            background: #f8fbff;
-        }
-
-        .room-name {
-            font-weight: 700;
-        }
-
-        .room-meta {
-            color: var(--muted);
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
-
-        .capacity-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #ecfdf5;
-            color: #166534;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .icon-btn {
-            border: none;
-            border-radius: 8px;
-            width: 34px;
-            height: 34px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .icon-btn.edit {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .icon-btn.delete {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .icon-btn.details {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-
-        .device-tag {
-            display: inline-flex;
-            align-items: center;
-            margin: 2px 4px 2px 0;
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: #eef2ff;
-            color: #3730a3;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .room-details-dialog {
-            width: min(520px, calc(100vw - 32px));
-            padding: 24px;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            color: var(--text);
-            box-shadow: var(--shadow);
-        }
-
-        .room-details-dialog::backdrop {
-            background: rgba(15, 23, 42, 0.45);
-        }
-
-        .dialog-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
-        .dialog-header .icon-btn {
-            flex: 0 0 34px;
-        }
-
-        .dialog-eyebrow {
-            margin: 0 0 6px;
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-        }
-
-        .dialog-header h2 {
-            margin: 0;
-            font-size: 1.35rem;
-        }
-
-        .room-detail-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            margin: 22px 0;
-        }
-
-        .room-detail-grid div {
-            padding: 14px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: #f8fafc;
-        }
-
-        .room-detail-grid dt {
-            color: var(--muted);
-            font-size: 0.8rem;
-        }
-
-        .room-detail-grid dd {
-            margin: 6px 0 0;
-            font-weight: 700;
-        }
-
-        .room-detail-devices h3 {
-            margin: 0 0 10px;
-            font-size: 0.95rem;
-        }
-
-        #roomDetailsDevices {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        #roomDetailsDevices .device-tag {
-            margin: 0;
-            padding: 7px 10px;
-            font-size: 0.82rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--muted);
-            padding: 24px 10px;
-        }
-
-        @media (max-width: 980px) {
-            .room-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .availability-fields {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 560px) {
-            .availability-fields {
-                grid-template-columns: minmax(0, 1fr);
-            }
-
-            .availability-fields .btn {
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="logo-icon">M</div>
-                <div class="brand-text">
-                    <h2>Meeting</h2>
-                    <span>Meeting Management</span>
-                </div>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quản lý sức chứa phòng · Meeting Management</title>
+    <link rel="stylesheet" href="../static/css/room-capacity.css" />
+    <script defer src="../static/js/room-capacity.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="rooms.html"
+        ><span class="brand-mark" data-icon="calendar"></span
+        ><span
+          ><strong>Meeting</strong><small>Meeting Management</small></span
+        ></a
+      >
+      <nav aria-label="Điều hướng chính">
+        <div class="nav-active">
+          <i data-icon="calendar"></i>Lịch họp<span>⌄</span>
+        </div>
+        <div class="subnav">
+          <a href="create-meeting.html">Tạo lịch họp</a
+          ><button disabled>Chỉnh sửa &amp; hủy lịch</button
+          ><button disabled>Lịch họp định kỳ</button
+          ><button disabled>Người tham gia</button
+          ><button disabled>Gợi ý thời gian</button
+          ><a class="current" href="rooms.html" aria-current="page"
+            >Quản lý sức chứa</a
+          >
+        </div>
+        <a class="nav-link" href="room-management.html"
+          ><i data-icon="rooms"></i>Phòng &amp; thiết bị<span>⌄</span></a
+        >
+        <button class="nav-link" disabled>
+          <i data-icon="clock"></i>Lịch của tôi<span>⌄</span>
+        </button>
+        <button class="nav-link" disabled>
+          <i data-icon="users"></i>Người dùng &amp; quyền<span>⌄</span>
+        </button>
+        <button class="nav-link" disabled>
+          <i data-icon="chart"></i>Báo cáo<span>⌄</span>
+        </button>
+      </nav>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button
+          id="menu-toggle"
+          class="icon-button mobile-menu"
+          aria-label="Ẩn hoặc hiện menu"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          <i data-icon="menu"></i>
+        </button>
+        <nav class="breadcrumb" aria-label="Đường dẫn">
+          <span>Trang chủ</span><b>›</b><span>Lịch họp</span><b>›</b
+          ><strong>Quản lý sức chứa phòng</strong>
+        </nav>
+        <div class="account">
+          <i data-icon="bell"></i><span class="avatar">NA</span>
+          <div>
+            <strong>Nguyễn Văn An</strong><small id="role-label">PM</small>
+          </div>
+          <span>⌄</span>
+        </div>
+      </header>
+      <main>
+        <div class="page-heading">
+          <h1>Quản lý sức chứa phòng</h1>
+          <p>
+            Theo dõi sức chứa, tình trạng sử dụng và kiểm tra phù hợp với số
+            người tham dự.
+          </p>
+        </div>
+        <section class="stats" aria-label="Thống kê phòng">
+          <article class="stat">
+            <span class="stat-icon blue" data-icon="rooms"></span>
+            <div>
+              <span>Tổng số phòng</span><strong id="stat-total">0</strong>
             </div>
-
-            <nav class="sidebar-menu">
-                <a href="dashboard.html" class="menu-item">
-                    <i class="fa-solid fa-house"></i>
-                    <span>Trang chủ</span>
-                </a>
-
-                <div class="menu-group">
-                    <a href="#" class="menu-item active">
-                        <i class="fa-regular fa-calendar-days"></i>
-                        <span>Lịch họp</span>
-                    </a>
-                    <div class="sub-menu">
-                        <a href="create-meeting.html" class="sub-item">
-                            <span class="dot"></span>
-                            <span>Tạo lịch họp</span>
-                        </a>
-                        <a href="update-meeting.html" class="sub-item">
-                            <span class="dot"></span>
-                            <span>Quản lý lịch họp</span>
-                        </a>
-                        <a href="rooms.html" class="sub-item active">
-                            <span class="dot"></span>
-                            <span>Quản trị phòng họp</span>
-                        </a>
-                    </div>
-                </div>
-
-                <a href="participants.html" class="menu-item">
-                    <i class="fa-solid fa-user-group"></i>
-                    <span>Người tham gia</span>
-                </a>
-            </nav>
-
-            <div class="user-profile-bottom">
-                <div class="avatar-circle">L</div>
-                <div class="user-info">
-                    <span class="name"></span>
-                    <span class="role">Manager</span>
-                </div>
-                <i class="fa-solid fa-chevron-down" style="color:#94a3b8;"></i>
+          </article>
+          <article class="stat">
+            <span class="stat-icon green" data-icon="users"></span>
+            <div>
+              <span>Sức chứa trung bình</span
+              ><strong><span id="stat-average">0</span><em> người</em></strong>
             </div>
-        </aside>
-
-        <main class="main-content">
-            <div class="content-body">
-                <div class="page-title">
-                    <div class="title-icon"><i class="fa-solid fa-building"></i></div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon blue" data-icon="calendar"></span>
+            <div>
+              <span>Phòng đang sử dụng</span><strong id="stat-busy">0</strong
+              ><small id="percent-busy">0%</small>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon red" data-icon="alert"></span>
+            <div>
+              <span>Phòng trống</span><strong id="stat-free">0</strong
+              ><small id="percent-free">0%</small>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon gray" data-icon="tools"></span>
+            <div>
+              <span>Phòng bảo trì</span><strong id="stat-maintenance">0</strong
+              ><small id="percent-maintenance">0%</small>
+            </div>
+          </article>
+        </section>
+        <form id="filters" class="card filters" novalidate>
+          <label
+            >Ngày<input
+              type="date"
+              id="date"
+              required
+              aria-describedby="filter-error"
+          /></label>
+          <label
+            >Khoảng thời gian<select id="time-range">
+              <option value="08:00,17:00">Cả ngày (08:00–17:00)</option>
+              <option value="09:00,10:00">09:00–10:00</option>
+              <option value="10:00,11:00">10:00–11:00</option>
+              <option value="13:00,17:00">Buổi chiều (13:00–17:00)</option>
+            </select></label
+          >
+          <label
+            >Tòa nhà / Khu vực<select id="building">
+              <option value="">Tất cả</option>
+              <option>Tòa A</option>
+              <option>Tòa B</option>
+              <option>Tòa C</option>
+              <option>Tòa D</option>
+            </select></label
+          >
+          <label
+            >Sức chứa tối thiểu<select id="min-capacity">
+              <option value="0">Tất cả</option>
+              <option value="10">10 người</option>
+              <option value="20">20 người</option>
+              <option value="30">30 người</option>
+              <option value="40">40 người</option>
+            </select></label
+          >
+          <label
+            >Trạng thái<select id="status">
+              <option value="">Tất cả</option>
+              <option value="AVAILABLE">Còn trống</option>
+              <option value="BUSY">Đã đặt</option>
+              <option value="MAINTENANCE">Bảo trì</option>
+            </select></label
+          >
+          <button id="reset-filters" class="primary-button" type="button">
+            <i data-icon="refresh"></i>Làm mới
+          </button>
+          <p id="filter-error" class="error" role="alert" hidden></p>
+        </form>
+        <div class="dashboard-grid">
+          <div class="main-column">
+            <div class="charts">
+              <section class="card bar-panel">
+                <h2>Tình trạng sử dụng phòng theo sức chứa</h2>
+                <div
+                  id="capacity-chart"
+                  class="capacity-chart"
+                  role="img"
+                  aria-label="Biểu đồ số phòng theo nhóm sức chứa"
+                ></div>
+              </section>
+              <section class="card donut-panel">
+                <h2>Tỷ lệ sử dụng phòng trong ngày</h2>
+                <div class="donut-content">
+                  <div id="usage-chart" class="donut" role="img">
                     <div>
-                        <h1>Quản trị phòng họp</h1>
+                      <strong id="donut-total">0</strong><span>phòng</span>
                     </div>
-                    <a class="home-link" href="dashboard.html">
-                        <i class="fa-solid fa-house"></i>
-                        <span>Về trang chủ</span>
-                    </a>
+                  </div>
+                  <dl id="chart-legend"></dl>
                 </div>
-
-                <div class="room-layout">
-                    <section class="card">
-                        <div class="card-header">
-                            <h2 class="card-title" id="formTitle">Thêm phòng họp</h2>
-                        </div>
-
-                        <div id="roomError" class="alert error" hidden></div>
-                        <div id="roomSuccess" class="alert success" hidden></div>
-
-                        <form id="roomForm" novalidate>
-                            <input type="hidden" id="roomId" />
-
-                            <div class="form-group">
-                                <label for="roomName">Tên phòng <span class="required">*</span></label>
-                                <input id="roomName" type="text" placeholder="Ví dụ: Phòng họp A1" maxlength="80" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="roomLocation">Vị trí <span class="required">*</span></label>
-                                <input id="roomLocation" type="text" placeholder="Ví dụ: Tầng 2, khu A" maxlength="80" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="roomCapacity">Sức chứa (người) <span class="required">*</span></label>
-                                <input id="roomCapacity" type="number" min="1" max="200" placeholder="Ví dụ: 12" />
-                            </div>
-
-                            <div class="form-group">
-                                <label>Thiết bị phòng <span class="required">*</span></label>
-                                <div class="device-list" id="roomDevices">
-                                    <label class="device-option"><input type="checkbox" value="Máy chiếu"> Máy chiếu</label>
-                                    <label class="device-option"><input type="checkbox" value="TV"> TV</label>
-                                    <label class="device-option"><input type="checkbox" value="Bảng trắng"> Bảng trắng</label>
-                                    
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">Lưu phòng</button>
-                                <button type="button" id="resetRoomForm" class="btn btn-secondary">Hủy</button>
-                            </div>
-                        </form>
-                    </section>
-
-                    <section class="card">
-                        <div class="table-header">
-                            <h3>Danh sách phòng</h3>
-                            <span class="badge" id="roomCount">0</span>
-                        </div>
-
-                        <div class="availability-search">
-                            <div class="availability-fields">
-                                <div class="availability-field">
-                                    <label for="availabilityDate">Ngày</label>
-                                    <input id="availabilityDate" type="date">
-                                </div>
-                                <div class="availability-field">
-                                    <label for="availabilityStart">Bắt đầu</label>
-                                    <input id="availabilityStart" type="time">
-                                </div>
-                                <div class="availability-field">
-                                    <label for="availabilityEnd">Kết thúc</label>
-                                    <input id="availabilityEnd" type="time">
-                                </div>
-                                <button class="btn btn-primary" id="checkRoomAvailability" type="button">
-                                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                                    <span>Kiểm tra</span>
-                                </button>
-                            </div>
-                            <p class="availability-message" id="availabilityMessage" role="status" aria-live="polite">Chọn ngày và giờ để xem phòng trống.</p>
-                        </div>
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Phòng</th>
-                                    <th>Vị trí</th>
-                                    <th>Sức chứa</th>
-                                    <th>Thiết bị</th>
-                                    <th>Khung giờ</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="roomTableBody"></tbody>
-                        </table>
-                    </section>
-                </div>
-                <dialog class="room-details-dialog" id="roomDetailsDialog" aria-labelledby="roomDetailsName">
-                    <div class="dialog-header">
-                        <div>
-                            <p class="dialog-eyebrow">THÔNG TIN PHÒNG</p>
-                            <h2 id="roomDetailsName"></h2>
-                        </div>
-                        <button class="icon-btn" id="closeRoomDetails" type="button" aria-label="Đóng chi tiết phòng" title="Đóng">
-                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <dl class="room-detail-grid">
-                        <div><dt>Vị trí</dt><dd id="roomDetailsLocation"></dd></div>
-                        <div><dt>Sức chứa</dt><dd id="roomDetailsCapacity"></dd></div>
-                        <div><dt>Khung giờ đã chọn</dt><dd id="roomDetailsAvailability">Chưa kiểm tra</dd></div>
-                    </dl>
-                    <div class="room-detail-devices">
-                        <h3>Thiết bị khả dụng</h3>
-                        <div id="roomDetailsDevices"></div>
-                    </div>
-                </dialog>
+              </section>
             </div>
-        </main>
+            <section class="card table-panel">
+              <div class="table-heading">
+                <div>
+                  <h2>Danh sách phòng họp</h2>
+                  <p>
+                    Hiển thị sức chứa và tình trạng sử dụng của các phòng họp.
+                  </p>
+                </div>
+                <label class="search"
+                  ><i data-icon="search"></i
+                  ><input
+                    id="search"
+                    type="search"
+                    placeholder="Tìm kiếm tên phòng, tòa nhà..."
+                    aria-label="Tìm kiếm phòng"
+                /></label>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Tên phòng</th>
+                      <th>Tòa nhà / Khu vực</th>
+                      <th>Sức chứa</th>
+                      <th>Thiết bị</th>
+                      <th>Trạng thái</th>
+                      <th>Đánh giá phù hợp</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="room-table"></tbody>
+                </table>
+              </div>
+              <p id="empty-state" class="empty-state" role="status" hidden>
+                Không có phòng đáp ứng bộ lọc. Hãy thay đổi điều kiện tìm kiếm.
+              </p>
+              <p class="demo-note">
+                Dữ liệu mô phỏng theo khung giờ đã chọn, không truy vấn hoặc cập
+                nhật database.
+              </p>
+            </section>
+          </div>
+          <aside class="right-column">
+            <section class="card check-panel">
+              <h2><i data-icon="users"></i>Kiểm tra sức chứa</h2>
+              <div class="attendee-summary">
+                <i data-icon="users"></i>
+                <div>
+                  <span>Số người tham dự</span
+                  ><strong id="attendee-count">Chưa có dữ liệu</strong
+                  ><small id="attendee-source"
+                    >Nhận từ US01, không nhập thủ công.</small
+                  >
+                </div>
+              </div>
+              <div id="fit-state" class="fit-state" role="status"></div>
+              <div id="selected-brief" class="selected-brief" hidden></div>
+              <button id="demo-attendees" type="button" class="text-button">
+                Thử với danh sách mẫu 12 người
+              </button>
+              <p id="permission-note" class="error" hidden></p>
+            </section>
+            <section class="card detail-panel">
+              <h2><i data-icon="rooms"></i>Thông tin phòng</h2>
+              <div id="detail-empty" class="detail-empty">
+                Chọn phòng trong danh sách để xem thông tin chi tiết.
+              </div>
+              <div id="room-detail" hidden>
+                <div id="detail-photo" class="room-photo"></div>
+                <dl id="detail-info"></dl>
+                <button
+                  id="prepare-selection"
+                  class="primary-button"
+                  type="button"
+                >
+                  Chuẩn bị phòng cho US01
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
+        <p
+          id="page-status"
+          class="page-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </main>
     </div>
-
-    <script src="../static/js/rooms.js" th:src="@{/js/rooms.js}" defer></script>
-</body>
+  </body>
 </html>

@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Keep the editor folder in Git without personal settings.
+!.vscode/
+.vscode/*
+!.vscode/.gitkeep
