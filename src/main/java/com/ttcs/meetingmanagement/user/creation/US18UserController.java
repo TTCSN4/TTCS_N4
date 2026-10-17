@@ -1,42 +1,51 @@
 package com.ttcs.meetingmanagement.user.creation;
-import jakarta.persistence.*;
+
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import org.springframework.boot.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import java.time.OffsetDateTime;
-import java.util.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import java.util.List;
 import com.ttcs.meetingmanagement.model.*;
 import com.ttcs.meetingmanagement.repository.*;
-@RestController @RequestMapping("/api") class US18UserController {
+
+@RestController
+@RequestMapping("/api")
+class US18UserController {
+
     final US18UserService service;
     final UserRepository users;
     final RoleRepository roles;
     final DepartmentRepository departments;
-    US18UserController(US18UserService s,UserRepository u,RoleRepository r,DepartmentRepository d) {
-        service=s;
-        users=u;
-        roles=r;
-        departments=d;
+
+    US18UserController(US18UserService s, UserRepository u, RoleRepository r, DepartmentRepository d) {
+        service = s;
+        users = u;
+        roles = r;
+        departments = d;
     }
-    @PostMapping("/users") @ResponseStatus(HttpStatus.CREATED) US18UserResponse create(@Valid @RequestBody US18CreateUserRequest r) {
+
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("@rbacAccess.isAdmin(authentication)")
+    US18UserResponse create(@Valid @RequestBody US18CreateUserRequest r) {
         return service.create(r);
     }
-    @GetMapping("/users") List<US18UserResponse> all() {
+
+    @GetMapping("/users")
+    @PreAuthorize("@rbacAccess.canBook(authentication)")
+    List<US18UserResponse> all() {
         return users.findAll().stream().map(US18UserResponse::of).toList();
     }
-    @GetMapping("/roles") List<Role> roles() {
+
+    @GetMapping("/roles")
+    @PreAuthorize("@rbacAccess.canAttend(authentication)")
+    List<Role> roles() {
         return roles.findAll();
     }
-    @GetMapping("/departments") List<Department> departments() {
+
+    @GetMapping("/departments")
+    @PreAuthorize("@rbacAccess.canAttend(authentication)")
+    List<Department> departments() {
         return departments.findAll();
     }
 }

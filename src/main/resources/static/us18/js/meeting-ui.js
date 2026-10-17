@@ -52,7 +52,7 @@ if (loginForm) {
     return valid;
   }
   function showStatus(message) { status.textContent = message; status.hidden = false; }
-  loginForm.addEventListener('submit', event => {
+    loginForm.addEventListener('submit', async event => {
     event.preventDefault();
     const identityValid = validate(identity);
     const passwordValid = validate(password);
@@ -62,8 +62,36 @@ if (loginForm) {
       (!identityValid ? identity : password).focus();
       return;
     }
-    showStatus('Giao diện đăng nhập chưa được kết nối với API xác thực. Bạn có thể xem giao diện quản trị qua liên kết bên dưới.');
-    preview.hidden = false;
+    showStatus('Dang xac thuc tai khoan...');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identity: identity.value.trim(),
+          password: password.value
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const role = data.user?.roleCategory || data.user?.roleName || '';
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('auth_user', JSON.stringify(data.user));
+        localStorage.setItem('auth_role', role);
+        sessionStorage.setItem('auth_token', data.token);
+        showStatus('Dang nhap thanh cong! Vai tro: ' + role);
+        preview.hidden = false;
+        preview.textContent = 'Chuyen den he thong ->';
+        setTimeout(() => {
+          window.location.href = '/user-permission.html';
+        }, 600);
+      } else {
+        const err = await response.json().catch(() => ({}));
+        showStatus(err.message || 'Dang nhap that bai. Vui long kiem tra lai thong tin.');
+      }
+    } catch (e) {
+      showStatus('Loi ket noi den may chu backend.');
+    }
   });
   [identity, password].forEach(input => input.addEventListener('input', () => { validate(input); status.hidden = true; preview.hidden = true; }));
   document.getElementById('forgot-password').addEventListener('click', () => { preview.hidden = true; showStatus('Chức năng khôi phục mật khẩu chưa được kết nối. Vui lòng liên hệ quản trị viên để được hỗ trợ.'); });

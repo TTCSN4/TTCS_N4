@@ -1,13 +1,15 @@
-
 package com.ttcs.meetingmanagement.roombooking;
 
 import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 import com.ttcs.meetingmanagement.model.Meeting;
+import com.ttcs.meetingmanagement.rbac.RbacAccess;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import com.ttcs.meetingmanagement.room.RoomRepository;
+import com.ttcs.meetingmanagement.security.BackendActor;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,15 +23,26 @@ public class RoomBookingService {
     private final MeetingRepository meetingRepository;
     private final RoomRepository roomRepository;
     private final RoomBookingPermissionService permissionService;
+    private final RbacAccess rbacAccess;
+
+    @Autowired
+    public RoomBookingService(
+            MeetingRepository meetingRepository,
+            RoomRepository roomRepository,
+            RoomBookingPermissionService permissionService,
+            @Autowired(required = false) RbacAccess rbacAccess) {
+
+        this.meetingRepository = meetingRepository;
+        this.roomRepository = roomRepository;
+        this.permissionService = permissionService;
+        this.rbacAccess = rbacAccess;
+    }
 
     public RoomBookingService(
             MeetingRepository meetingRepository,
             RoomRepository roomRepository,
             RoomBookingPermissionService permissionService) {
-
-        this.meetingRepository = meetingRepository;
-        this.roomRepository = roomRepository;
-        this.permissionService = permissionService;
+        this(meetingRepository, roomRepository, permissionService, null);
     }
 
     // US08 + US21: Dat phong va kiem tra quyen
@@ -58,6 +71,16 @@ public class RoomBookingService {
                         HttpStatus.NOT_FOUND,
                         "Meeting not found"
                 ));
+
+        // Kiem tra nguoi thao tac (Admin hoac Organizer)
+        String actorId = BackendActor.requireUserId();
+        boolean isAdmin = rbacAccess != null && rbacAccess.isAdmin(actorId);
+        if (!actorId.equals(meeting.getOrganizerId()) && !isAdmin) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only the organizer or an administrator can book a room for this meeting"
+            );
+        }
 
         // 2. Kiem tra trang thai
         if ("CANCELLED".equalsIgnoreCase(meeting.getStatus())) {
@@ -131,6 +154,15 @@ public class RoomBookingService {
                         HttpStatus.NOT_FOUND,
                         "Meeting not found"
                 ));
+
+        String actorId = BackendActor.requireUserId();
+        boolean isAdmin = rbacAccess != null && rbacAccess.isAdmin(actorId);
+        if (!actorId.equals(meeting.getOrganizerId()) && !isAdmin) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only the organizer or an administrator can cancel room booking for this meeting"
+            );
+        }
 
         if (meeting.getRoomId() == null
                 || meeting.getRoomId().isBlank()) {
