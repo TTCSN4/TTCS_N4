@@ -5,6 +5,8 @@ import com.ttcs.meetingmanagement.dto.MeetingResponse;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.exception.MeetingException;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.room.Room;
+import com.ttcs.meetingmanagement.room.RoomRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,12 @@ import java.util.UUID;
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
+    private final RoomRepository roomRepository;
 
-    public MeetingService(MeetingRepository meetingRepository) {
+    public MeetingService(MeetingRepository meetingRepository,
+                          RoomRepository roomRepository) {
         this.meetingRepository = meetingRepository;
+        this.roomRepository = roomRepository;
     }
 
     public MeetingResponse createMeeting(CreateMeetingRequest request) {
@@ -45,14 +50,24 @@ public class MeetingService {
         if (request.getRoomId() != null
                 && !request.getRoomId().isBlank()) {
 
-            // Kiểm tra room tồn tại
-            if (meetingRepository.countRoomById(
-                    request.getRoomId()) == 0) {
+            Room room = roomRepository.findById(request.getRoomId())
+                    .orElseThrow(() -> new MeetingException(
+                            "Phòng họp không tồn tại", HttpStatus.NOT_FOUND));
 
+            String status = room.status == null
+                    ? ""
+                    : room.status.trim().toUpperCase(java.util.Locale.ROOT);
+            if (!java.util.Set.of("ACTIVE", "AVAILABLE").contains(status)) {
                 throw new MeetingException(
-                        "Phòng họp không tồn tại",
-                        HttpStatus.NOT_FOUND
-                );
+                        "Phòng họp không khả dụng", HttpStatus.CONFLICT);
+            }
+
+            try {
+                RoomCapacityValidator.validate(room.capacity, 1);
+            } catch (org.springframework.web.server.ResponseStatusException ex) {
+                throw new MeetingException(
+                        ex.getReason(),
+                        HttpStatus.valueOf(ex.getStatusCode().value()));
             }
 
             // 4. Kiểm tra phòng có bị trùng lịch

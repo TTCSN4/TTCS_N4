@@ -3,6 +3,7 @@ import com.ttcs.meetingmanagement.model.*;
 import com.ttcs.meetingmanagement.room.Room;
 import com.ttcs.meetingmanagement.repository.*;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
+import com.ttcs.meetingmanagement.service.RoomCapacityValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,9 @@ class US25ChatbotBookingService {
     }
     List<US25AvailableRoom> availableRooms(LocalDateTime start,LocalDateTime end,int attendees) {
         if(start==null||end==null||!end.isAfter(start)||attendees<1)return List.of();
-        return rooms.findAll().stream().filter(r->List.of("ACTIVE","AVAILABLE").contains(r.status)&&r.capacity>=attendees)
+        return rooms.findAll().stream().filter(r->r.status!=null
+                &&List.of("ACTIVE","AVAILABLE").contains(r.status.trim().toUpperCase(Locale.ROOT))
+                &&r.capacity!=null&&r.capacity>0&&r.capacity>=attendees)
         .filter(r->meetings.countRoomConflicts(r.roomId,null,start,end)==0)
         .sorted(Comparator.comparingInt(r->r.capacity)).map(US25AvailableRoom::of).toList();
     }
@@ -39,6 +42,11 @@ class US25ChatbotBookingService {
         List<String> invited=Optional.ofNullable(q.participantIds()).orElse(List.of()).stream().distinct().toList();
         if(invited.size()+1>q.attendees())throw error(HttpStatus.BAD_REQUEST,"Số người tham dự phải bao gồm người tổ chức và người được mời");
         invited.forEach(this::activeUser);
+        if(q.roomId()!=null&&!q.roomId().isBlank()) {
+            Room requestedRoom=rooms.findLockedById(q.roomId())
+                    .orElseThrow(()->error(HttpStatus.NOT_FOUND,"Không tìm thấy phòng"));
+            RoomCapacityValidator.validate(requestedRoom.capacity, q.attendees());
+        }
         Set<String> members=new HashSet<>(invited);
         members.add(q.organizerId());
         for(var existing:meetings.findAll()) {
@@ -52,7 +60,8 @@ class US25ChatbotBookingService {
         :rooms.findAvailableForBooking(q.attendees());
         Room chosen=null;
         for(Room room:candidates) {
-            if(!List.of("ACTIVE","AVAILABLE").contains(room.status)||room.capacity<q.attendees()
+            if(room.status==null||!List.of("ACTIVE","AVAILABLE").contains(room.status.trim().toUpperCase(Locale.ROOT))
+            ||room.capacity==null||room.capacity<=0||room.capacity<q.attendees()
             ||meetings.countRoomConflicts(room.roomId,null,q.startTime(),q.endTime())>0)continue;
             try {
                 permissions.assertCanBook(q.organizerId(),room.roomId);

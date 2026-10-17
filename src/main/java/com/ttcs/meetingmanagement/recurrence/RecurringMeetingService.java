@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.ttcs.meetingmanagement.service.RoomCapacityValidator;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -60,6 +61,14 @@ public class RecurringMeetingService {
                     HttpStatus.NOT_FOUND,
                     "Phong hop khong ton tai");
         }
+
+        Number capacity = (Number) entityManager.createNativeQuery(
+                "SELECT capacity FROM room WHERE room_id = :roomId")
+                .setParameter("roomId", roomId)
+                .getSingleResult();
+        RoomCapacityValidator.validate(
+                capacity == null ? null : capacity.intValue(),
+                1);
 
         // 3. Kiem tra nguoi to chuc
         Number users = (Number) entityManager.createNativeQuery(

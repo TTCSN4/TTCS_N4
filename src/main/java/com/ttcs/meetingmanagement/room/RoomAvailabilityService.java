@@ -64,6 +64,11 @@ public class RoomAvailabilityService {
 
         // 4. Loc phong khong trung lich
         return rooms.stream()
+                .filter(room -> room.getStatus() != null
+                        && List.of("ACTIVE", "AVAILABLE")
+                        .contains(room.getStatus().trim().toUpperCase(java.util.Locale.ROOT)))
+                .filter(room -> room.getCapacity() != null
+                        && room.getCapacity() > 0)
                 .filter(room -> {
 
                     long conflicts =

@@ -4,6 +4,7 @@ package com.ttcs.meetingmanagement.service;
 import com.ttcs.meetingmanagement.dto.*;
 import com.ttcs.meetingmanagement.model.MeetingParticipant;
 import com.ttcs.meetingmanagement.repository.MeetingParticipantRepository;
+import com.ttcs.meetingmanagement.repository.MeetingRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +32,36 @@ class MeetingParticipantServiceTest {
     @Mock
     private JdbcTemplate jdbcTemplate;
 
+    @Mock
+    private MeetingRepository meetingRepository;
+
     @InjectMocks
     private MeetingParticipantService service;
+
+    private void mockLockedMeeting(Integer capacity, List<MeetingParticipant> existing) {
+        com.ttcs.meetingmanagement.model.Meeting meeting =
+                new com.ttcs.meetingmanagement.model.Meeting();
+        meeting.setMeetingId("meeting-1");
+        meeting.setOrganizerId("organizer-1");
+        when(meetingRepository.findByIdForUpdate("meeting-1"))
+                .thenReturn(Optional.of(meeting));
+        when(repository.findByMeetingId("meeting-1"))
+                .thenReturn(existing);
+        when(jdbcTemplate.queryForObject(
+                argThat(sql -> sql.contains("SELECT r.capacity")
+                        && sql.contains("LEFT JOIN room")),
+                eq(Integer.class), eq("meeting-1")))
+                .thenReturn(capacity);
+    }
+
+    private void mockLockedMeetingOnly() {
+        com.ttcs.meetingmanagement.model.Meeting meeting =
+                new com.ttcs.meetingmanagement.model.Meeting();
+        meeting.setMeetingId("meeting-1");
+        meeting.setOrganizerId("organizer-1");
+        when(meetingRepository.findByIdForUpdate("meeting-1"))
+                .thenReturn(Optional.of(meeting));
+    }
 
     private void mockMeetingExists() {
         when(jdbcTemplate.queryForObject(
@@ -43,10 +72,14 @@ class MeetingParticipantServiceTest {
     }
 
     private void mockUserExists() {
+        mockUserExists("user-1");
+    }
+
+    private void mockUserExists(String userId) {
         when(jdbcTemplate.queryForObject(
                 contains("FROM `user`"),
                 eq(Integer.class),
-                eq("user-1")
+                eq(userId)
         )).thenReturn(1);
     }
 
@@ -64,7 +97,7 @@ class MeetingParticipantServiceTest {
     // TEST 1 - THEM NGUOI THAM DU
     @Test
     void addParticipant_success() {
-        mockMeetingExists();
+        mockLockedMeeting(10, List.of());
         mockUserExists();
 
         when(repository.save(any(MeetingParticipant.class)))
@@ -86,7 +119,7 @@ class MeetingParticipantServiceTest {
     // TEST 2 - KHONG CHO THEM TRUNG
     @Test
     void addParticipant_duplicate() {
-        mockMeetingExists();
+        mockLockedMeetingOnly();
         mockUserExists();
 
         when(repository.existsByMeetingIdAndUserId(
@@ -109,7 +142,6 @@ class MeetingParticipantServiceTest {
     @Test
     void getParticipants_success() {
         mockMeetingExists();
-
         when(repository.findByMeetingId("meeting-1"))
                 .thenReturn(List.of(sampleParticipant()));
 
@@ -183,5 +215,78 @@ class MeetingParticipantServiceTest {
         service.removeParticipant("meeting-1", "user-1");
 
         verify(repository).delete(p);
+    }
+
+    @Test
+    void addParticipant_rejectsWhenRoomIsFull() {
+        mockLockedMeeting(2, List.of(sampleParticipant()));
+        mockUserExists("user-2");
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.addParticipant(
+                        "meeting-1",
+                        new AddMeetingParticipantRequest("user-2")
+                )
+        );
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void addParticipant_countsOrganizerOnlyOnceAndDeduplicatesExistingUsers() {
+        MeetingParticipant organizerDuplicate = sampleParticipant();
+        organizerDuplicate.setUserId("organizer-1");
+        MeetingParticipant duplicate = sampleParticipant();
+        duplicate.setUserId("user-2");
+
+        mockLockedMeeting(3, List.of(organizerDuplicate, duplicate));
+        mockUserExists("user-3");
+        when(repository.existsByMeetingIdAndUserId("meeting-1", "user-3"))
+                .thenReturn(false);
+
+        when(repository.save(any(MeetingParticipant.class)))
+                .thenAnswer(i -> i.getArgument(0));
+
+        MeetingParticipantResponse result = service.addParticipant(
+                "meeting-1", new AddMeetingParticipantRequest("user-3"));
+
+        assertEquals("user-3", result.userId());
+        verify(repository).save(any(MeetingParticipant.class));
+    }
+
+    @Test
+    void addParticipant_rejectsWhenCapacityIsMissing() {
+        mockLockedMeeting(0, List.of());
+        mockUserExists();
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.addParticipant(
+                        "meeting-1",
+                        new AddMeetingParticipantRequest("user-1")
+                )
+        );
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void addParticipant_rejectsWhenMeetingHasNoRoom() {
+        mockLockedMeeting(null, List.of());
+        mockUserExists();
+
+        ResponseStatusException ex = assertThrows(
+                ResponseStatusException.class,
+                () -> service.addParticipant(
+                        "meeting-1",
+                        new AddMeetingParticipantRequest("user-1")
+                )
+        );
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(repository, never()).save(any());
     }
 }
