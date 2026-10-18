@@ -161,10 +161,18 @@ public class EquipmentController {
         reservations.replace(m,items);
         return new BookingResponse(m.meetingId+":"+request.equipmentId(),request.equipmentId(),m.meetingId,m.roomId,request.quantity(),request.startTime(),request.endTime(),EquipmentBookingStatus.BOOKED);
     }
+    // Preserve the frontend's existing /bookings/{id} route using the new ERD key.
+    @DeleteMapping("/bookings/{id}") @Transactional
+    public ResponseEntity<Void> cancelBookingId(@PathVariable String id){
+        String[] key=id.split(":",2);
+        if(key.length!=2||key[0].isBlank()||key[1].isBlank())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Booking ID must be meetingId:equipmentId");
+        return cancelBooking(key[0],key[1]);
+    }
     @DeleteMapping("/bookings/{meetingId}/{equipmentId}") @Transactional
     public ResponseEntity<Void> cancelBooking(@PathVariable String meetingId,@PathVariable String equipmentId){
         Meeting m=meetingRepository.findByIdForUpdate(meetingId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Meeting not found"));
         if(!com.ttcs.meetingmanagement.security.BackendActor.requireUserId().equals(m.organizerId))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Only the organizer can cancel equipment");
+        if(!"SCHEDULED".equals(m.status)||!m.startTime.isAfter(java.time.LocalDateTime.now(VN_ZONE)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Meeting cannot be modified");
         var items=new ArrayList<>(reservations.items(meetingId));items.removeIf(i->i.equipmentId().equals(equipmentId));reservations.replace(m,items);
         return ResponseEntity.noContent().build();
     }
