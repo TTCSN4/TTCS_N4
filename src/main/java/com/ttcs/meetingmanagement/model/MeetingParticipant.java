@@ -5,24 +5,24 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "meeting_participant", uniqueConstraints = @UniqueConstraint(name = "uq_meeting_participant", columnNames = {"meeting_id", "user_id"}))
+@Table(name = "meeting_participant")
 public class MeetingParticipant {
 
     @Id
     @Column(name = "participant_id", length = 50)
-    private String participantId;
+    public String participantId;
 
     @Column(name = "meeting_id", nullable = false, length = 50)
-    private String meetingId;
+    public String meetingId;
 
     @Column(name = "user_id", nullable = false, length = 50)
-    private String userId;
+    public String userId;
 
     @Column(name = "status", nullable = false, length = 50)
-    private String status = "PENDING";
+    public String status = "PENDING";
 
     @Column(name = "responded_at")
-    private LocalDateTime respondedAt;
+    public LocalDateTime respondedAt;
 
     @PrePersist
     void initialize() {

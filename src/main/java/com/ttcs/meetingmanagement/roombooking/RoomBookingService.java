@@ -9,6 +9,7 @@ import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import com.ttcs.meetingmanagement.room.Room;
 import com.ttcs.meetingmanagement.room.RoomRepository;
+import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,151 +23,151 @@ public class RoomBookingService {
 
     private final MeetingRepository meetingRepository;
     private final RoomRepository roomRepository;
+    private final RoomBookingPermissionService permissionService;
     private final EquipmentBookingRepository equipmentBookingRepository;
 
     public RoomBookingService(
             MeetingRepository meetingRepository,
             RoomRepository roomRepository,
+            RoomBookingPermissionService permissionService,
             EquipmentBookingRepository equipmentBookingRepository) {
 
         this.meetingRepository = meetingRepository;
         this.roomRepository = roomRepository;
+        this.permissionService = permissionService;
         this.equipmentBookingRepository = equipmentBookingRepository;
     }
 
+    // US08 + US21: Dat phong va kiem tra quyen
     @Transactional
     public RoomBookingResponse bookRoom(RoomBookingRequest request) {
 
-        // 1. Kiểm tra cuộc họp tồn tại
-        Meeting meeting = meetingRepository
-                .findById(request.getMeetingId())
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Meeting not found: " + request.getMeetingId()
-                        )
-                );
+        if (request == null
+                || request.getMeetingId() == null
+                || request.getMeetingId().isBlank()
+                || request.getRoomId() == null
+                || request.getRoomId().isBlank()) {
 
-        // 2. Không cho đặt phòng cho cuộc họp đã hủy
-        if ("CANCELLED".equalsIgnoreCase(meeting.getStatus())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Cannot book room for a cancelled meeting"
+                    "Meeting ID and Room ID are required"
             );
         }
 
-        // 3. Chuẩn hóa mã phòng
+        String meetingId = request.getMeetingId().trim();
         String roomId = request.getRoomId().trim();
 
-        // 4. Kiểm tra phòng tồn tại
-        Room room = roomRepository
-                .findById(roomId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Room not found: " + roomId
-                        )
-                );
+        // 1. Kiem tra Meeting
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Meeting not found"
+                ));
 
-        // 5. Kiểm tra thời gian Meeting hợp lệ
+        // 2. Kiem tra trang thai
+        if ("CANCELLED".equalsIgnoreCase(meeting.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Cannot book a cancelled meeting"
+            );
+        }
+
+        // 3. Kiem tra phong
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room not found"
+                ));
+
+        if ("MAINTENANCE".equalsIgnoreCase(room.getStatus()) || "INACTIVE".equalsIgnoreCase(room.getStatus())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Phòng đang bảo trì hoặc ngừng hoạt động"
+            );
+        }
+
+        // 4. Kiem tra thoi gian
         if (meeting.getStartTime() == null
                 || meeting.getEndTime() == null
                 || !meeting.getEndTime().isAfter(meeting.getStartTime())) {
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Meeting time is invalid"
+                    "Invalid meeting time"
             );
         }
 
-        // 6. Kiểm tra trùng lịch phòng
-        long conflictCount = meetingRepository.countRoomConflicts(
+        // 5. US21: Kiem tra quyen theo USER, ROLE, DEPARTMENT
+        String userId = meeting.getOrganizerId();
+        permissionService.assertCanBook(userId, roomId);
+
+        // 6. US08: Kiem tra trung lich
+        long conflicts = meetingRepository.countRoomConflicts(
                 roomId,
-                meeting.getMeetingId(),
+                meetingId,
                 meeting.getStartTime(),
                 meeting.getEndTime()
         );
 
-        if (conflictCount > 0) {
+        if (conflicts > 0) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Room is already booked in this time range"
+                    "Room already booked"
             );
         }
 
-        // 7. Gán phòng cho Meeting và cập nhật trạng thái phòng
-        meeting.setRoomId(room.getRoomId());
+        // 7. Luu thong tin dat phong
+        meeting.setRoomId(roomId);
         meeting.setUpdatedAt(LocalDateTime.now());
-        room.setStatus("OCCUPIED");
-        roomRepository.save(room);
 
-        // 8. Lưu xuống database
-        Meeting savedMeeting = meetingRepository.save(meeting);
+        Meeting saved = meetingRepository.save(meeting);
 
-        // 9. Trả kết quả
         return new RoomBookingResponse(
-                savedMeeting.getMeetingId(),
-                savedMeeting.getRoomId(),
-                savedMeeting.getStartTime(),
-                savedMeeting.getEndTime(),
+                saved.getMeetingId(),
+                saved.getRoomId(),
+                saved.getStartTime(),
+                saved.getEndTime(),
                 "Room booked successfully"
         );
     }
 
+    // US09: Huy dat phong
     @Transactional
     public RoomBookingResponse cancelRoomBooking(String meetingId) {
 
-        // 1. Kiểm tra cuộc họp tồn tại
-        Meeting meeting = meetingRepository
-                .findById(meetingId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Meeting not found: " + meetingId
-                        )
-                );
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Meeting not found"
+                ));
 
-        // 2. Kiểm tra cuộc họp hiện có đặt phòng hay không
         if (meeting.getRoomId() == null || meeting.getRoomId().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Meeting has no room booking to cancel"
+                    "Meeting has no room booking"
             );
         }
 
-        // 3. Lưu thông tin phòng và khung giờ trước khi giải phóng
-        String releasedRoomId = meeting.getRoomId();
+        String oldRoomId = meeting.getRoomId();
+
         LocalDateTime startTime = meeting.getStartTime();
         LocalDateTime endTime = meeting.getEndTime();
 
-        // 4. Hủy liên kết Meeting - Room
         meeting.setRoomId(null);
         meeting.setUpdatedAt(LocalDateTime.now());
+
         meetingRepository.save(meeting);
 
-        // 5. Cập nhật trạng thái phòng về AVAILABLE nếu không còn cuộc họp active
-        long activeCount = meetingRepository.findAll().stream()
-                .filter(m -> !m.getMeetingId().equals(meetingId))
-                .filter(m -> releasedRoomId.equalsIgnoreCase(m.getRoomId()))
-                .filter(m -> "SCHEDULED".equalsIgnoreCase(m.getStatus()) || "IN_PROGRESS".equalsIgnoreCase(m.getStatus()))
-                .count();
-        if (activeCount == 0) {
-            roomRepository.findById(releasedRoomId).ifPresent(r -> {
-                r.setStatus("AVAILABLE");
-                roomRepository.save(r);
-            });
+        if (equipmentBookingRepository != null) {
+            for (EquipmentBooking booking : equipmentBookingRepository.findAllByMeetingId(meetingId)) {
+                booking.setStatus(EquipmentBookingStatus.CANCELLED);
+                equipmentBookingRepository.save(booking);
+            }
         }
 
-        // 6. Giải phóng thiết bị đi kèm (nếu có)
-        for (EquipmentBooking booking : equipmentBookingRepository.findAllByMeetingId(meetingId)) {
-            booking.setStatus(EquipmentBookingStatus.CANCELLED);
-            equipmentBookingRepository.save(booking);
-        }
-
-        // 6. Trả kết quả
         return new RoomBookingResponse(
                 meeting.getMeetingId(),
-                releasedRoomId,
+                oldRoomId,
                 startTime,
                 endTime,
                 "Room booking cancelled successfully"

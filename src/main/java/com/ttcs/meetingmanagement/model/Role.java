@@ -8,10 +8,10 @@ public class Role {
 
     @Id
     @Column(name = "role_id", length = 50)
-    private String roleId;
+    public String roleId;
 
     @Column(name = "role_name", nullable = false, length = 100)
-    private String roleName;
+    public String roleName;
 
     public Role() {
     }

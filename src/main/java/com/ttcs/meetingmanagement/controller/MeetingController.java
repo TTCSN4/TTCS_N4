@@ -10,14 +10,18 @@ import com.ttcs.meetingmanagement.room.Room;
 import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.AuthorizationService;
 import com.ttcs.meetingmanagement.service.MeetingService;
+import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,6 +40,8 @@ public class MeetingController {
     private final EquipmentRepository equipmentRepository;
     private final UserRepository userRepository;
     private final AuthorizationService authorizationService;
+    private final RoomBookingPermissionService permissionService;
+    private final NamedParameterJdbcTemplate jdbc;
 
     public MeetingController(
             MeetingRepository meetings,
@@ -46,7 +52,9 @@ public class MeetingController {
             MeetingEquipmentRepository meetingEquipmentRepository,
             EquipmentRepository equipmentRepository,
             UserRepository userRepository,
-            AuthorizationService authorizationService
+            AuthorizationService authorizationService,
+            RoomBookingPermissionService permissionService,
+            NamedParameterJdbcTemplate jdbc
     ) {
         this.meetings = meetings;
         this.equipmentBookings = equipmentBookings;
@@ -57,29 +65,45 @@ public class MeetingController {
         this.equipmentRepository = equipmentRepository;
         this.userRepository = userRepository;
         this.authorizationService = authorizationService;
+        this.permissionService = permissionService;
+        this.jdbc = jdbc;
     }
+
+    // ==========================================
+    // 1. LAY DANH SACH CUOC HOP
+    // ==========================================
 
     @GetMapping
     public List<Meeting> list() {
         return meetings.findAllByOrderByStartTimeAsc();
     }
 
-    @GetMapping("/{id}")
     public Meeting getById(@PathVariable String id) {
         return findMeeting(id);
     }
+
+    // ==========================================
+    // 2. LICH SU CUOC HOP
+    // ==========================================
 
     @GetMapping("/history")
     public List<Meeting> history() {
         return meetings.findAllByEndTimeBeforeOrderByStartTimeDesc(LocalDateTime.now());
     }
 
-    // US01 - API tạo cuộc họp chuẩn DTO
+    // ==========================================
+    // 3. TAO CUOC HOP (US01 DTO API)
+    // ==========================================
+
     @PostMapping("/create")
     public ResponseEntity<MeetingResponse> createMeeting(@Valid @RequestBody CreateMeetingRequest request) {
         MeetingResponse response = meetingService.createMeeting(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    // ==========================================
+    // 4. TAO CUOC HOP (Develop / US03 API)
+    // ==========================================
 
     @PostMapping
     @Transactional
@@ -90,86 +114,102 @@ public class MeetingController {
     ) {
         validate(request);
 
-        // Phân quyền: Chỉ Admin và Project Manager mới được tạo lịch họp
         String effectiveUserId = resolveUserId(headerUserId, paramUserId, request.organizerId(), "USER001");
         authorizationService.validateMeetingManagementPermission(effectiveUserId);
 
         List<String> participants = cleanParticipants(request.participants());
 
-        String room = cleanRoom(request.room());
+        int repeatCount = request.repeatCount() == null ? 0 : request.repeatCount();
+        if (repeatCount < 0 || repeatCount > 12) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Repeat count must be between 0 and 12");
+        }
+
+        String recurrence = request.recurrence() == null ? "NONE" : request.recurrence().toUpperCase(Locale.ROOT);
+        if (repeatCount > 0 && !List.of("WEEKLY", "MONTHLY").contains(recurrence)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid recurrence rule");
+        }
+
+        String rawRoom = cleanRoom(request.room());
         Room existingRoom = null;
-        if (room != null) {
-            existingRoom = roomRepository.findByRoomIdOrRoomNameFuzzy(room)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Phòng họp không tồn tại: " + room));
+        String resolvedRoomId = null;
+        if (rawRoom != null) {
+            existingRoom = roomRepository.findByRoomIdOrRoomNameFuzzy(rawRoom)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Phòng họp không tồn tại: " + rawRoom));
+            resolvedRoomId = existingRoom.getRoomId();
 
             if (participants.size() > existingRoom.getCapacity()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng người tham dự vượt quá sức chứa của phòng.");
             }
 
-            long roomConflicts = meetings.countRoomConflicts(existingRoom.getRoomId(), null, request.startTime(), request.endTime());
+            if ("MAINTENANCE".equalsIgnoreCase(existingRoom.getStatus()) || "INACTIVE".equalsIgnoreCase(existingRoom.getStatus())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phòng đang bảo trì hoặc ngừng hoạt động.");
+            }
+
+            permissionService.assertCanBook(effectiveUserId, resolvedRoomId);
+
+            long roomConflicts = meetings.countRoomConflicts(resolvedRoomId, null, request.startTime(), request.endTime());
             if (roomConflicts > 0) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Phòng họp đã được đặt trong khoảng thời gian này.");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Room already booked");
             }
         }
 
-        ensureNoConflict(request.startTime(), request.endTime(), participants, null);
+        if (hasParticipantConflict(request.startTime(), request.endTime(), participants, null)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Participant already has a meeting");
+        }
 
-        String resolvedRoomId = existingRoom != null ? existingRoom.getRoomId() : null;
+        String seriesId = repeatCount > 0 ? UUID.randomUUID().toString() : null;
 
-        // Lưu cuộc họp đầu tiên
-        Meeting first = save(request, participants, null, null, resolvedRoomId);
+        Meeting first = createOccurrence(
+                request,
+                participants,
+                resolvedRoomId,
+                request.startTime(),
+                request.endTime(),
+                seriesId,
+                recurrence
+        );
 
-        // Cập nhật trạng thái phòng khi đặt thành công
         if (existingRoom != null) {
             existingRoom.setStatus("OCCUPIED");
             roomRepository.save(existingRoom);
         }
 
-        // Lưu người tham dự
-        saveParticipants(first.getMeetingId(), first.getOrganizerId(), participants);
-
-        // Lưu thiết bị và cập nhật trạng thái thiết bị
         if (request.equipmentIds() != null && !request.equipmentIds().isEmpty()) {
             saveEquipments(first, request.equipmentIds());
         }
 
-        int repeatCount = Math.clamp(request.repeatCount() == null ? 0 : request.repeatCount(), 0, 12);
-        String recurrence = request.recurrence() == null ? "NONE" : request.recurrence().toUpperCase(Locale.ROOT);
-        if (repeatCount > 0 && !List.of("WEEKLY", "MONTHLY").contains(recurrence)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tần suất lặp không hợp lệ.");
-        }
+        Duration duration = Duration.between(request.startTime(), request.endTime());
 
-        if (repeatCount > 0) {
-            first.setRecurrenceSeriesId(first.getMeetingId());
-            first.setIsRecurring(true);
-            first.setRecurrenceRule("FREQ=" + recurrence);
-            meetings.save(first);
-            for (int occurrence = 1; occurrence <= repeatCount; occurrence++) {
-                LocalDateTime start = recurrence.equals("WEEKLY")
-                        ? request.startTime().plusWeeks(occurrence)
-                        : request.startTime().plusMonths(occurrence);
-                long seconds = java.time.Duration.between(request.startTime(), request.endTime()).getSeconds();
-                LocalDateTime end = start.plusSeconds(seconds);
+        for (int i = 1; i <= repeatCount; i++) {
+            LocalDateTime start = recurrence.equals("WEEKLY")
+                    ? request.startTime().plusWeeks(i)
+                    : request.startTime().plusMonths(i);
+            LocalDateTime end = start.plus(duration);
 
-                if (resolvedRoomId != null && meetings.countRoomConflicts(resolvedRoomId, null, start, end) > 0) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Xung đột lịch phòng cho chuỗi lặp lại.");
-                }
-                ensureNoConflict(start, end, participants, null);
-                Meeting occMeeting = save(request, participants, start, first.getMeetingId(), resolvedRoomId);
-                occMeeting.setIsRecurring(true);
-                occMeeting.setRecurrenceRule("FREQ=" + recurrence);
-                meetings.save(occMeeting);
-                saveParticipants(occMeeting.getMeetingId(), occMeeting.getOrganizerId(), participants);
+            if (resolvedRoomId != null && meetings.countRoomConflicts(resolvedRoomId, null, start, end) > 0) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Xung đột lịch phòng cho chuỗi lặp lại.");
+            }
+            if (hasParticipantConflict(start, end, participants, null)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Participant already has a meeting");
+            }
 
-                if (request.equipmentIds() != null && !request.equipmentIds().isEmpty()) {
-                    saveEquipments(occMeeting, request.equipmentIds());
-                }
+            Meeting occ = createOccurrence(request, participants, resolvedRoomId, start, end, seriesId, recurrence);
+            if (request.equipmentIds() != null && !request.equipmentIds().isEmpty()) {
+                saveEquipments(occ, request.equipmentIds());
             }
         }
+
         return first;
     }
 
-    @PutMapping("/{id}")
+    public Meeting create(MeetingRequest request) {
+        return create(request, null, null);
+    }
+
+    // ==========================================
+    // 5. CAP NHAT CUOC HOP (US02)
+    // ==========================================
+
     @Transactional
     public Meeting update(
             @PathVariable String id,
@@ -178,9 +218,9 @@ public class MeetingController {
             @RequestParam(value = "userId", required = false) String paramUserId
     ) {
         validate(request);
+
         Meeting meeting = findMeeting(id);
 
-        // Phân quyền: Chỉ Admin và Project Manager mới được sửa lịch họp
         String effectiveUserId = resolveUserId(headerUserId, paramUserId, request.organizerId(), meeting.getOrganizerId());
         authorizationService.validateMeetingManagementPermission(effectiveUserId);
 
@@ -201,6 +241,7 @@ public class MeetingController {
             if (participants.size() > existingRoom.getCapacity()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Số lượng người tham dự vượt quá sức chứa của phòng.");
             }
+            permissionService.assertCanBook(effectiveUserId, resolvedNewRoomId);
             long roomConflicts = meetings.countRoomConflicts(resolvedNewRoomId, id, request.startTime(), request.endTime());
             if (roomConflicts > 0) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Phòng họp đã được đặt trong khoảng thời gian này.");
@@ -209,12 +250,13 @@ public class MeetingController {
             roomRepository.save(existingRoom);
         }
 
-        // Nếu phòng cũ khác phòng mới thì giải phóng phòng cũ
         if (oldRoom != null && !oldRoom.equalsIgnoreCase(resolvedNewRoomId)) {
             releaseRoomIfNoActiveMeetings(oldRoom, id);
         }
 
-        ensureNoConflict(request.startTime(), request.endTime(), participants, id);
+        if (hasParticipantConflict(request.startTime(), request.endTime(), participants, id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Participant already has a meeting");
+        }
 
         meeting.setTitle(request.title().trim());
         meeting.setDescription(request.description());
@@ -224,25 +266,34 @@ public class MeetingController {
         if (request.organizerId() != null && !request.organizerId().isBlank()) {
             meeting.setOrganizerId(request.organizerId().trim());
         }
+        meeting.setStatus("SCHEDULED");
+        meeting.setCancelledAt(null);
+        meeting.setCancelReason(null);
         meeting.setUpdatedAt(LocalDateTime.now());
 
-        // Đồng bộ người tham gia
-        saveParticipants(meeting.getMeetingId(), meeting.getOrganizerId(), participants);
+        Meeting saved = meetings.save(meeting);
+        syncParticipants(saved.getMeetingId(), participants);
 
-        // Đồng bộ thiết bị nếu phòng hoặc giờ thay đổi
-        if (newRoom != null) {
+        if (resolvedNewRoomId != null) {
             for (EquipmentBooking booking : equipmentBookings.findAllByMeetingId(id)) {
-                booking.setRoom(newRoom);
+                booking.setRoom(resolvedNewRoomId);
                 booking.setStartTime(request.startTime().atZone(ZoneId.systemDefault()).toOffsetDateTime());
                 booking.setEndTime(request.endTime().atZone(ZoneId.systemDefault()).toOffsetDateTime());
                 equipmentBookings.save(booking);
             }
         }
 
-        return meetings.save(meeting);
+        return saved;
     }
 
-    @DeleteMapping("/{id}")
+    public Meeting update(String id, MeetingRequest request) {
+        return update(id, request, null, null);
+    }
+
+    // ==========================================
+    // 6. HUY CUOC HOP
+    // ==========================================
+
     @Transactional
     public void cancel(
             @PathVariable String id,
@@ -251,7 +302,6 @@ public class MeetingController {
     ) {
         Meeting meeting = findMeeting(id);
 
-        // Phân quyền: Chỉ Admin và Project Manager mới được hủy lịch họp
         String effectiveUserId = resolveUserId(headerUserId, paramUserId, null, meeting.getOrganizerId());
         authorizationService.validateMeetingManagementPermission(effectiveUserId);
 
@@ -264,12 +314,10 @@ public class MeetingController {
         meeting.setUpdatedAt(LocalDateTime.now());
         meetings.save(meeting);
 
-        // Giải phóng phòng họp trong database
         if (roomId != null) {
             releaseRoomIfNoActiveMeetings(roomId, id);
         }
 
-        // Giải phóng thiết bị trong database
         List<MeetingEquipment> meetingEqList = meetingEquipmentRepository.findById_MeetingId(id);
         for (MeetingEquipment me : meetingEqList) {
             Equipment eq = equipmentRepository.findById(me.getEquipmentId()).orElse(null);
@@ -290,93 +338,226 @@ public class MeetingController {
         }
     }
 
-    private String resolveUserId(String headerUserId, String paramUserId, String requestUserId, String fallbackUserId) {
-        if (headerUserId != null && !headerUserId.isBlank()) return headerUserId.trim();
-        if (paramUserId != null && !paramUserId.isBlank()) return paramUserId.trim();
-        if (requestUserId != null && !requestUserId.isBlank()) return requestUserId.trim();
-        if (fallbackUserId != null && !fallbackUserId.isBlank()) return fallbackUserId.trim();
-        return "USER001";
+    public void cancel(String id) {
+        cancel(id, null, null);
     }
 
-    private void releaseRoomIfNoActiveMeetings(String roomId, String excludedMeetingId) {
-        long activeCount = meetings.findAll().stream()
-                .filter(m -> !m.getMeetingId().equals(excludedMeetingId))
-                .filter(m -> roomId.equalsIgnoreCase(m.getRoomId()))
-                .filter(m -> "SCHEDULED".equalsIgnoreCase(m.getStatus()) || "IN_PROGRESS".equalsIgnoreCase(m.getStatus()))
-                .count();
-        if (activeCount == 0) {
-            roomRepository.findById(roomId).ifPresent(r -> {
-                r.setStatus("AVAILABLE");
-                roomRepository.save(r);
-            });
-        }
-    }
+    // ==========================================
+    // 7. GOI Y THOI GIAN HOP
+    // ==========================================
 
     @PostMapping("/suggestions")
     public List<TimeSuggestion> suggestions(@RequestBody SuggestionRequest request) {
         if (request.date() == null || request.durationMinutes() == null || request.durationMinutes() < 15) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chọn ngày và thời lượng ít nhất 15 phút.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date or duration");
         }
+
         List<String> participants = cleanParticipants(request.participants());
         List<TimeSuggestion> available = new ArrayList<>();
+
         for (int hour = 9; hour < 17 && available.size() < 5; hour++) {
             for (int minute : List.of(0, 30)) {
                 LocalDateTime start = request.date().atTime(hour, minute);
                 LocalDateTime end = start.plusMinutes(request.durationMinutes());
-                if (start.isAfter(LocalDateTime.now()) && !hasConflict(start, end, participants, null)) {
+                if (start.isAfter(LocalDateTime.now()) && !hasParticipantConflict(start, end, participants, null)) {
                     available.add(new TimeSuggestion(start, end));
                 }
-                if (available.size() == 5) break;
+                if (available.size() == 5) {
+                    break;
+                }
             }
         }
+
         return available;
     }
 
-    private Meeting save(MeetingRequest request, List<String> participants, LocalDateTime start, String seriesId, String resolvedRoomId) {
+    private Meeting createOccurrence(
+            MeetingRequest request,
+            List<String> participants,
+            String roomId,
+            LocalDateTime start,
+            LocalDateTime end,
+            String seriesId,
+            String recurrence) {
+
+        checkSchedule(
+                request.organizerId(),
+                roomId,
+                start,
+                end,
+                participants,
+                null
+        );
+
         LocalDateTime now = LocalDateTime.now();
+
         Meeting meeting = new Meeting();
         meeting.setMeetingId(UUID.randomUUID().toString());
         meeting.setTitle(request.title().trim());
         meeting.setDescription(request.description());
-        meeting.setRoomId(resolvedRoomId != null ? resolvedRoomId : cleanRoom(request.room()));
-        meeting.setStartTime(start == null ? request.startTime() : start);
-
-        long duration = java.time.Duration.between(request.startTime(), request.endTime()).getSeconds();
-        meeting.setEndTime(start == null ? request.endTime() : start.plusSeconds(duration));
-
-        meeting.setOrganizerId(request.organizerId() == null || request.organizerId().isBlank() ? "USER001" : request.organizerId().trim());
+        meeting.setRoomId(roomId);
+        meeting.setOrganizerId(request.organizerId().trim());
+        meeting.setStartTime(start);
+        meeting.setEndTime(end);
         meeting.setStatus("SCHEDULED");
+        meeting.setIsRecurring(seriesId != null);
         meeting.setRecurrenceSeriesId(seriesId);
+        meeting.setRecurrenceRule(seriesId == null ? null : recurrence);
+        meeting.setCancelReason(null);
+        meeting.setCancelledAt(null);
         meeting.setCreatedAt(now);
         meeting.setUpdatedAt(now);
-        return meetings.save(meeting);
+
+        Meeting saved = meetings.save(meeting);
+        syncParticipants(saved.getMeetingId(), participants);
+
+        return saved;
     }
 
-    private void saveParticipants(String meetingId, String organizerId, List<String> participants) {
-        List<MeetingParticipant> existing = participantRepository.findByMeetingId(meetingId);
-        if (!existing.isEmpty()) {
-            participantRepository.deleteAll(existing);
-            participantRepository.flush();
+    private void validate(MeetingRequest request) {
+        if (request == null || request.title() == null || request.title().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting title is required");
+        }
+        if (request.startTime() == null || request.endTime() == null || !request.endTime().isAfter(request.startTime())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid meeting time");
+        }
+        if (request.organizerId() == null || request.organizerId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Organizer ID is required");
         }
 
-        // Lưu organizer
-        if (organizerId != null && !organizerId.isBlank()) {
-            String validOrgId = findOrCreateUser(organizerId.trim());
-            MeetingParticipant host = new MeetingParticipant(meetingId, validOrgId);
-            host.setStatus("ACCEPTED");
-            host.setRespondedAt(LocalDateTime.now());
-            participantRepository.save(host);
+        Integer count = jdbc.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM `user`
+                WHERE user_id = :userId
+                """,
+                new MapSqlParameterSource("userId", request.organizerId().trim()),
+                Integer.class
+        );
+
+        if (count == null || count == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organizer not found");
+        }
+        if (request.startTime().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể tạo cuộc họp trong quá khứ.");
+        }
+    }
+
+    private void checkSchedule(
+            String organizerId,
+            String roomId,
+            LocalDateTime start,
+            LocalDateTime end,
+            List<String> participants,
+            String ignoredId) {
+
+        if (roomId != null) {
+            permissionService.assertCanBook(organizerId, roomId);
+
+            long conflicts = meetings.countRoomConflicts(roomId, ignoredId, start, end);
+            if (conflicts > 0) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Room already booked");
+            }
         }
 
-        // Lưu người tham gia
-        for (String user : participants) {
-            if (user.equalsIgnoreCase(organizerId)) continue;
-            String validUserId = findOrCreateUser(user);
-            MeetingParticipant mp = new MeetingParticipant(meetingId, validUserId);
-            mp.setStatus("INVITED");
-            participantRepository.save(mp);
+        if (hasParticipantConflict(start, end, participants, ignoredId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Participant already has a meeting");
         }
-        participantRepository.flush();
+    }
+
+    private boolean hasParticipantConflict(
+            LocalDateTime start,
+            LocalDateTime end,
+            List<String> participants,
+            String ignoredId) {
+
+        if (participants.isEmpty()) {
+            return false;
+        }
+
+        String sql = """
+                SELECT COUNT(*)
+                FROM meeting_participant mp
+                JOIN meeting m
+                    ON m.meeting_id = mp.meeting_id
+                WHERE mp.user_id IN (:userIds)
+                  AND m.status <> 'CANCELLED'
+                  AND m.start_time < :endTime
+                  AND m.end_time > :startTime
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userIds", participants)
+                .addValue("startTime", start)
+                .addValue("endTime", end);
+
+        if (ignoredId != null) {
+            sql += " AND m.meeting_id <> :ignoredId";
+            params.addValue("ignoredId", ignoredId);
+        }
+
+        Long count = jdbc.queryForObject(sql, params, Long.class);
+        return count != null && count > 0;
+    }
+
+    private void syncParticipants(String meetingId, List<String> participants) {
+        List<String> existing = jdbc.queryForList(
+                """
+                SELECT user_id
+                FROM meeting_participant
+                WHERE meeting_id = :meetingId
+                """,
+                new MapSqlParameterSource("meetingId", meetingId),
+                String.class
+        );
+
+        Set<String> desired = new HashSet<>(participants);
+        Set<String> current = new HashSet<>(existing);
+
+        for (String userId : current) {
+            if (!desired.contains(userId)) {
+                jdbc.update(
+                        """
+                        DELETE FROM meeting_participant
+                        WHERE meeting_id = :meetingId
+                          AND user_id = :userId
+                        """,
+                        new MapSqlParameterSource()
+                                .addValue("meetingId", meetingId)
+                                .addValue("userId", userId)
+                );
+            }
+        }
+
+        for (String userId : desired) {
+            if (!current.contains(userId)) {
+                String validUserId = findOrCreateUser(userId);
+                jdbc.update(
+                        """
+                        INSERT INTO meeting_participant
+                        (
+                            participant_id,
+                            meeting_id,
+                            user_id,
+                            status,
+                            responded_at
+                        )
+                        VALUES
+                        (
+                            :participantId,
+                            :meetingId,
+                            :userId,
+                            'PENDING',
+                            NULL
+                        )
+                        """,
+                        new MapSqlParameterSource()
+                                .addValue("participantId", UUID.randomUUID().toString())
+                                .addValue("meetingId", meetingId)
+                                .addValue("userId", validUserId)
+                );
+            }
+        }
     }
 
     private void saveEquipments(Meeting meeting, List<String> equipmentIds) {
@@ -384,19 +565,16 @@ public class MeetingController {
             if (eqId == null || eqId.isBlank()) continue;
             Equipment eq = equipmentRepository.findById(eqId.trim()).orElse(null);
             if (eq != null) {
-                // Lưu vào bảng meeting_equipment
                 MeetingEquipment me = new MeetingEquipment(meeting.getMeetingId(), eq.getEquipmentId(), 1);
                 meetingEquipmentRepository.save(me);
 
-                // Cập nhật trạng thái thiết bị thành IN_USE
                 eq.setStatus("IN_USE");
                 equipmentRepository.save(eq);
 
-                // Lưu EquipmentBooking
                 EquipmentBooking booking = new EquipmentBooking();
                 booking.setEquipment(eq);
                 booking.setMeetingId(meeting.getMeetingId());
-                booking.setRoom(meeting.getRoomId());
+                booking.setRoom(meeting.getRoomId() != null ? meeting.getRoomId() : "NONE");
                 booking.setQuantity(1);
                 booking.setStartTime(meeting.getStartTime().atZone(ZoneId.systemDefault()).toOffsetDateTime());
                 booking.setEndTime(meeting.getEndTime().atZone(ZoneId.systemDefault()).toOffsetDateTime());
@@ -428,20 +606,15 @@ public class MeetingController {
         return userRepository.save(newUser).getUserId();
     }
 
-    private void validate(MeetingRequest request) {
-        if (request.title() == null || request.title().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng nhập tiêu đề cuộc họp.");
-        }
-        if (request.startTime() == null || request.endTime() == null || !request.endTime().isAfter(request.startTime())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Thời gian kết thúc phải sau thời gian bắt đầu.");
-        }
-        if (request.startTime().isBefore(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Không thể tạo cuộc họp trong quá khứ.");
-        }
+    private Meeting findMeeting(String meetingId) {
+        return meetings.findById(meetingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meeting not found"));
     }
 
     private List<String> cleanParticipants(List<String> participants) {
-        if (participants == null) return new ArrayList<>();
+        if (participants == null) {
+            return new ArrayList<>();
+        }
         return participants.stream()
                 .filter(value -> value != null && !value.isBlank())
                 .map(String::trim)
@@ -453,26 +626,26 @@ public class MeetingController {
         return room == null || room.isBlank() ? null : room.trim();
     }
 
-    private void ensureNoConflict(LocalDateTime start, LocalDateTime end, List<String> participants, String ignoredId) {
-        if (hasConflict(start, end, participants, ignoredId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Người tham dự đã có lịch trong khoảng thời gian này.");
+    private String resolveUserId(String headerUserId, String paramUserId, String requestUserId, String fallbackUserId) {
+        if (headerUserId != null && !headerUserId.isBlank()) return headerUserId.trim();
+        if (paramUserId != null && !paramUserId.isBlank()) return paramUserId.trim();
+        if (requestUserId != null && !requestUserId.isBlank()) return requestUserId.trim();
+        if (fallbackUserId != null && !fallbackUserId.isBlank()) return fallbackUserId.trim();
+        return "USER001";
+    }
+
+    private void releaseRoomIfNoActiveMeetings(String roomId, String excludedMeetingId) {
+        long activeCount = meetings.findAll().stream()
+                .filter(m -> !m.getMeetingId().equals(excludedMeetingId))
+                .filter(m -> roomId.equalsIgnoreCase(m.getRoomId()))
+                .filter(m -> "SCHEDULED".equalsIgnoreCase(m.getStatus()) || "IN_PROGRESS".equalsIgnoreCase(m.getStatus()))
+                .count();
+        if (activeCount == 0) {
+            roomRepository.findById(roomId).ifPresent(r -> {
+                r.setStatus("AVAILABLE");
+                roomRepository.save(r);
+            });
         }
-    }
-
-    private boolean hasConflict(LocalDateTime start, LocalDateTime end, List<String> participants, String ignoredId) {
-        if (participants.isEmpty()) return false;
-        return meetings.findAll().stream()
-                .filter(meeting -> !meeting.getMeetingId().equals(ignoredId))
-                .filter(meeting -> "SCHEDULED".equalsIgnoreCase(meeting.getStatus()))
-                .filter(meeting -> meeting.getStartTime().isBefore(end) && meeting.getEndTime().isAfter(start))
-                .anyMatch(meeting -> {
-                    List<MeetingParticipant> parts = participantRepository.findByMeetingId(meeting.getMeetingId());
-                    return parts.stream().anyMatch(p -> participants.contains(p.getUserId()));
-                });
-    }
-
-    private Meeting findMeeting(String id) {
-        return meetings.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy cuộc họp."));
     }
 
     public record MeetingRequest(
@@ -486,8 +659,32 @@ public class MeetingController {
             Integer repeatCount,
             String room,
             List<String> equipmentIds
-    ) { }
+    ) {
+        public MeetingRequest(
+                String title,
+                String description,
+                LocalDateTime startTime,
+                LocalDateTime endTime,
+                String organizerId,
+                List<String> participants,
+                String recurrence,
+                Integer repeatCount,
+                String room
+        ) {
+            this(title, description, startTime, endTime, organizerId, participants, recurrence, repeatCount, room, null);
+        }
+    }
 
-    public record SuggestionRequest(LocalDate date, Integer durationMinutes, List<String> participants) { }
-    public record TimeSuggestion(LocalDateTime startTime, LocalDateTime endTime) { }
+    public record SuggestionRequest(
+            LocalDate date,
+            Integer durationMinutes,
+            List<String> participants
+    ) {
+    }
+
+    public record TimeSuggestion(
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    ) {
+    }
 }

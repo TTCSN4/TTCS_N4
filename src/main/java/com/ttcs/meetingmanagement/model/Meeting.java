@@ -10,49 +10,49 @@ public class Meeting {
 
     @Id
     @Column(name = "meeting_id", length = 50)
-    private String meetingId;
+    public String meetingId;
 
     @Column(name = "organizer_id", nullable = false, length = 50)
-    private String organizerId;
+    public String organizerId;
 
     @Column(name = "room_id", length = 50)
-    private String roomId;
+    public String roomId;
 
     @Column(name = "title", nullable = false, length = 255)
-    private String title;
+    public String title;
 
     @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    public String description;
 
     @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    public LocalDateTime startTime;
 
     @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    public LocalDateTime endTime;
 
     @Column(name = "status", nullable = false, length = 50)
-    private String status;
+    public String status;
 
     @Column(name = "is_recurring")
-    private Boolean isRecurring = false;
+    public Boolean isRecurring = false;
 
     @Column(name = "recurrence_rule", length = 255)
-    private String recurrenceRule;
+    public String recurrenceRule;
 
     @Column(name = "recurrence_series_id", length = 50)
-    private String recurrenceSeriesId;
+    public String recurrenceSeriesId;
 
     @Column(name = "cancel_reason", length = 255)
-    private String cancelReason;
+    public String cancelReason;
 
     @Column(name = "cancelled_at")
-    private LocalDateTime cancelledAt;
+    public LocalDateTime cancelledAt;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public LocalDateTime updatedAt;
 
     @PrePersist
     void initialize() {
@@ -76,7 +76,6 @@ public class Meeting {
     public Meeting() {
     }
 
-    // Standard ERD getters & setters
     public String getMeetingId() {
         return meetingId;
     }

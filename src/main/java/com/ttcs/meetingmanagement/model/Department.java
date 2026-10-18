@@ -10,61 +10,46 @@ public class Department {
 
     @Id
     @Column(name = "department_id", length = 50)
-    private String departmentId;
+    public String id;
 
-    @Column(name = "department_name", nullable = false)
-    private String departmentName;
+    @Column(name = "department_name")
+    public String name;
 
-    @Column(name = "hrm_code", length = 100)
-    private String hrmCode;
+    @Column(name = "hrm_code")
+    public String hrmCode;
 
     @Column(name = "last_synced_at")
-    private LocalDateTime lastSyncedAt;
+    public LocalDateTime lastSyncedAt;
+
+    public Department() {}
+
+    public Department(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     @PrePersist
     void initialize() {
-        if (departmentId == null || departmentId.isBlank()) {
-            departmentId = UUID.randomUUID().toString();
+        if (id == null || id.isBlank()) {
+            id = UUID.randomUUID().toString();
         }
     }
 
-    public Department() {
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public Department(String departmentId, String departmentName) {
-        this.departmentId = departmentId;
-        this.departmentName = departmentName;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getDepartmentId() {
-        return departmentId;
-    }
+    public String getDepartmentId() { return id; }
+    public void setDepartmentId(String departmentId) { this.id = departmentId; }
 
-    public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
-    }
+    public String getDepartmentName() { return name; }
+    public void setDepartmentName(String departmentName) { this.name = departmentName; }
 
-    public String getDepartmentName() {
-        return departmentName;
-    }
+    public String getHrmCode() { return hrmCode; }
+    public void setHrmCode(String hrmCode) { this.hrmCode = hrmCode; }
 
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    public String getHrmCode() {
-        return hrmCode;
-    }
-
-    public void setHrmCode(String hrmCode) {
-        this.hrmCode = hrmCode;
-    }
-
-    public LocalDateTime getLastSyncedAt() {
-        return lastSyncedAt;
-    }
-
-    public void setLastSyncedAt(LocalDateTime lastSyncedAt) {
-        this.lastSyncedAt = lastSyncedAt;
-    }
+    public LocalDateTime getLastSyncedAt() { return lastSyncedAt; }
+    public void setLastSyncedAt(LocalDateTime lastSyncedAt) { this.lastSyncedAt = lastSyncedAt; }
 }

@@ -6,12 +6,7 @@ import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/room-bookings")
@@ -23,7 +18,7 @@ public class RoomBookingController {
         this.roomBookingService = roomBookingService;
     }
 
-    // US08 - Đặt phòng
+    // US08 + US21: Dat phong va kiem tra quyen
     @PostMapping
     public ResponseEntity<RoomBookingResponse> bookRoom(
             @Valid @RequestBody RoomBookingRequest request) {
@@ -32,7 +27,7 @@ public class RoomBookingController {
         return ResponseEntity.ok(response);
     }
 
-    // US09 - Hủy đặt phòng
+    // US09: Huy dat phong
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<RoomBookingResponse> cancelRoomBooking(
             @PathVariable String meetingId) {

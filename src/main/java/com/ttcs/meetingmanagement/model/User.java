@@ -11,42 +11,42 @@ public class User {
 
     @Id
     @Column(name = "user_id", length = 50)
-    private String userId;
+    public String userId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "role_id")
-    private Role role;
+    public Role role;
 
     @Column(name = "department_id", length = 50)
-    private String departmentId;
+    public String departmentId;
 
-    @Column(name = "hrm_code", length = 100)
-    private String hrmCode;
+    @Column(name = "hrm_code", length = 100, unique = true)
+    public String hrmCode;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "full_name")
+    public String fullName;
 
     @Column(name = "email")
-    private String email;
+    public String email;
 
     @Column(name = "phone", length = 30)
-    private String phone;
+    public String phone;
 
-    @Column(name = "status", nullable = false, length = 50)
-    private String status;
+    @Column(name = "status", length = 50)
+    public String status;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public LocalDateTime updatedAt;
 
     @Column(name = "last_synced_at")
-    private LocalDateTime lastSyncedAt;
+    public LocalDateTime lastSyncedAt;
 
     @JsonIgnore
     @Column(name = "password_hash")
-    private String passwordHash;
+    public String passwordHash;
 
     @PrePersist
     void initialize() {

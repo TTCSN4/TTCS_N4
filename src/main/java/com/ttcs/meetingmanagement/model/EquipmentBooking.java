@@ -1,23 +1,14 @@
 package com.ttcs.meetingmanagement.model;
 
 import com.ttcs.meetingmanagement.equipment.Equipment;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "equipment_bookings")
 public class EquipmentBooking {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -48,19 +39,63 @@ public class EquipmentBooking {
     public EquipmentBooking() {
     }
 
-    public Long getId() { return id; }
-    public Equipment getEquipment() { return equipment; }
-    public void setEquipment(Equipment equipment) { this.equipment = equipment; }
-    public String getMeetingId() { return meetingId; }
-    public void setMeetingId(String meetingId) { this.meetingId = meetingId; }
-    public String getRoom() { return room; }
-    public void setRoom(String room) { this.room = room; }
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-    public OffsetDateTime getStartTime() { return startTime; }
-    public void setStartTime(OffsetDateTime startTime) { this.startTime = startTime; }
-    public OffsetDateTime getEndTime() { return endTime; }
-    public void setEndTime(OffsetDateTime endTime) { this.endTime = endTime; }
-    public EquipmentBookingStatus getStatus() { return status; }
-    public void setStatus(EquipmentBookingStatus status) { this.status = status; }
+    public Long getId() {
+        return id;
+    }
+
+    public Equipment getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(Equipment equipment) {
+        this.equipment = equipment;
+    }
+
+    public String getMeetingId() {
+        return meetingId;
+    }
+
+    public void setMeetingId(String meetingId) {
+        this.meetingId = meetingId;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public OffsetDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(OffsetDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public OffsetDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(OffsetDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public EquipmentBookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EquipmentBookingStatus status) {
+        this.status = status;
+    }
 }

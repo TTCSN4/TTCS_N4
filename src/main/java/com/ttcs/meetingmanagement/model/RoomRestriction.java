@@ -3,28 +3,29 @@ package com.ttcs.meetingmanagement.model;
 import jakarta.persistence.*;
 import java.util.UUID;
 
+/** ERD restriction plus the role/department scope already used by develop's US21 SQL. */
 @Entity
 @Table(name = "room_restriction")
 public class RoomRestriction {
 
     @Id
     @Column(name = "restriction_id", length = 50)
-    private String restrictionId;
+    public String restrictionId;
 
-    @Column(name = "room_id", nullable = false, length = 50)
-    private String roomId;
+    @Column(name = "room_id", length = 50)
+    public String roomId;
 
     @Column(name = "user_id", length = 50)
-    private String userId;
+    public String userId;
 
     @Column(name = "role_id", length = 50)
-    private String roleId;
+    public String roleId;
 
     @Column(name = "department_id", length = 50)
-    private String departmentId;
+    public String departmentId;
 
-    @Column(name = "notes", length = 255)
-    private String notes;
+    @Column(columnDefinition = "TEXT")
+    public String notes;
 
     @PrePersist
     void initialize() {

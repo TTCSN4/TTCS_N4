@@ -5,8 +5,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, String> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Room r where r.roomId = :id")
+    Optional<Room> findLockedById(@Param("id") String id);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    List<Room> findByStatusAndCapacityGreaterThanEqualOrderByCapacity(String status, int capacity);
 
     // US10 - filter rooms by participant capacity
     List<Room> findByCapacityGreaterThanEqualOrderByCapacityAsc(
@@ -33,7 +40,7 @@ public interface RoomRepository extends JpaRepository<Room, String> {
             @Param("roomId") String roomId
     );
 
-    java.util.Optional<Room> findByRoomNameIgnoreCase(String roomName);
+    Optional<Room> findByRoomNameIgnoreCase(String roomName);
 
     @Query("""
            SELECT r FROM Room r
@@ -43,9 +50,9 @@ public interface RoomRepository extends JpaRepository<Room, String> {
            """)
     List<Room> searchByRoomIdOrName(@Param("query") String query);
 
-    default java.util.Optional<Room> findByRoomIdOrRoomNameFuzzy(String query) {
-        if (query == null || query.isBlank()) return java.util.Optional.empty();
+    default Optional<Room> findByRoomIdOrRoomNameFuzzy(String query) {
+        if (query == null || query.isBlank()) return Optional.empty();
         List<Room> list = searchByRoomIdOrName(query.trim());
-        return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
+        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 }
