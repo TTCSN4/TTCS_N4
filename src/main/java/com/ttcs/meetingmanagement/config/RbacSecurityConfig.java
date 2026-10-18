@@ -2,9 +2,11 @@
 package com.ttcs.meetingmanagement.config;
 
 import com.ttcs.meetingmanagement.rbac.RbacAccess;
+import com.ttcs.meetingmanagement.security.MobileJwtAuthenticationConverter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -13,13 +15,18 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableMethodSecurity
+@Order(2)
 public class RbacSecurityConfig {
 
     @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            RbacAccess rbacAccess
+            RbacAccess rbacAccess,
+            MobileJwtAuthenticationConverter converter
     ) throws Exception {
+
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
 
         http.authorizeHttpRequests(auth -> auth
 
@@ -64,6 +71,19 @@ public class RbacSecurityConfig {
                 )
             )
 
+            // Chi Admin hoac Nguoi dat lich co the yeu cau huy;
+            // service van chi cho phep nguoi to chuc huy meeting cua minh.
+            .requestMatchers(
+                HttpMethod.DELETE,
+                "/api/meetings/**",
+                "/api/room-bookings/**"
+            )
+            .access((authentication, context) ->
+                new AuthorizationDecision(
+                    rbacAccess.canBook(authentication.get())
+                )
+            )
+
             // Doc thong tin phong theo vai tro duoc phep
             .requestMatchers(
                 HttpMethod.GET,
@@ -84,8 +104,10 @@ public class RbacSecurityConfig {
             .anyRequest().permitAll()
         );
 
-        // Giu nguyen CSRF mac dinh.
-        // Chua cau hinh boi vi module dang nhap chua co.
+        http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
+                jwt.jwtAuthenticationConverter(converter)));
+
+        // Browser CSRF protection remains enabled outside stateless /api/** requests.
 
         return http.build();
     }

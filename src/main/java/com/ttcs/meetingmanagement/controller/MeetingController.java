@@ -201,27 +201,6 @@ public class MeetingController {
     }
 
     // ==========================================
-    // 5. HUY CUOC HOP
-    // ==========================================
-
-    @DeleteMapping("/{id}")
-    @Transactional
-    public void cancel(@PathVariable String id) {
-
-        Meeting meeting = findMeeting(id);
-
-        meeting.setStatus("CANCELLED");
-        meeting.setCancelledAt(LocalDateTime.now());
-        meeting.setUpdatedAt(LocalDateTime.now());
-
-        meetings.save(meeting);
-
-        // Can dong bo phan huy dat thiet bi
-        // sau khi sua EquipmentBookingRepository
-        // theo meetingId String.
-    }
-
-    // ==========================================
     // 6. GOI Y THOI GIAN HOP
     // ==========================================
 

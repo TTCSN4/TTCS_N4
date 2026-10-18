@@ -4,6 +4,7 @@ package com.ttcs.meetingmanagement.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,6 +27,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Configuration
+@Order(1)
 public class MobileSecurityConfig {
 
     private final String secretBase64;
@@ -122,12 +124,14 @@ public class MobileSecurityConfig {
     // 2. CAU HINH BAO MAT API MOBILE
     // ========================================
     @Bean
+    @Order(1)
     public SecurityFilterChain mobileFilterChain(
             HttpSecurity http,
             MobileJwtAuthenticationConverter converter
     ) throws Exception {
 
         return http
+                .securityMatcher("/api/mobile/**", "/us17.html")
 
                 // KHONG SU DUNG CSRF CHO API STATELESS
                 .csrf(csrf -> csrf.disable())

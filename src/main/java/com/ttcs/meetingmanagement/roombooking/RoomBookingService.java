@@ -3,7 +3,9 @@ package com.ttcs.meetingmanagement.roombooking;
 
 import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
+import com.ttcs.meetingmanagement.model.EquipmentBookingStatus;
 import com.ttcs.meetingmanagement.model.Meeting;
+import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
@@ -19,15 +21,18 @@ import java.time.LocalDateTime;
 public class RoomBookingService {
 
     private final MeetingRepository meetingRepository;
+    private final EquipmentBookingRepository equipmentBookingRepository;
     private final RoomRepository roomRepository;
     private final RoomBookingPermissionService permissionService;
 
     public RoomBookingService(
             MeetingRepository meetingRepository,
+            EquipmentBookingRepository equipmentBookingRepository,
             RoomRepository roomRepository,
             RoomBookingPermissionService permissionService) {
 
         this.meetingRepository = meetingRepository;
+        this.equipmentBookingRepository = equipmentBookingRepository;
         this.roomRepository = roomRepository;
         this.permissionService = permissionService;
     }
@@ -122,41 +127,50 @@ public class RoomBookingService {
         );
     }
 
-    // US09: Huy dat phong
+    // US09: Huy dat phong, giu nguyen cuoc hop va lich su cua no.
     @Transactional
-    public RoomBookingResponse cancelRoomBooking(String meetingId) {
+    public RoomBookingResponse cancelRoomBooking(String meetingId, String actorId) {
+        if (meetingId == null || meetingId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Meeting ID is required");
+        }
+        if (actorId == null || actorId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user identity is required");
+        }
 
-        Meeting meeting = meetingRepository.findById(meetingId)
+        Meeting meeting = meetingRepository.findByIdForUpdate(meetingId.trim())
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Meeting not found"
-                ));
+                        HttpStatus.NOT_FOUND, "Meeting not found"));
 
-        if (meeting.getRoomId() == null
-                || meeting.getRoomId().isBlank()) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Meeting has no room booking"
-            );
+        if (!actorId.trim().equals(meeting.getOrganizerId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only the organizer can cancel this room booking");
+        }
+        if ("CANCELLED".equalsIgnoreCase(meeting.getStatus())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Cannot cancel a room booking for a cancelled meeting");
+        }
+        if (meeting.getRoomId() == null || meeting.getRoomId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Meeting has no room booking");
         }
 
         String oldRoomId = meeting.getRoomId();
-
         LocalDateTime startTime = meeting.getStartTime();
         LocalDateTime endTime = meeting.getEndTime();
 
+        // Equipment reservations created for this meeting are no longer usable
+        // without its room. Maintenance records are independent and must remain.
+        var bookings = equipmentBookingRepository.findAllByMeetingId(meeting.getMeetingId());
+        bookings.stream()
+                .filter(booking -> booking.getStatus() == EquipmentBookingStatus.BOOKED)
+                .forEach(booking -> booking.setStatus(EquipmentBookingStatus.CANCELLED));
+        equipmentBookingRepository.saveAll(bookings);
+
         meeting.setRoomId(null);
         meeting.setUpdatedAt(LocalDateTime.now());
+        meetingRepository.saveAndFlush(meeting);
 
-        meetingRepository.save(meeting);
-
-        return new RoomBookingResponse(
-                meeting.getMeetingId(),
-                oldRoomId,
-                startTime,
-                endTime,
-                "Room booking cancelled successfully"
-        );
+        return new RoomBookingResponse(meeting.getMeetingId(), oldRoomId,
+                startTime, endTime, "Room booking cancelled successfully");
     }
 }

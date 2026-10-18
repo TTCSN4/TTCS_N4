@@ -5,6 +5,7 @@ import com.ttcs.meetingmanagement.model.User;
 import com.ttcs.meetingmanagement.repository.UserRepository;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,12 +59,9 @@ public class RbacAccess {
 
         // Identity must come from trusted authentication.
         // Do not trust a client-provided userId.
-        if (!(authentication.getPrincipal()
-                instanceof AuthenticatedUserIdentity identity)) {
-            return false;
-        }
-
-        String userId = identity.getUserId();
+        String userId = authentication.getPrincipal() instanceof AuthenticatedUserIdentity identity
+                ? identity.getUserId()
+                : authentication.getPrincipal() instanceof Jwt jwt ? jwt.getSubject() : null;
 
         if (userId == null || userId.isBlank()) {
             return false;

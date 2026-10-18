@@ -49,9 +49,18 @@ public class US02MeetingService {
 
     @Transactional
     public void cancel(String id, String actor, String reason) {
-        Meeting m = locked(id, actor);
-        m.status = "CANCELLED"; m.cancelReason = reason; m.cancelledAt = LocalDateTime.now();
-        releaseEquipment(id); meetings.saveAndFlush(m);
+        if (id == null || id.isBlank()) {
+            throw error(HttpStatus.BAD_REQUEST, "Meeting ID is required");
+        }
+        if (reason != null && reason.length() > 255) {
+            throw error(HttpStatus.BAD_REQUEST, "Cancel reason must not exceed 255 characters");
+        }
+        Meeting m = locked(id.trim(), actor);
+        m.status = "CANCELLED";
+        m.cancelReason = reason == null || reason.isBlank() ? null : reason.trim();
+        m.cancelledAt = LocalDateTime.now();
+        releaseEquipment(m.meetingId);
+        meetings.saveAndFlush(m);
     }
 
     private Meeting locked(String id, String actor) {
@@ -63,7 +72,9 @@ public class US02MeetingService {
     }
     private void releaseEquipment(String id) {
         var bookings = equipment.findAllByMeetingId(id);
-        bookings.forEach(b -> b.setStatus(EquipmentBookingStatus.CANCELLED));
+        bookings.stream()
+                .filter(booking -> booking.getStatus() == EquipmentBookingStatus.BOOKED)
+                .forEach(booking -> booking.setStatus(EquipmentBookingStatus.CANCELLED));
         equipment.saveAll(bookings);
     }
     private static ResponseStatusException error(HttpStatus status, String message) { return new ResponseStatusException(status, message); }

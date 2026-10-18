@@ -1,8 +1,8 @@
-
 package com.ttcs.meetingmanagement.roombooking;
 
 import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
+import com.ttcs.meetingmanagement.security.BackendActor;
 
 import jakarta.validation.Valid;
 
@@ -38,7 +38,10 @@ public class RoomBookingController {
             @PathVariable String meetingId) {
 
         RoomBookingResponse response =
-                roomBookingService.cancelRoomBooking(meetingId);
+                roomBookingService.cancelRoomBooking(
+                        meetingId,
+                        BackendActor.requireUserId()
+                );
 
         return ResponseEntity.ok(response);
     }
