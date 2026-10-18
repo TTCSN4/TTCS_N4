@@ -32,6 +32,10 @@ public interface MeetingRepository
     long countByRoomIdAndStatusInAndStartTimeLessThanAndEndTimeGreaterThan(
         String room, java.util.Collection<String> statuses, LocalDateTime end, LocalDateTime start);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select m from Meeting m where m.recurrenceSeriesId=:series order by m.startTime,m.meetingId")
+    List<Meeting> lockSeries(@Param("series") String series);
+
     // Lay tat ca cuoc hop theo thoi gian bat dau
     List<Meeting> findAllByOrderByStartTimeAsc();
 
