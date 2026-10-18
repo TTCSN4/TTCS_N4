@@ -1,14 +1,13 @@
 package com.ttcs.meetingmanagement.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public class RoomBookingRequest {
 
-    @NotNull(message = "meetingId is required")
+    @NotBlank(message = "Meeting ID is required")
     private String meetingId;
 
-    @NotBlank(message = "roomId is required")
+    @NotBlank(message = "Room ID is required")
     private String roomId;
 
     public RoomBookingRequest() {

@@ -6,15 +6,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "role")
+@Table(name = "`role`")
 public class Role {
 
     @Id
     @Column(name = "role_id", nullable = false, length = 50)
-    private String roleId;
+    public String roleId;
 
     @Column(name = "role_name", nullable = false, length = 100)
-    private String roleName;
+    public String roleName;
 
     public Role() {
     }

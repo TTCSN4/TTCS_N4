@@ -1,13 +1,14 @@
+
 package com.ttcs.meetingmanagement.dto;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 public class RoomBookingResponse {
 
     private String meetingId;
     private String roomId;
-    private OffsetDateTime startTime;
-    private OffsetDateTime endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String message;
 
     public RoomBookingResponse() {
@@ -16,8 +17,8 @@ public class RoomBookingResponse {
     public RoomBookingResponse(
             String meetingId,
             String roomId,
-            OffsetDateTime startTime,
-            OffsetDateTime endTime,
+            LocalDateTime startTime,
+            LocalDateTime endTime,
             String message) {
 
         this.meetingId = meetingId;
@@ -43,19 +44,19 @@ public class RoomBookingResponse {
         this.roomId = roomId;
     }
 
-    public OffsetDateTime getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(OffsetDateTime startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public OffsetDateTime getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(OffsetDateTime endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 

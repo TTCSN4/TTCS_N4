@@ -1,53 +1,77 @@
 package com.ttcs.meetingmanagement.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import java.time.OffsetDateTime;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "department")
+@Table(name = "department", uniqueConstraints = @UniqueConstraint(name = "uk_department_hrm_code", columnNames = "hrm_code"))
 public class Department {
 
     @Id
-    @Column(name = "department_id", nullable = false, length = 50)
-    private String departmentId;
+    @Column(name = "department_id", length = 50)
+    public String id;
 
-    @Column(name = "department_name", nullable = false, length = 255)
-    private String departmentName;
+    @Column(name = "department_name")
+    public String name;
 
-    @Column(name = "hrm_code", length = 50)
-    private String hrmCode;
+    @Column(name = "hrm_code")
+    public String hrmCode;
 
     @Column(name = "last_synced_at")
-    private OffsetDateTime lastSyncedAt;
+    public LocalDateTime lastSyncedAt;
 
-    public Department() {
+    public Department() {}
+
+    public Department(String id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
-    public Department(String departmentId, String departmentName, String hrmCode, OffsetDateTime lastSyncedAt) {
-        this.departmentId = departmentId;
-        this.departmentName = departmentName;
+    public Department(String id, String name, String hrmCode, LocalDateTime lastSyncedAt) {
+        this.id = id;
+        this.name = name;
         this.hrmCode = hrmCode;
         this.lastSyncedAt = lastSyncedAt;
     }
 
+    @PrePersist
+    void initialize() {
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getDepartmentId() {
-        return departmentId;
+        return id;
     }
 
     public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
+        this.id = departmentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDepartmentName() {
-        return departmentName;
+        return name;
     }
 
     public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
+        this.name = departmentName;
     }
 
     public String getHrmCode() {
@@ -58,11 +82,11 @@ public class Department {
         this.hrmCode = hrmCode;
     }
 
-    public OffsetDateTime getLastSyncedAt() {
+    public LocalDateTime getLastSyncedAt() {
         return lastSyncedAt;
     }
 
-    public void setLastSyncedAt(OffsetDateTime lastSyncedAt) {
+    public void setLastSyncedAt(LocalDateTime lastSyncedAt) {
         this.lastSyncedAt = lastSyncedAt;
     }
 }

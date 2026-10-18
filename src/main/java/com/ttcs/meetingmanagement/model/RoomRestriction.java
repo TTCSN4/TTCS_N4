@@ -1,26 +1,31 @@
 package com.ttcs.meetingmanagement.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.util.UUID;
 
+/** ERD restriction plus the role/department scope already used by develop's US21 SQL. */
 @Entity
 @Table(name = "room_restriction")
 public class RoomRestriction {
 
     @Id
     @Column(name = "restriction_id", nullable = false, length = 50)
-    private String restrictionId;
+    public String restrictionId;
 
     @Column(name = "room_id", nullable = false, length = 50)
-    private String roomId;
+    public String roomId;
 
-    @Column(name = "user_id", nullable = false, length = 50)
-    private String userId;
+    @Column(name = "user_id", length = 50)
+    public String userId;
+
+    @Column(name = "role_id", length = 50)
+    public String roleId;
+
+    @Column(name = "department_id", length = 50)
+    public String departmentId;
 
     @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
+    public String notes;
 
     public RoomRestriction() {
     }
@@ -30,6 +35,13 @@ public class RoomRestriction {
         this.roomId = roomId;
         this.userId = userId;
         this.notes = notes;
+    }
+
+    @PrePersist
+    void initialize() {
+        if (restrictionId == null) {
+            restrictionId = UUID.randomUUID().toString();
+        }
     }
 
     public String getRestrictionId() {
@@ -54,6 +66,22 @@ public class RoomRestriction {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
+
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
     }
 
     public String getNotes() {

@@ -1,41 +1,48 @@
 package com.ttcs.meetingmanagement.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import java.time.OffsetDateTime;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "meeting_participant")
 public class MeetingParticipant {
 
     @Id
-    @Column(name = "participant_id", nullable = false, length = 50)
-    private String participantId;
+    @Column(name = "participant_id", length = 50)
+    public String participantId;
 
     @Column(name = "meeting_id", nullable = false, length = 50)
-    private String meetingId;
+    public String meetingId;
 
     @Column(name = "user_id", nullable = false, length = 50)
-    private String userId;
+    public String userId;
 
-    @Column(name = "status", length = 50)
-    private String status;
+    @Column(name = "status", nullable = false, length = 50)
+    public String status = "PENDING";
 
     @Column(name = "responded_at")
-    private OffsetDateTime respondedAt;
+    public LocalDateTime respondedAt;
 
     public MeetingParticipant() {
     }
 
-    public MeetingParticipant(String participantId, String meetingId, String userId, String status, OffsetDateTime respondedAt) {
+    public MeetingParticipant(String participantId, String meetingId, String userId, String status, LocalDateTime respondedAt) {
         this.participantId = participantId;
         this.meetingId = meetingId;
         this.userId = userId;
         this.status = status;
         this.respondedAt = respondedAt;
+    }
+
+    @PrePersist
+    void initialize() {
+        if (participantId == null) {
+            participantId = UUID.randomUUID().toString();
+        }
+        if (status == null) {
+            status = "PENDING";
+        }
     }
 
     public String getParticipantId() {
@@ -70,11 +77,11 @@ public class MeetingParticipant {
         this.status = status;
     }
 
-    public OffsetDateTime getRespondedAt() {
+    public LocalDateTime getRespondedAt() {
         return respondedAt;
     }
 
-    public void setRespondedAt(OffsetDateTime respondedAt) {
+    public void setRespondedAt(LocalDateTime respondedAt) {
         this.respondedAt = respondedAt;
     }
 }

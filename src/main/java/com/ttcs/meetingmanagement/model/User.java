@@ -1,67 +1,67 @@
 package com.ttcs.meetingmanagement.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import java.time.OffsetDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "`user`")
+@Table(name = "`user`", uniqueConstraints = @UniqueConstraint(name = "uk_user_email", columnNames = "email"))
 public class User {
 
     @Id
-    @Column(name = "user_id", nullable = false, length = 50)
-    private String userId;
+    @Column(name = "user_id", length = 50)
+    public String userId;
 
-    @Column(name = "role_id", length = 50)
-    private String roleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    public Role role;
 
     @Column(name = "department_id", length = 50)
-    private String departmentId;
+    public String departmentId;
 
-    @Column(name = "hrm_code", length = 50)
-    private String hrmCode;
+    @Column(name = "hrm_code", unique = true, length = 50)
+    public String hrmCode;
 
-    @Column(name = "full_name", nullable = false, length = 255)
-    private String fullName;
+    @Column(name = "full_name", nullable = false)
+    public String fullName;
 
-    @Column(name = "email", length = 255)
-    private String email;
+    @Column(name = "email")
+    public String email;
 
     @Column(name = "phone", length = 50)
-    private String phone;
+    public String phone;
 
     @Column(name = "status", length = 50)
-    private String status;
+    public String status;
 
     @Column(name = "created_at")
-    private OffsetDateTime createdAt;
+    public LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    public LocalDateTime updatedAt;
 
     @Column(name = "last_synced_at")
-    private OffsetDateTime lastSyncedAt;
+    public LocalDateTime lastSyncedAt;
+
+    @JsonIgnore
+    @Column(name = "password_hash")
+    public String passwordHash;
 
     public User() {
     }
 
-    public User(String userId, String roleId, String departmentId, String hrmCode, String fullName,
-                String email, String phone, String status, OffsetDateTime createdAt,
-                OffsetDateTime updatedAt, OffsetDateTime lastSyncedAt) {
-        this.userId = userId;
-        this.roleId = roleId;
-        this.departmentId = departmentId;
-        this.hrmCode = hrmCode;
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.lastSyncedAt = lastSyncedAt;
+    @PrePersist
+    void initialize() {
+        if (userId == null) userId = UUID.randomUUID().toString();
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (status == null) status = "ACTIVE";
+    }
+
+    @PreUpdate
+    void updateTimestamp() {
+        updatedAt = LocalDateTime.now();
     }
 
     public String getUserId() {
@@ -72,12 +72,27 @@ public class User {
         this.userId = userId;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public String getRoleId() {
-        return roleId;
+        return role == null ? null : role.getRoleId();
     }
 
     public void setRoleId(String roleId) {
-        this.roleId = roleId;
+        if (roleId != null) {
+            if (this.role == null) {
+                this.role = new Role();
+            }
+            this.role.setRoleId(roleId);
+        } else {
+            this.role = null;
+        }
     }
 
     public String getDepartmentId() {
@@ -128,27 +143,35 @@ public class User {
         this.status = status;
     }
 
-    public OffsetDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(OffsetDateTime createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public OffsetDateTime getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 
-    public OffsetDateTime getLastSyncedAt() {
+    public LocalDateTime getLastSyncedAt() {
         return lastSyncedAt;
     }
 
-    public void setLastSyncedAt(OffsetDateTime lastSyncedAt) {
+    public void setLastSyncedAt(LocalDateTime lastSyncedAt) {
         this.lastSyncedAt = lastSyncedAt;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 }
