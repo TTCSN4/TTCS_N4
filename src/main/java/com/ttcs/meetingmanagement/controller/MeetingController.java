@@ -26,6 +26,8 @@ import java.util.UUID;
 @RequestMapping("/api/meetings")
 public class MeetingController {
 
+    private final com.ttcs.meetingmanagement.equipment.EquipmentReservationService reservations;
+    private final com.ttcs.meetingmanagement.room.RoomRepository rooms;
     private final MeetingRepository meetings;
     private final RoomBookingPermissionService permissionService;
     private final NamedParameterJdbcTemplate jdbc;
@@ -33,7 +35,10 @@ public class MeetingController {
     public MeetingController(
             MeetingRepository meetings,
             RoomBookingPermissionService permissionService,
-            NamedParameterJdbcTemplate jdbc) {
+            NamedParameterJdbcTemplate jdbc,
+            com.ttcs.meetingmanagement.equipment.EquipmentReservationService reservations,
+            com.ttcs.meetingmanagement.room.RoomRepository rooms) {
+        this.reservations=reservations;this.rooms=rooms;
 
         this.meetings = meetings;
         this.permissionService = permissionService;
@@ -72,6 +77,10 @@ public class MeetingController {
             @RequestBody MeetingRequest request) {
 
         validate(request);
+        if(!com.ttcs.meetingmanagement.security.BackendActor.requireUserId().equals(request.organizerId().trim()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Organizer must be the authenticated user");
+        if(!request.startTime().isAfter(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Meeting must start in the future");
 
         List<String> participants =
                 cleanParticipants(request.participants());
@@ -274,6 +283,8 @@ public class MeetingController {
                 participants
         );
 
+        meetings.flush();
+        if(request.equipment()!=null)reservations.replace(saved,request.equipment());
         return saved;
     }
 
@@ -348,6 +359,10 @@ public class MeetingController {
 
         // Kiem tra quyen truoc khi dat phong
         if (roomId != null) {
+            var room=rooms.findLockedById(roomId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Room not found"));
+            if(!"AVAILABLE".equalsIgnoreCase(room.status)&&!"ACTIVE".equalsIgnoreCase(room.status))throw new ResponseStatusException(HttpStatus.CONFLICT,"Room is unavailable");
+            if(room.capacity!=null && new HashSet<>(participants).size()+(participants.contains(organizerId)?0:1)>room.capacity)
+                throw new ResponseStatusException(HttpStatus.CONFLICT,"Room capacity exceeded");
 
             permissionService.assertCanBook(
                     organizerId,
@@ -555,7 +570,8 @@ public class MeetingController {
             List<String> participants,
             String recurrence,
             Integer repeatCount,
-            String room
+            String room,
+            List<com.ttcs.meetingmanagement.equipment.EquipmentReservationService.Item> equipment
     ) {
     }
 
