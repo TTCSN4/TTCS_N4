@@ -49,9 +49,9 @@ public class EquipmentReservationService {
         List<Event> events=new ArrayList<>();
         for(EquipmentBooking b:allocations){
             Meeting m=b.getMeeting();
-            if(ignored.contains(m.meetingId)||"CANCELLED".equals(m.status)||!m.startTime.isBefore(end)||!m.endTime.isAfter(start))continue;
-            events.add(new Event(m.startTime.isBefore(start)?start:m.startTime,b.getQuantity()));
-            events.add(new Event(m.endTime.isAfter(end)?end:m.endTime,-b.getQuantity()));
+            if(ignored.contains(m.getMeetingId())||"CANCELLED".equals(m.getStatus())||!m.getStartTime().isBefore(end)||!m.getEndTime().isAfter(start))continue;
+            events.add(new Event(m.getStartTime().isBefore(start)?start:m.getStartTime(),b.getQuantity()));
+            events.add(new Event(m.getEndTime().isAfter(end)?end:m.getEndTime(),-b.getQuantity()));
         }
         events.sort(Comparator.comparing(Event::time).thenComparingInt(Event::delta));
         int used=0,peak=0;for(Event event:events){used+=event.delta();peak=Math.max(peak,used);}

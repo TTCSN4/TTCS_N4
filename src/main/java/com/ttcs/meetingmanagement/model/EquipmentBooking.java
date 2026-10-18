@@ -14,14 +14,14 @@ public class EquipmentBooking {
     public EquipmentBookingId getId(){return new EquipmentBookingId(meetingId,equipmentId);}
     public String getMeetingId(){return meetingId;}
     public void setMeetingId(String id){meetingId=id;}
-    public void setMeeting(Meeting value){meeting=value;meetingId=value.meetingId;}
+    public void setMeeting(Meeting value){meeting=value;meetingId=value.getMeetingId();}
     public Meeting getMeeting(){return meeting;}
     public Equipment getEquipment(){return equipment;}
     public void setEquipment(Equipment value){equipment=value;equipmentId=value.getEquipmentId();}
     public int getQuantity(){return quantity;}
     public void setQuantity(int value){quantity=value;}
-    public String getRoom(){return meeting.roomId;}
-    public OffsetDateTime getStartTime(){return meeting.startTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime();}
-    public OffsetDateTime getEndTime(){return meeting.endTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime();}
-    public EquipmentBookingStatus getStatus(){return "CANCELLED".equals(meeting.status)?EquipmentBookingStatus.CANCELLED:EquipmentBookingStatus.BOOKED;}
+    public String getRoom(){return meeting.getRoomId();}
+    public OffsetDateTime getStartTime(){return meeting.getStartTime().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime();}
+    public OffsetDateTime getEndTime(){return meeting.getEndTime().atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime();}
+    public EquipmentBookingStatus getStatus(){return "CANCELLED".equals(meeting.getStatus())?EquipmentBookingStatus.CANCELLED:EquipmentBookingStatus.BOOKED;}
 }
