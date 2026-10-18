@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Quản lý phòng họp · Meeting</title>
+    <link rel="stylesheet" href="../css/room-capacity.css" />
+    <link rel="stylesheet" href="../css/room-management.css" />
+    <script defer src="../js/room-management.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">Meeting</div>
+          <div class="brand-sub">Meeting Management</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <span
+          class="nav-item"
+          aria-disabled="true"
+          title="Chức năng chưa có trong bản US11"
+        >
+          <i data-icon="room"></i>
+          <span>Trang chủ</span>
+        </span>
+
+        <div>
+          <span
+            class="nav-item parent"
+            aria-disabled="true"
+            title="Chức năng chưa có trong bản US11"
+          >
+            <i data-icon="calendar"></i>
+            <span>Lịch họp</span>
+            <span class="chev"><i data-icon="menu"></i></span>
+          </span>
+          <div class="sub-menu">
+            <span
+              class="sub-item"
+              aria-disabled="true"
+              title="Chức năng chưa có trong bản US11"
+              ><span class="dot"></span><span>Tạo lịch họp</span></span
+            >
+            <span class="sub-item" aria-disabled="true"
+              ><span class="dot"></span><span>Quản lý lịch họp</span></span
+            >
+          </div>
+        </div>
+
+        <div class="room-navigation">
+          <a class="nav-item parent active" href="rooms.html"
+            ><i data-icon="room"></i><span>Phòng &amp; thiết bị</span
+            ><span class="chev">⌃</span></a
+          >
+          <div class="sub-menu">
+            <a class="sub-item active" href="rooms.html" aria-current="page"
+              ><span class="dot"></span><span>Quản lý phòng họp</span></a
+            >
+          </div>
+        </div>
+        <a class="nav-item" href="#">
+          <i data-icon="clock"></i>
+          <span>Lịch của tôi</span>
+        </a>
+
+        <span
+          class="nav-item"
+          aria-disabled="true"
+          title="Chức năng chưa có trong bản US11"
+        >
+          <i data-icon="users"></i>
+          <span>Người tham gia</span>
+        </span>
+
+        <a class="nav-item" href="#">
+          <i data-icon="tool"></i>
+          <span>Cài đặt</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">L</div>
+        <div class="user-mini">
+          <div class="name">Lê</div>
+          <div class="role">Nhân viên</div>
+        </div>
+        <i data-icon="menu" style="opacity: 0.7; font-size: 11px"></i>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button
+          id="menu-toggle"
+          class="icon-button mobile-menu"
+          aria-label="Ẩn hoặc hiện menu"
+          aria-controls="sidebar"
+          aria-expanded="false"
+        >
+          <i data-icon="menu"></i>
+        </button>
+        <nav class="breadcrumb" aria-label="Đường dẫn">
+          <span>Trang chủ</span><b>›</b><span>Phòng &amp; thiết bị</span><b>›</b
+          ><strong>Quản lý phòng họp</strong>
+        </nav>
+        <div class="account">
+          <i data-icon="bell"></i><span class="avatar">NA</span>
+          <div>
+            <strong>Nguyễn Văn An</strong><small id="role-label">Admin</small>
+          </div>
+          <span>⌄</span>
+        </div>
+      </header>
+      <main>
+        <div class="page-heading">
+          <div class="title-row">
+            <h1>Quản lý phòng họp</h1>
+          </div>
+          <p>
+            Quản lý thông tin phòng họp: thêm, sửa, trạng thái hoạt động, bảo
+            trì hoặc ngừng sử dụng.
+          </p>
+        </div>
+        <div id="permission-warning" class="notice danger" hidden>
+          Chỉ Admin được quản lý phòng. Bạn có thể xem danh sách nhưng không
+          được thay đổi dữ liệu.
+        </div>
+        <section class="stats admin-stats" aria-label="Thống kê phòng">
+          <article class="stat">
+            <span class="stat-icon blue" data-icon="room"></span>
+            <div>
+              <p>Tổng số phòng</p>
+              <strong id="total">8</strong>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon green" data-icon="check"></span>
+            <div>
+              <p>Đang hoạt động</p>
+              <strong id="active">5</strong><small id="active-percent"></small>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon orange" data-icon="tool"></span>
+            <div>
+              <p>Bảo trì</p>
+              <strong id="maintenance">1</strong
+              ><small id="maintenance-percent"></small>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon red" data-icon="ban"></span>
+            <div>
+              <p>Ngừng sử dụng</p>
+              <strong id="inactive">2</strong
+              ><small id="inactive-percent"></small>
+            </div>
+          </article>
+        </section>
+        <section class="card admin-filters" aria-label="Bộ lọc phòng">
+          <label class="search"
+            ><i data-icon="search"></i
+            ><input
+              id="search"
+              aria-label="Tìm kiếm phòng"
+              placeholder="Tìm kiếm tên phòng, tòa nhà..."
+          /></label>
+          <label
+            >Tòa nhà / Khu vực<select id="building-filter">
+              <option value="">Tất cả</option>
+              <option>Tòa A</option>
+              <option>Tòa B</option>
+              <option>Tòa C</option>
+              <option>Tòa D</option>
+            </select></label
+          >
+          <label
+            >Trạng thái<select id="status-filter">
+              <option value="">Tất cả</option>
+              <option value="ACTIVE">Đang hoạt động</option>
+              <option value="MAINTENANCE">Bảo trì</option>
+              <option value="INACTIVE">Ngừng sử dụng</option>
+            </select></label
+          >
+          <label
+            >Sức chứa<select id="capacity-filter">
+              <option value="0">Tất cả</option>
+              <option value="10">Từ 10 người</option>
+              <option value="20">Từ 20 người</option>
+              <option value="30">Từ 30 người</option>
+              <option value="40">Từ 40 người</option>
+            </select></label
+          >
+          <button id="add-room" hidden class="primary-button">
+            <i data-icon="plus"></i>Thêm phòng
+          </button>
+        </section>
+        <div class="admin-layout">
+          <section class="card room-list" aria-label="Danh sách phòng họp">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Ảnh</th>
+                    <th>Tên phòng</th>
+                    <th>Tòa nhà / Khu vực</th>
+                    <th>Vị trí</th>
+                    <th>Tầng</th>
+                    <th>Sức chứa</th>
+                    <th>Thiết bị</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-rooms"></tbody>
+              </table>
+            </div>
+            <div id="empty-rooms" class="notice" hidden>
+              Không tìm thấy phòng phù hợp. Hãy thay đổi bộ lọc.
+            </div>
+            <footer class="pagination">
+              <span id="result-count"></span>
+              <div>
+                <button
+                  id="previous"
+                  class="outline-button"
+                  aria-label="Trang trước"
+                >
+                  ‹</button
+                ><span id="page-number">1</span
+                ><button
+                  id="next"
+                  class="outline-button"
+                  aria-label="Trang sau"
+                >
+                  ›</button
+                ><select id="page-size" aria-label="Số phòng mỗi trang">
+                  <option value="10">10 / trang</option>
+                  <option value="5">5 / trang</option>
+                  <option value="20">20 / trang</option>
+                </select>
+              </div>
+            </footer>
+          </section>
+          <aside class="card editor" id="editor">
+            <div class="editor-heading">
+              <h2 id="editor-title">Thêm phòng họp</h2>
+              <button
+                id="close-editor"
+                class="icon-button"
+                aria-label="Đóng biểu mẫu"
+              >
+                ×
+              </button>
+            </div>
+            <form id="room-form" novalidate>
+              <label
+                >Mã phòng <em>*</em
+                ><input
+                  id="room-code"
+                  maxlength="50"
+                  required
+                  placeholder="Ví dụ: P.101"
+              /></label>
+              <div class="tabs" role="tablist" aria-label="Thông tin phòng">
+                <button
+                  type="button"
+                  role="tab"
+                  id="basic-tab"
+                  aria-controls="basic-panel"
+                  aria-selected="true"
+                  class="active"
+                >
+                  Thông tin cơ bản</button
+                ><button
+                  type="button"
+                  role="tab"
+                  id="equipment-tab"
+                  aria-controls="equipment-panel"
+                  aria-selected="false"
+                >
+                  Thiết bị &amp; mô tả
+                </button>
+              </div>
+              <div
+                id="basic-panel"
+                role="tabpanel"
+                aria-labelledby="basic-tab"
+                class="form-panel"
+              >
+                <label
+                  >Tên phòng <em>*</em
+                  ><input
+                    id="room-name"
+                    maxlength="80"
+                    required
+                    placeholder="Ví dụ: Phòng A101"
+                /></label>
+                <label
+                  >Tòa nhà / Khu vực <em>*</em
+                  ><select id="room-building" required>
+                    <option value="">Chọn tòa nhà / khu vực</option>
+                    <option>Tòa A</option>
+                    <option>Tòa B</option>
+                    <option>Tòa C</option>
+                    <option>Tòa D</option>
+                  </select></label
+                >
+                <div class="form-row">
+                  <label
+                    >Tầng <em>*</em
+                    ><input
+                      id="room-floor"
+                      type="number"
+                      min="-5"
+                      max="100"
+                      step="1"
+                      required
+                      placeholder="Ví dụ: 1" /></label
+                  ><label
+                    >Sức chứa tối đa <em>*</em
+                    ><input
+                      id="room-capacity"
+                      type="number"
+                      min="1"
+                      max="1000"
+                      step="1"
+                      required
+                      placeholder="Ví dụ: 20"
+                  /></label>
+                </div>
+                <label
+                  >Vị trí<textarea
+                    id="room-location"
+                    maxlength="250"
+                    rows="2"
+                    placeholder="Ví dụ: Gần thang máy, khu A ..."
+                  ></textarea>
+                </label>
+                <fieldset>
+                  <legend>Trạng thái <em>*</em></legend>
+                  <div class="status-options">
+                    <label
+                      ><input
+                        type="radio"
+                        name="room-status"
+                        value="ACTIVE"
+                        checked
+                      />Đang hoạt động</label
+                    ><label
+                      ><input
+                        type="radio"
+                        name="room-status"
+                        value="MAINTENANCE"
+                      />Bảo trì</label
+                    ><label
+                      ><input
+                        type="radio"
+                        name="room-status"
+                        value="INACTIVE"
+                      />Ngừng sử dụng</label
+                    >
+                  </div>
+                </fieldset>
+                <div class="notice">
+                  <i data-icon="info"></i
+                  ><span
+                    >Phòng ở trạng thái bảo trì hoặc ngừng sử dụng sẽ không thể
+                    chọn để đặt lịch mới.</span
+                  >
+                </div>
+              </div>
+              <div
+                id="equipment-panel"
+                role="tabpanel"
+                aria-labelledby="equipment-tab"
+                class="form-panel"
+                hidden
+              >
+                <fieldset>
+                  <legend>Thiết bị có sẵn</legend>
+                  <div id="equipment-options" class="equipment-options"></div>
+                </fieldset>
+                <label
+                  >Mô tả<textarea
+                    id="room-description"
+                    rows="5"
+                    maxlength="1000"
+                    placeholder="Mô tả tiện nghi, lưu ý khi sử dụng..."
+                  ></textarea></label
+                ><label
+                  >Ảnh minh họa mẫu<select id="room-image">
+                    <option value="0">Phòng sáng, bàn dài</option>
+                    <option value="1">Phòng họp hiện đại</option>
+                    <option value="2">Phòng nhìn ra thành phố</option>
+                    <option value="3">Phòng lớn</option>
+                    <option value="4">Phòng yên tĩnh</option>
+                    <option value="5">Phòng đa năng</option>
+                  </select></label
+                >
+                <div class="notice">
+                  Ảnh có sẵn chỉ dùng để minh họa giao diện.
+                </div>
+              </div>
+              <div id="booking-impact" class="notice warning" hidden></div>
+              <div
+                id="form-error"
+                class="notice danger"
+                role="alert"
+                hidden
+              ></div>
+              <div class="form-actions">
+                <button id="cancel-edit" type="button" class="outline-button">
+                  Hủy</button
+                ><button id="save-room" type="submit" class="primary-button">
+                  Lưu
+                </button>
+              </div>
+            </form>
+          </aside>
+        </div>
+        <button id="reload-rooms" type="button" class="outline-button">
+          Tải lại danh sách
+        </button>
+        <p id="admin-message" role="status" aria-live="polite"></p>
+        <p class="mock-note">
+          Dữ liệu phòng được tải và lưu qua API. Các trường thiết bị, mô tả và
+          ảnh chưa được API phòng hỗ trợ cập nhật.
+        </p>
+      </main>
+    </div>
+  </body>
+</html>
