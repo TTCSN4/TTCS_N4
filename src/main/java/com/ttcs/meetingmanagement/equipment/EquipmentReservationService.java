@@ -33,7 +33,7 @@ public class EquipmentReservationService {
         for(var entry:quantities.entrySet()){
             Equipment e=locked.get(entry.getKey());
             if(!Objects.equals(e.getRoomId(),meeting.roomId))throw error(HttpStatus.BAD_REQUEST,"Equipment does not belong to meeting room: "+entry.getKey());
-            int remaining=available(e,meeting.startTime,meeting.endTime,Set.of(meeting.meetingId));
+            int remaining=remaining(e,meeting.startTime,meeting.endTime,Set.of(meeting.meetingId),bookings.lockForEquipment(e.getEquipmentId()));
             if(entry.getValue()>remaining)throw error(HttpStatus.CONFLICT,"Equipment "+entry.getKey()+": remaining quantity: "+remaining);
             EquipmentBooking b=new EquipmentBooking();b.setMeeting(meeting);b.setEquipment(e);b.setQuantity(entry.getValue());result.add(b);
         }
@@ -41,10 +41,13 @@ public class EquipmentReservationService {
     }
     @Transactional(readOnly=true)
     public int available(Equipment e,LocalDateTime start,LocalDateTime end,Set<String> ignored){
+        return remaining(e,start,end,ignored,bookings.findAllByEquipment_EquipmentId(e.getEquipmentId()));
+    }
+    private int remaining(Equipment e,LocalDateTime start,LocalDateTime end,Set<String> ignored,List<EquipmentBooking> allocations){
         if(start==null||end==null||!end.isAfter(start))throw error(HttpStatus.BAD_REQUEST,"Invalid time range");
         if(!"AVAILABLE".equalsIgnoreCase(e.getStatus()))return 0;
         List<Event> events=new ArrayList<>();
-        for(EquipmentBooking b:bookings.findAllByEquipment_EquipmentId(e.getEquipmentId())){
+        for(EquipmentBooking b:allocations){
             Meeting m=b.getMeeting();
             if(ignored.contains(m.meetingId)||"CANCELLED".equals(m.status)||!m.startTime.isBefore(end)||!m.endTime.isAfter(start))continue;
             events.add(new Event(m.startTime.isBefore(start)?start:m.startTime,b.getQuantity()));

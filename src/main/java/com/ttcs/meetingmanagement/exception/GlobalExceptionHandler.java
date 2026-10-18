@@ -13,6 +13,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<Map<String,Object>> handleStatus(org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(Map.of(
+            "status",ex.getStatusCode().value(),"message",ex.getReason()==null?"Request rejected":ex.getReason()));
+    }
+
     // =========================
     // ROOM EXCEPTION
     // =========================
