@@ -11,22 +11,22 @@ public class Room {
 
     @Id
     @Column(name = "room_id", nullable = false, length = 50)
-    private String roomId;
+    public String roomId;
 
     @Column(name = "room_name", nullable = false)
-    private String roomName;
+    public String roomName;
 
     @Column(name = "capacity", nullable = false)
-    private Integer capacity;
+    public Integer capacity;
 
     @Column(name = "location")
-    private String location;
+    public String location;
 
     @Column(name = "qr_code")
-    private String qrCode;
+    public String qrCode;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    public String status;
 
     public Room() {
     }

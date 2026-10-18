@@ -7,6 +7,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface RoomRepository extends JpaRepository<Room, String> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Room r where r.roomId = :id")
+    java.util.Optional<Room> findLockedById(@Param("id") String id);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    List<Room> findByStatusAndCapacityGreaterThanEqualOrderByCapacity(String status, int capacity);
 
     // US10 - filter rooms by participant capacity
     List<Room> findByCapacityGreaterThanEqualOrderByCapacityAsc(
