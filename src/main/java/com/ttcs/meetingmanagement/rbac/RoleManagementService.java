@@ -21,7 +21,7 @@ import java.util.Set;
 public class RoleManagementService {
 
     private static final Set<String> ALLOWED_ROLES = Set.of(
-            "Admin",
+            "Admin", "PM", "Member",
             "Người đặt lịch",
             "Người tham dự"
     );

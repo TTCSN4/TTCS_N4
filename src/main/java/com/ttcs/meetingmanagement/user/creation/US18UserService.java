@@ -30,7 +30,7 @@ import com.ttcs.meetingmanagement.repository.*;
     @Transactional US18UserResponse create(US18CreateUserRequest r) {
         String email=r.email().trim().toLowerCase(Locale.ROOT);
         if(users.existsByEmailIgnoreCase(email))throw new ResponseStatusException(HttpStatus.CONFLICT,"Email đã tồn tại");
-        if(!roles.existsById(r.roleId()))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Vai trò không tồn tại");
+        validateRole(r.roleId());
         if(r.departmentId()!=null&&!r.departmentId().isBlank()&&!departments.existsById(r.departmentId()))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Phòng ban không tồn tại");
         if(r.password().getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Password must be at most 72 UTF-8 bytes");
         User u=new User();
@@ -42,4 +42,36 @@ import com.ttcs.meetingmanagement.repository.*;
         u.departmentId=(r.departmentId()==null||r.departmentId().isBlank())?null:r.departmentId();
         return US18UserResponse.of(users.save(u));
     }
+
+    @Transactional US18UserResponse update(String id,US18UpdateUserRequest r){
+        User u=locked(id);String email=r.email().trim().toLowerCase(Locale.ROOT);
+        users.findByEmailIgnoreCase(email).filter(other->!other.userId.equals(id)).ifPresent(other->{throw error(HttpStatus.CONFLICT,"Email already exists");});
+        validateRole(r.roleId());
+        if(r.departmentId()!=null&&!r.departmentId().isBlank()&&!departments.existsById(r.departmentId()))throw error(HttpStatus.BAD_REQUEST,"Department does not exist");
+        var role=roles.findById(r.roleId()).orElseThrow();
+        protectLastAdmin(u,role.getRoleName(),u.status);
+        u.fullName=r.fullName().trim();u.email=email;u.phone=r.phone();u.role=role;u.departmentId=r.departmentId()==null||r.departmentId().isBlank()?null:r.departmentId();
+        return US18UserResponse.of(users.saveAndFlush(u));
+    }
+    @Transactional US18UserResponse setLocked(String id,boolean lock,String actor){
+        if(lock&&id.equals(actor))throw error(HttpStatus.BAD_REQUEST,"Admin cannot lock their own account");
+        User u=locked(id);String status=lock?"LOCKED":"ACTIVE";
+        protectLastAdmin(u,u.role==null?null:u.role.getRoleName(),status);u.status=status;
+        return US18UserResponse.of(users.saveAndFlush(u));
+    }
+    @Transactional(readOnly=true) US18UserResponse get(String id){return US18UserResponse.of(users.findWithRole(id).orElseThrow(()->error(HttpStatus.NOT_FOUND,"User not found")));}
+    private User locked(String id){return users.lockByIdWithRole(id).orElseThrow(()->error(HttpStatus.NOT_FOUND,"User not found"));}
+    private void validateRole(String id){
+        var role=roles.findById(id).orElseThrow(()->error(HttpStatus.BAD_REQUEST,"Role does not exist"));
+        if(!Set.of("ADMIN","PM","MEMBER","NGƯỜI ĐẶT LỊCH","NGƯỜI THAM DỰ").contains(role.getRoleName().toUpperCase(Locale.ROOT)))throw error(HttpStatus.BAD_REQUEST,"Role must be Admin, PM or Member");
+    }
+    private void protectLastAdmin(User u,String roleName,String status){
+        if(u.role!=null&&"Admin".equalsIgnoreCase(u.role.getRoleName())&&"ACTIVE".equalsIgnoreCase(u.status)
+            &&(!"Admin".equalsIgnoreCase(roleName)||!"ACTIVE".equalsIgnoreCase(status))){
+            roles.lockById(u.role.getRoleId()).orElseThrow();
+            long active=users.findAll().stream().filter(x->x.role!=null&&"Admin".equalsIgnoreCase(x.role.getRoleName())&&"ACTIVE".equalsIgnoreCase(x.status)).count();
+            if(active<=1)throw error(HttpStatus.CONFLICT,"Cannot disable the last active Admin");
+        }
+    }
+    private static ResponseStatusException error(HttpStatus status,String message){return new ResponseStatusException(status,message);}
 }

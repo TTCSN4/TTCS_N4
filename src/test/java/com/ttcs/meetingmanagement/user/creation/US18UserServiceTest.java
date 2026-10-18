@@ -13,7 +13,7 @@ class US18UserServiceTest {
     US18UserService service=new US18UserService(users,roles,departments,encoder);
     @Test void normalizesEmailAndHashesPasswordWithoutReturningIt(){
         Role role=new Role();role.roleId="ATTENDEE";role.roleName="Người tham dự";
-        when(roles.existsById("ATTENDEE")).thenReturn(true);when(roles.getReferenceById("ATTENDEE")).thenReturn(role);
+        when(roles.findById("ATTENDEE")).thenReturn(java.util.Optional.of(role));when(roles.getReferenceById("ATTENDEE")).thenReturn(role);
         when(users.save(any(User.class))).thenAnswer(call->{User u=call.getArgument(0);u.userId="U1";
             assertTrue(encoder.matches("safe-password",u.passwordHash));assertEquals("user@example.com",u.email);return u;});
         var result=service.create(new US18CreateUserRequest(" User "," USER@example.com ",null,"safe-password","ATTENDEE",null));

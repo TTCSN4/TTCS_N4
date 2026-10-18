@@ -33,6 +33,10 @@ import com.ttcs.meetingmanagement.repository.*;
     @GetMapping("/users") List<US18UserResponse> all() {
         return users.findAll().stream().map(US18UserResponse::of).toList();
     }
+    @GetMapping("/users/{id}") US18UserResponse get(@PathVariable String id){return service.get(id);}
+    @PutMapping("/users/{id}") US18UserResponse update(@PathVariable String id,@Valid @RequestBody US18UpdateUserRequest r){return service.update(id,r);}
+    @PostMapping("/users/{id}/lock") US18UserResponse lock(@PathVariable String id){return service.setLocked(id,true,com.ttcs.meetingmanagement.security.BackendActor.requireUserId());}
+    @PostMapping("/users/{id}/unlock") US18UserResponse unlock(@PathVariable String id){return service.setLocked(id,false,com.ttcs.meetingmanagement.security.BackendActor.requireUserId());}
     @GetMapping("/roles") List<Role> roles() {
         return roles.findAll();
     }
