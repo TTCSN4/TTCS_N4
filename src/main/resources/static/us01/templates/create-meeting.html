@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tạo lịch họp · Meeting Management</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../css/create-meeting.css" />
+    <script defer src="../js/create-meeting.js"></script>
+  </head>
+  <body class="us01-page">
+    <aside class="sidebar">
+      <a class="brand" href="../index.html"
+        ><span class="brand-mark"
+          ><svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path
+              d="M7 3v5m10-5v5M3 11h18m-14 4h2m3 0h2m3 0h1M7 18h2m3 0h2"
+            /></svg></span
+        ><span>Meeting<small>Meeting Management</small></span></a
+      >
+      <nav aria-label="Điều hướng chính">
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path
+              d="M7 3v5m10-5v5M3 11h18m-14 4h2m3 0h2m3 0h1M7 18h2m3 0h2"
+            /></svg
+          ><span>Lịch họp</span
+          ><span class="nav-arrow" aria-hidden="true">⌄</span>
+        </div>
+        <div class="us01-subnav">
+          <a class="selected" href="create-meeting.html" aria-current="page"
+            >Tạo lịch họp</a
+          ><button type="button" disabled>Chỉnh sửa &amp; hủy lịch</button
+          ><button type="button" disabled>Lịch họp định kỳ</button
+          ><button type="button" disabled>Người tham gia</button
+          ><button type="button" disabled>Gợi ý thời gian</button
+          ><button type="button" disabled>Lịch sử cuộc họp</button>
+        </div>
+        <button
+          type="button"
+          class="nav-item"
+          disabled
+          title="Chức năng này thuộc US khác"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 21V3h13v18M2 21h20M8 7h1m3 0h1m-5 4h1m3 0h1m-5 4h1m3 0h1m-5 6v-3h5v3"
+            /></svg
+          ><span>Phòng &amp; thiết bị</span
+          ><span class="nav-arrow" aria-hidden="true">⌄</span></button
+        ><button
+          type="button"
+          class="nav-item"
+          disabled
+          title="Chức năng này thuộc US khác"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l4 2" /></svg
+          ><span>Lịch của tôi</span
+          ><span class="nav-arrow" aria-hidden="true">⌄</span></button
+        ><button
+          type="button"
+          class="nav-item"
+          disabled
+          title="Chức năng này thuộc US khác"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="9" cy="7" r="4" />
+            <path
+              d="M2 21v-2a7 7 0 0 1 14 0v2m1-17a4 4 0 0 1 0 8m2 3a6 6 0 0 1 3 6"
+            /></svg
+          ><span>Người dùng &amp; quyền</span
+          ><span class="nav-arrow" aria-hidden="true">⌄</span></button
+        ><button
+          type="button"
+          class="nav-item"
+          disabled
+          title="Chức năng này thuộc US khác"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 3v18h18M7 17v-5m5 5V7m5 10V4" /></svg
+          ><span>Báo cáo</span
+          ><span class="nav-arrow" aria-hidden="true">⌄</span></button
+        ><button
+          type="button"
+          class="nav-item"
+          disabled
+          title="Chức năng này thuộc US khác"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="m9 3-1 3-4 1v4l2 1-2 3 3 4 3-1 2 3 4-2v-3l4-1v-4l-3-1V6l-4-3z"
+            /></svg
+          ><span>Tích hợp</span
+          ><span class="nav-arrow" aria-hidden="true">⌄</span>
+        </button>
+      </nav>
+      <div class="sidebar-profile">
+        <span class="profile-avatar">L</span>
+        <div>
+          <strong id="currentUserName">Người tổ chức</strong
+          ><small id="currentUserRole">Quyền do máy chủ kiểm tra</small>
+        </div>
+        <span aria-hidden="true">⌄</span>
+      </div>
+    </aside>
+    <main>
+      <div class="content">
+        <div class="page-heading">
+          <span class="heading-icon"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path
+                d="M7 3v5m10-5v5M3 11h18m-14 4h2m3 0h2m3 0h1M7 18h2m3 0h2"
+              /></svg
+          ></span>
+          <div>
+            <h1>Tạo lịch họp</h1>
+            <p>Tạo cuộc họp và chuẩn bị mọi thứ trong một bước.</p>
+          </div>
+        </div>
+        <nav class="meeting-tabs" aria-label="Chức năng lịch họp">
+          <a href="create-meeting.html" aria-current="page">Tạo lịch họp</a
+          ><button type="button" disabled>Chỉnh sửa &amp; hủy lịch</button
+          ><button type="button" disabled>Lịch họp định kỳ</button
+          ><button type="button" disabled>Người tham gia</button
+          ><button type="button" disabled>Gợi ý thời gian</button
+          ><button type="button" disabled>Lịch sử cuộc họp</button>
+        </nav>
+        <div class="api-toolbar">
+          <button type="button" id="reloadData" class="button secondary">
+            ↻ Tải lại dữ liệu</button
+          ><button
+            type="button"
+            id="acknowledgeRequest"
+            class="button secondary"
+            hidden
+          >
+            Tôi đã kiểm tra lịch đã tạo
+          </button>
+        </div>
+        <p class="field-hint">
+          Nhập mã tài khoản chủ trì đang có trong hệ thống. Máy chủ kiểm tra
+          quyền Admin hoặc PM khi tạo lịch; đây không phải màn hình đăng nhập.
+        </p>
+        <p
+          id="permissionStatus"
+          class="error"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></p>
+        <div id="formStatus" role="status" aria-live="polite" hidden></div>
+        <form id="createMeetingForm" novalidate>
+          <div class="us01-form-grid">
+            <section class="card meeting-info">
+              <div class="section-heading">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path
+                    d="M7 3v5m10-5v5M3 11h18m-14 4h2m3 0h2m3 0h1M7 18h2m3 0h2"
+                  />
+                </svg>
+                <div>
+                  <h2>Thông tin cuộc họp</h2>
+                  <p>Thời gian và phòng tổ chức cuộc họp</p>
+                </div>
+              </div>
+              <div class="field">
+                <label for="organizerId">Mã người chủ trì <em>*</em></label
+                ><input
+                  id="organizerId"
+                  maxlength="50"
+                  autocomplete="off"
+                  placeholder="Nhập mã tài khoản có sẵn"
+                  required
+                  aria-describedby="organizerIdError organizerHint"
+                /><small id="organizerIdError" class="error"></small
+                ><small id="organizerHint" class="field-hint"
+                  >Chủ trì được tính một lần vào tổng số người tham dự.</small
+                >
+              </div>
+              <div class="field">
+                <label for="meetingTitle">Tên cuộc họp <em>*</em></label
+                ><input
+                  id="meetingTitle"
+                  maxlength="120"
+                  placeholder="Ví dụ: Tổng kết dự án của nhóm"
+                  required
+                  aria-describedby="meetingTitleError"
+                /><small id="meetingTitleError" class="error"></small>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="meetingDate">Ngày họp <em>*</em></label
+                  ><input
+                    id="meetingDate"
+                    type="date"
+                    required
+                    aria-describedby="meetingDateError"
+                  /><small id="meetingDateError" class="error"></small>
+                </div>
+                <div class="field">
+                  <label for="meetingRoom">Phòng họp <em>*</em></label
+                  ><select
+                    id="meetingRoom"
+                    required
+                    aria-describedby="meetingRoomError"
+                  >
+                    <option value="">Chọn phòng họp</option></select
+                  ><small id="meetingRoomError" class="error"></small
+                  ><small class="field-hint"
+                    >Tên phòng · Sức chứa · Trạng thái khả dụng</small
+                  >
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="startTime">Giờ bắt đầu <em>*</em></label
+                  ><input
+                    id="startTime"
+                    type="time"
+                    required
+                    aria-describedby="startTimeError"
+                  /><small id="startTimeError" class="error"></small>
+                </div>
+                <div class="field">
+                  <label for="endTime">Giờ kết thúc <em>*</em></label
+                  ><input
+                    id="endTime"
+                    type="time"
+                    required
+                    aria-describedby="endTimeError"
+                  /><small id="endTimeError" class="error"></small>
+                </div>
+              </div>
+              <p
+                id="availabilityStatus"
+                class="field-hint"
+                role="status"
+                aria-live="polite"
+              >
+                Chọn ngày và giờ để kiểm tra lịch phòng từ máy chủ.
+              </p>
+              <span class="duration-hint"
+                >Thời lượng:
+                <output id="summaryDuration">Chưa chọn</output></span
+              >
+            </section>
+            <aside class="meeting-art" aria-label="Minh họa sắp xếp lịch họp">
+              <svg
+                viewBox="0 0 300 180"
+                role="img"
+                aria-label="Lịch và đồng hồ"
+              >
+                <ellipse cx="151" cy="153" rx="100" ry="9" fill="#e2eef7" />
+                <rect
+                  x="90"
+                  y="40"
+                  width="130"
+                  height="108"
+                  rx="10"
+                  fill="#dfeafb"
+                />
+                <rect
+                  x="90"
+                  y="40"
+                  width="130"
+                  height="24"
+                  rx="9"
+                  fill="#2476ef"
+                />
+                <path d="M90 57h130v9H90" fill="#2476ef" />
+                <path
+                  d="M115 35v15m80-15v15"
+                  stroke="#a3c4ee"
+                  stroke-width="8"
+                  stroke-linecap="round"
+                />
+                <g fill="#c7dafa">
+                  <rect x="102" y="77" width="23" height="17" rx="2" />
+                  <rect x="132" y="77" width="23" height="17" rx="2" />
+                  <rect x="162" y="77" width="23" height="17" rx="2" />
+                  <rect x="102" y="101" width="23" height="17" rx="2" />
+                  <rect x="132" y="101" width="23" height="17" rx="2" />
+                  <rect x="102" y="125" width="23" height="12" rx="2" />
+                  <rect x="132" y="125" width="23" height="12" rx="2" />
+                </g>
+                <rect
+                  x="162"
+                  y="101"
+                  width="23"
+                  height="17"
+                  rx="2"
+                  fill="#3a8aeb"
+                />
+                <path
+                  d="m168 108 4 4 7-8"
+                  stroke="white"
+                  stroke-width="2"
+                  fill="none"
+                />
+                <circle
+                  cx="218"
+                  cy="123"
+                  r="29"
+                  fill="white"
+                  stroke="#2c6bd9"
+                  stroke-width="5"
+                />
+                <path
+                  d="M218 105v18l11 9"
+                  fill="none"
+                  stroke="#2c6bd9"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M70 145V93m0 25q-25-9-22-27 22 2 22 27m0-14q23-9 20-30-22 5-20 30"
+                  fill="#a0d5cc"
+                  stroke="#7bb9b2"
+                  stroke-width="2"
+                />
+                <path d="M58 133h24l-4 20H62z" fill="#72a2be" />
+                <g stroke="#a1c9dc" stroke-width="2">
+                  <path d="M245 41h9m-4-4v8M63 62h7m-4-4v8" />
+                </g>
+              </svg>
+              <h2>Mọi cuộc họp,<br />đều được sắp xếp rõ ràng</h2>
+              <p>
+                Chọn thời gian, phòng họp và người tham gia.<br />Meeting sẽ
+                giúp bạn kết nối cả nhóm.
+              </p>
+            </aside>
+            <div class="secondary-grid">
+              <section class="card">
+                <div class="section-heading">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="9" cy="7" r="4" />
+                    <path
+                      d="M2 21v-2a7 7 0 0 1 14 0v2m1-17a4 4 0 0 1 0 8m2 3a6 6 0 0 1 3 6"
+                    />
+                  </svg>
+                  <div>
+                    <h2>Người tham gia cuộc họp</h2>
+                    <p>Mời đồng nghiệp tham gia cuộc họp</p>
+                  </div>
+                </div>
+                <fieldset
+                  class="field participant-field"
+                  id="participants"
+                  aria-describedby="participantsError participantCapacity"
+                >
+                  <legend>
+                    Người tham dự
+                    <output id="participantCount" aria-live="polite"
+                      >0 người</output
+                    >
+                  </legend>
+                  <label for="participantId">Mã người tham dự</label>
+                  <div class="participant-id-entry">
+                    <input
+                      id="participantId"
+                      autocomplete="off"
+                      placeholder="Nhập mã người tham dự"
+                      aria-describedby="participantIdHint participantsError"
+                    /><button
+                      type="button"
+                      id="addParticipant"
+                      class="button secondary"
+                    >
+                      Thêm
+                    </button>
+                  </div>
+                  <p id="participantIdHint" class="field-hint">
+                    Nhập mã tài khoản có sẵn, ngăn cách bằng dấu phẩy nếu thêm
+                    nhiều người. Mã trùng được tính một lần. API hiện chưa cung
+                    cấp danh sách tài khoản để chọn.
+                  </p>
+                  <div class="participant-actions">
+                    <button
+                      id="clearParticipants"
+                      class="button secondary"
+                      type="button"
+                    >
+                      Bỏ các mã đã thêm
+                    </button>
+                  </div>
+                  <p
+                    id="participantCapacity"
+                    class="field-hint"
+                    aria-live="polite"
+                  >
+                    Chọn phòng để kiểm tra sức chứa.
+                  </p>
+                  <div
+                    id="participantOptions"
+                    class="participant-options"
+                    role="group"
+                    aria-label="Danh sách mã người tham dự"
+                  ></div>
+                  <small
+                    id="participantsError"
+                    class="error"
+                    role="alert"
+                  ></small>
+                </fieldset>
+              </section>
+              <section class="card">
+                <div class="section-heading">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="13" rx="2" />
+                    <path d="M8 21h8m-4-4v4" />
+                  </svg>
+                  <div>
+                    <h2>Thiết bị cuộc họp</h2>
+                    <p>Chuẩn bị đầy đủ cho cuộc họp</p>
+                  </div>
+                </div>
+                <fieldset
+                  class="field equipment-field"
+                  id="equipment"
+                  tabindex="-1"
+                  aria-describedby="equipmentError"
+                >
+                  <legend>Thiết bị cần dùng</legend>
+                  <p
+                    id="equipmentStatus"
+                    class="field-hint"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    Chọn phòng và thời gian để tải thiết bị.
+                  </p>
+                  <div id="equipmentOptions" class="equipment-options"></div>
+                  <button
+                    id="clearEquipment"
+                    class="button secondary"
+                    type="button"
+                  >
+                    Bỏ chọn thiết bị
+                  </button>
+                  <small id="equipmentError" class="error" role="alert"></small>
+                </fieldset>
+                <p class="field-hint">
+                  Mỗi mã thiết bị có thể chọn một đơn vị. Số lượng còn lại được
+                  kiểm tra tại giờ bắt đầu; API hiện chưa kiểm tra trọn khoảng
+                  giờ. Trang này tạo một cuộc họp, chưa tạo chuỗi lịch lặp.
+                </p>
+              </section>
+            </div>
+            <section class="card notes-section">
+              <div class="section-heading">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 3h9l5 5v13H5zM14 3v6h5M8 13h8m-8 4h8" />
+                </svg>
+                <div>
+                  <h2>Ghi chú</h2>
+                  <p>Thêm nội dung cần lưu ý cho cuộc họp</p>
+                </div>
+              </div>
+              <div class="field">
+                <label class="sr-only" for="meetingNotes"
+                  >Ghi chú cuộc họp</label
+                ><textarea
+                  id="meetingNotes"
+                  rows="2"
+                  maxlength="2000"
+                  placeholder="Nhập ghi chú…"
+                  aria-describedby="meetingNotesError"
+                ></textarea
+                ><small id="meetingNotesError" class="error"></small>
+              </div>
+            </section>
+          </div>
+          <div class="actions">
+            <span><em>*</em> Thông tin bắt buộc · Kết nối hệ thống</span>
+            <div>
+              <button type="button" id="resetBtn" class="button secondary">
+                × &nbsp; Hủy / Nhập lại</button
+              ><button type="submit" id="submitBtn" class="button primary">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path
+                    d="M7 3v5m10-5v5M3 11h18m-14 4h2m3 0h2m3 0h1M7 18h2m3 0h2"
+                  />
+                </svg>
+                Tạo lịch họp
+              </button>
+            </div>
+          </div>
+        </form>
+        <section class="card saved" id="savedMeetings" style="margin-top: 24px">
+          <div class="section-heading">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path
+                d="M7 3v5m10-5v5M3 11h18m-14 4h2m3 0h2m3 0h1M7 18h2m3 0h2"
+              />
+            </svg>
+            <div>
+              <h2>Lịch họp đã tạo (<span id="meetingBadge">0</span>)</h2>
+              <p>
+                Danh sách cuộc họp nhận từ API; tải lại để kiểm tra trạng thái
+                mới nhất.
+              </p>
+            </div>
+          </div>
+          <div id="savedList"></div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
