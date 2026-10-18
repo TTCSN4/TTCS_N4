@@ -38,8 +38,8 @@ public class US02MeetingService {
         Meeting selected=get(id);
         if(r==null||r.title()==null||r.title().isBlank()||r.title().length()>255||r.startTime()==null||r.endTime()==null||!r.endTime().isAfter(r.startTime())||!r.startTime().isAfter(now()))throw error(400,"Valid title and future time range are required");
         boolean series=r.scope()==US02MeetingRequest.Scope.SERIES;
-        if(series&&selected.recurrenceSeriesId==null)throw error(409,"Meeting is not in a recurring series");
-        List<Meeting> targets=series?meetings.lockSeries(selected.recurrenceSeriesId).stream().filter(m->"SCHEDULED".equals(m.status)&&m.startTime.isAfter(now())).toList()
+        if(series&&selected.recurrenceSeriesId==null&&r.recurrenceRule()==null)throw error(400,"A recurrence rule is required to create a series");
+        List<Meeting> targets=series&&selected.recurrenceSeriesId!=null?meetings.lockSeries(selected.recurrenceSeriesId).stream().filter(m->"SCHEDULED".equals(m.status)&&m.startTime.isAfter(now())).toList()
             :List.of(meetings.findByIdForUpdate(id).orElseThrow(()->error(404,"Meeting not found")));
         targets=new ArrayList<>(targets);for(Meeting m:targets)authorize(m,actor);
         int index=0;while(index<targets.size()&&!targets.get(index).meetingId.equals(id))index++;
@@ -60,6 +60,7 @@ public class US02MeetingService {
         }
         List<String> selectedPeople=people(selected.meetingId);
         List<Item> selectedEquipment=equipment.items(selected.meetingId);
+        if(series&&frequency!=null&&selected.recurrenceSeriesId==null)selected.recurrenceSeriesId=UUID.randomUUID().toString();
         List<Meeting> removed=new ArrayList<>();
         if(count==1&&series&&frequency==null&&r.recurrenceRule()!=null){for(Meeting m:targets)if(!m.meetingId.equals(id))removed.add(m);targets=new ArrayList<>(List.of(selected));index=0;}
         else {while(targets.size()>count)removed.add(targets.remove(targets.size()-1));if(index>=targets.size())throw error(400,"COUNT excludes the selected occurrence");}

@@ -45,4 +45,8 @@ class US02MeetingServiceTest {
         service.update("M1","U1",new US02MeetingRequest("New",null,meeting.startTime,meeting.endTime,null,null,null,"FREQ=WEEKLY;INTERVAL=2;COUNT=2",US02MeetingRequest.Scope.SERIES));
         assertEquals(meeting.startTime.plusWeeks(2),second.startTime);verify(equipment).replace(eq(second),any());
     }
+    @Test void singleMeetingCanBecomeRecurring(){
+        service.update("M1","U1",new US02MeetingRequest("New",null,meeting.startTime,meeting.endTime,null,null,null,"FREQ=WEEKLY;COUNT=2",US02MeetingRequest.Scope.SERIES));
+        assertNotNull(meeting.recurrenceSeriesId);assertTrue(meeting.isRecurring);verify(equipment,times(2)).replace(any(),any());
+    }
 }
