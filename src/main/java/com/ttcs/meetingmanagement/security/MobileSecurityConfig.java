@@ -4,7 +4,7 @@ package com.ttcs.meetingmanagement.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -122,14 +122,14 @@ public class MobileSecurityConfig {
     // 2. CAU HINH BAO MAT API MOBILE
     // ========================================
     @Bean
+    @Order(1)
     public SecurityFilterChain mobileFilterChain(
             HttpSecurity http,
             MobileJwtAuthenticationConverter converter
     ) throws Exception {
 
         return http
-
-                // KHONG SU DUNG CSRF CHO API STATELESS
+                .securityMatcher("/api/mobile/calendar", "/api/mobile/calendar/**")
                 .csrf(csrf -> csrf.disable())
 
                 // KHONG TAO HTTP SESSION

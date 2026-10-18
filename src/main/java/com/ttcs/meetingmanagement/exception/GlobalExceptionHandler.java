@@ -105,6 +105,17 @@ public class GlobalExceptionHandler {
     // =========================
     // OTHER EXCEPTIONS
     // =========================
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(
+            org.springframework.web.server.ResponseStatusException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", ex.getStatusCode().value());
+        response.put("error", HttpStatus.valueOf(ex.getStatusCode().value()).getReasonPhrase());
+        response.put("message", ex.getReason());
+        return ResponseEntity.status(ex.getStatusCode()).body(response);
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
             Exception ex) {
