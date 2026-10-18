@@ -3,7 +3,11 @@ package com.ttcs.meetingmanagement.controller;
 
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.room.Room;
+import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -29,15 +33,27 @@ public class MeetingController {
     private final MeetingRepository meetings;
     private final RoomBookingPermissionService permissionService;
     private final NamedParameterJdbcTemplate jdbc;
+    private final RoomRepository roomRepository;
+
+    @Autowired
+    public MeetingController(
+            MeetingRepository meetings,
+            RoomBookingPermissionService permissionService,
+            NamedParameterJdbcTemplate jdbc,
+            @Autowired(required = false) RoomRepository roomRepository) {
+
+        this.meetings = meetings;
+        this.permissionService = permissionService;
+        this.jdbc = jdbc;
+        this.roomRepository = roomRepository;
+    }
 
     public MeetingController(
             MeetingRepository meetings,
             RoomBookingPermissionService permissionService,
             NamedParameterJdbcTemplate jdbc) {
 
-        this.meetings = meetings;
-        this.permissionService = permissionService;
-        this.jdbc = jdbc;
+        this(meetings, permissionService, jdbc, null);
     }
 
     // ==========================================
@@ -67,7 +83,7 @@ public class MeetingController {
     // ==========================================
 
     @PostMapping
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public Meeting create(
             @RequestBody MeetingRequest request) {
 
@@ -153,7 +169,8 @@ public class MeetingController {
     // 4. CAP NHAT CUOC HOP
     // ==========================================
 
-    @PutMapping("/{id}")
+    // Duplicate endpoint handled by US02MeetingController
+    // @PutMapping("/{id}")
     @Transactional
     public Meeting update(
             @PathVariable String id,
@@ -204,7 +221,8 @@ public class MeetingController {
     // 5. HUY CUOC HOP
     // ==========================================
 
-    @DeleteMapping("/{id}")
+    // Duplicate endpoint handled by US02MeetingController
+    // @DeleteMapping("/{id}")
     @Transactional
     public void cancel(@PathVariable String id) {
 
@@ -416,6 +434,21 @@ public class MeetingController {
 
         // Kiem tra quyen truoc khi dat phong
         if (roomId != null) {
+
+            if (roomRepository != null) {
+                Room room = roomRepository.findLockedById(roomId)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Room not found"
+                        ));
+
+                if (room.getStatus() == null || !"AVAILABLE".equalsIgnoreCase(room.getStatus().trim())) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Room is not available for booking"
+                    );
+                }
+            }
 
             permissionService.assertCanBook(
                     organizerId,

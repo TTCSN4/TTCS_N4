@@ -122,12 +122,14 @@ public class MobileSecurityConfig {
     // 2. CAU HINH BAO MAT API MOBILE
     // ========================================
     @Bean
+    @org.springframework.core.annotation.Order(1)
     public SecurityFilterChain mobileFilterChain(
             HttpSecurity http,
             MobileJwtAuthenticationConverter converter
     ) throws Exception {
 
         return http
+                .securityMatcher("/api/mobile/**", "/us17.html")
 
                 // KHONG SU DUNG CSRF CHO API STATELESS
                 .csrf(csrf -> csrf.disable())

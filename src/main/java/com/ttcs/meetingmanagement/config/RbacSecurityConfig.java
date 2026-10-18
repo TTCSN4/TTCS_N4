@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class RbacSecurityConfig {
 
     @Bean
+    @org.springframework.core.annotation.Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             RbacAccess rbacAccess
