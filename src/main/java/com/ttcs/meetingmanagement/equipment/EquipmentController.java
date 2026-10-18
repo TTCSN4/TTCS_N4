@@ -140,9 +140,13 @@ public class EquipmentController {
         return equipmentRepository.findByRoomIdIgnoreCaseOrderByEquipmentNameAsc(room.trim()).stream().map(e->{
             int total=e.getTotalQuantity()==null?0:e.getTotalQuantity();
             int available=reservations.available(e,at.atZoneSameInstant(VN_ZONE).toLocalDateTime(),at.plusNanos(1).atZoneSameInstant(VN_ZONE).toLocalDateTime(),java.util.Set.of());
-            int maintenance="AVAILABLE".equalsIgnoreCase(e.getStatus())?0:total;
-            return new EquipmentStatusResponse(e.getEquipmentId(),e.getEquipmentName(),e.getRoomId(),total,total-available-maintenance,maintenance,available,
-                List.of(maintenance>0?EquipmentAvailabilityStatus.MAINTENANCE:available>0?EquipmentAvailabilityStatus.AVAILABLE:EquipmentAvailabilityStatus.BOOKED));
+            int booked=reservations.reserved(e,at.atZoneSameInstant(VN_ZONE).toLocalDateTime(),at.plusNanos(1).atZoneSameInstant(VN_ZONE).toLocalDateTime());
+            int maintenance="AVAILABLE".equalsIgnoreCase(e.getStatus())?0:Math.max(0,total-booked);
+            List<EquipmentAvailabilityStatus> statuses=new ArrayList<>();
+            if(available>0)statuses.add(EquipmentAvailabilityStatus.AVAILABLE);
+            if(booked>0)statuses.add(EquipmentAvailabilityStatus.BOOKED);
+            if(maintenance>0)statuses.add(EquipmentAvailabilityStatus.MAINTENANCE);
+            return new EquipmentStatusResponse(e.getEquipmentId(),e.getEquipmentName(),e.getRoomId(),total,booked,maintenance,available,statuses);
         }).toList();
     }
     @PostMapping("/bookings") @Transactional

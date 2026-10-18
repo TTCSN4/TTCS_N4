@@ -46,6 +46,13 @@ public class EquipmentReservationService {
     private int remaining(Equipment e,LocalDateTime start,LocalDateTime end,Set<String> ignored,List<EquipmentBooking> allocations){
         if(start==null||end==null||!end.isAfter(start))throw error(HttpStatus.BAD_REQUEST,"Invalid time range");
         if(!"AVAILABLE".equalsIgnoreCase(e.getStatus()))return 0;
+        return Math.max(0,(e.getTotalQuantity()==null?0:e.getTotalQuantity())-peak(start,end,ignored,allocations));
+    }
+    @Transactional(readOnly=true)
+    public int reserved(Equipment e,LocalDateTime start,LocalDateTime end){
+        return peak(start,end,Set.of(),bookings.findAllByEquipment_EquipmentId(e.getEquipmentId()));
+    }
+    private int peak(LocalDateTime start,LocalDateTime end,Set<String> ignored,List<EquipmentBooking> allocations){
         List<Event> events=new ArrayList<>();
         for(EquipmentBooking b:allocations){
             Meeting m=b.getMeeting();
@@ -55,7 +62,7 @@ public class EquipmentReservationService {
         }
         events.sort(Comparator.comparing(Event::time).thenComparingInt(Event::delta));
         int used=0,peak=0;for(Event event:events){used+=event.delta();peak=Math.max(peak,used);}
-        return Math.max(0,(e.getTotalQuantity()==null?0:e.getTotalQuantity())-peak);
+        return peak;
     }
     private static ResponseStatusException error(HttpStatus status,String message){return new ResponseStatusException(status,message);}
 }
