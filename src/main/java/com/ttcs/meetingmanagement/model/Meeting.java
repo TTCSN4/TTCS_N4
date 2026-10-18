@@ -1,88 +1,198 @@
+
 package com.ttcs.meetingmanagement.model;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "meetings")
+@Table(name = "meeting")
 public class Meeting {
+
+    // Ma cuoc hop - String theo ERD
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "meeting_id", length = 50)
+    public String meetingId;
 
-    @Column(nullable = false, length = 200)
-    private String title;
+    // Nguoi to chuc
+    @Column(name = "organizer_id", nullable = false, length = 50)
+    public String organizerId;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    // Phong duoc dat
+    @Column(name = "room_id", length = 50)
+    public String roomId;
 
-    @Column(length = 120)
-    private String room;
+    @Column(name = "title", nullable = false, length = 255)
+    public String title;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    public String description;
+
+    // Thoi gian hop
     @Column(name = "start_time", nullable = false)
-    private OffsetDateTime startTime;
+    public LocalDateTime startTime;
 
     @Column(name = "end_time", nullable = false)
-    private OffsetDateTime endTime;
+    public LocalDateTime endTime;
 
-    @Column(name = "organizer_id", nullable = false)
-    private Long organizerId;
+    // Trang thai cuoc hop
+    @Column(name = "status", nullable = false, length = 50)
+    public String status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private MeetingStatus status;
+    // Lich hop dinh ky
+    @Column(name = "is_recurring")
+    public Boolean isRecurring = false;
 
-    @Column(name = "recurrence_series_id")
-    private Long recurrenceSeriesId;
+    @Column(name = "recurrence_rule", length = 255)
+    public String recurrenceRule;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "recurrence_series_id", length = 50)
+    public String recurrenceSeriesId;
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    // Huy cuoc hop
+    @Column(name = "cancel_reason", length = 255)
+    public String cancelReason;
 
-    @ElementCollection
-    @CollectionTable(name = "meeting_participants", joinColumns = @JoinColumn(name = "meeting_id"))
-    @Column(name = "participant", nullable = false, length = 320)
-    private List<String> participants = new ArrayList<>();
+    @Column(name = "cancelled_at")
+    public LocalDateTime cancelledAt;
+
+    // Thoi gian tao va cap nhat
+    @Column(name = "created_at")
+    public LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    public LocalDateTime updatedAt;
+
+    @PrePersist
+    void initialize() {
+        if (meetingId == null) meetingId = java.util.UUID.randomUUID().toString();
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (status == null) status = "SCHEDULED";
+    }
+
+    @PreUpdate
+    void updateTimestamp() { updatedAt = LocalDateTime.now(); }
 
     public Meeting() {
     }
 
-    public Long getId() { return id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public String getRoom() { return room; }
-    public void setRoom(String room) { this.room = room; }
-    public OffsetDateTime getStartTime() { return startTime; }
-    public void setStartTime(OffsetDateTime startTime) { this.startTime = startTime; }
-    public OffsetDateTime getEndTime() { return endTime; }
-    public void setEndTime(OffsetDateTime endTime) { this.endTime = endTime; }
-    public Long getOrganizerId() { return organizerId; }
-    public void setOrganizerId(Long organizerId) { this.organizerId = organizerId; }
-    public MeetingStatus getStatus() { return status; }
-    public void setStatus(MeetingStatus status) { this.status = status; }
-    public Long getRecurrenceSeriesId() { return recurrenceSeriesId; }
-    public void setRecurrenceSeriesId(Long recurrenceSeriesId) { this.recurrenceSeriesId = recurrenceSeriesId; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
-    public List<String> getParticipants() { return participants; }
-    public void setParticipants(List<String> participants) { this.participants = participants; }
+    public String getMeetingId() {
+        return meetingId;
+    }
+
+    public void setMeetingId(String meetingId) {
+        this.meetingId = meetingId;
+    }
+
+    public String getOrganizerId() {
+        return organizerId;
+    }
+
+    public void setOrganizerId(String organizerId) {
+        this.organizerId = organizerId;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Boolean getIsRecurring() {
+        return isRecurring;
+    }
+
+    public void setIsRecurring(Boolean isRecurring) {
+        this.isRecurring = isRecurring;
+    }
+
+    public String getRecurrenceRule() {
+        return recurrenceRule;
+    }
+
+    public void setRecurrenceRule(String recurrenceRule) {
+        this.recurrenceRule = recurrenceRule;
+    }
+
+    public String getRecurrenceSeriesId() {
+        return recurrenceSeriesId;
+    }
+
+    public void setRecurrenceSeriesId(String recurrenceSeriesId) {
+        this.recurrenceSeriesId = recurrenceSeriesId;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
