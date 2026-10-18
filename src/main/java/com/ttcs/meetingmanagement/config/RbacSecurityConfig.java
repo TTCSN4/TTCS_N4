@@ -21,8 +21,24 @@ public class RbacSecurityConfig {
             RbacAccess rbacAccess
     ) throws Exception {
 
+        http.csrf(csrf -> csrf.disable());
+        http.sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
+        http.oauth2ResourceServer(oauth -> oauth.jwt(jwt -> {}));
         http.authorizeHttpRequests(auth -> auth
 
+            .requestMatchers("/api/auth/login").permitAll()
+            .requestMatchers("/api/users", "/api/users/**", "/api/roles", "/api/departments")
+            .access((a,c) -> new AuthorizationDecision(rbacAccess.isAdmin(a.get())))
+            .requestMatchers(HttpMethod.GET, "/api/equipment/**", "/api/meetings/**")
+            .access((a,c) -> new AuthorizationDecision(rbacAccess.canAttend(a.get())))
+            .requestMatchers("/api/equipment/bookings", "/api/equipment/bookings/**")
+            .access((a,c) -> new AuthorizationDecision(rbacAccess.canBook(a.get())))
+            .requestMatchers("/api/equipment", "/api/equipment/**")
+            .access((a,c) -> new AuthorizationDecision(rbacAccess.isAdmin(a.get())))
+            .requestMatchers(HttpMethod.PUT, "/api/meetings/**")
+            .access((a,c) -> new AuthorizationDecision(rbacAccess.canBook(a.get())))
+            .requestMatchers(HttpMethod.DELETE, "/api/meetings/**")
+            .access((a,c) -> new AuthorizationDecision(rbacAccess.canBook(a.get())))
             // US20: Chi Admin duoc quan ly vai tro
             .requestMatchers("/api/admin/**")
             .access((authentication, context) ->

@@ -21,10 +21,10 @@ public interface EquipmentRepository
     @Query(
         value = """
             SELECT COUNT(*)
-            FROM equipment_bookings
-            WHERE equipment_id = :equipmentId
-              AND end_time >= CURRENT_TIMESTAMP
-              AND status IN ('BOOKED', 'MAINTENANCE')
+            FROM meeting_equipment me JOIN meeting m ON m.meeting_id=me.meeting_id
+            WHERE me.equipment_id = :equipmentId
+              AND m.end_time >= CURRENT_TIMESTAMP
+              AND m.status <> 'CANCELLED'
             """,
         nativeQuery = true
     )

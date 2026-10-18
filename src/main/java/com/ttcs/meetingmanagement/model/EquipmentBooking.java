@@ -1,102 +1,27 @@
-
 package com.ttcs.meetingmanagement.model;
-
 import com.ttcs.meetingmanagement.equipment.Equipment;
 import jakarta.persistence.*;
-
 import java.time.OffsetDateTime;
-
-@Entity
-@Table(name = "equipment_bookings")
+import java.time.ZoneId;
+/** ERD meeting_equipment: time, room and cancellation come from the meeting. */
+@Entity @Table(name="meeting_equipment") @IdClass(EquipmentBookingId.class)
 public class EquipmentBooking {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "equipment_id", nullable = false)
-    private Equipment equipment;
-
-    @Column(name = "meeting_id", length = 50)
-    private String meetingId;
-
-    @Column(nullable = false, length = 120)
-    private String room;
-
-    @Column(nullable = false)
-    private int quantity;
-
-    @Column(name = "start_time", nullable = false)
-    private OffsetDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private OffsetDateTime endTime;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private EquipmentBookingStatus status;
-
-    public EquipmentBooking() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Equipment getEquipment() {
-        return equipment;
-    }
-
-    public void setEquipment(Equipment equipment) {
-        this.equipment = equipment;
-    }
-
-    public String getMeetingId() {
-        return meetingId;
-    }
-
-    public void setMeetingId(String meetingId) {
-        this.meetingId = meetingId;
-    }
-
-    public String getRoom() {
-        return room;
-    }
-
-    public void setRoom(String room) {
-        this.room = room;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public OffsetDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(OffsetDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public OffsetDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(OffsetDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public EquipmentBookingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(EquipmentBookingStatus status) {
-        this.status = status;
-    }
+    @Id @Column(name="meeting_id",length=255) private String meetingId;
+    @Id @Column(name="equipment_id",length=255) private String equipmentId;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="meeting_id",insertable=false,updatable=false) private Meeting meeting;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="equipment_id",insertable=false,updatable=false) private Equipment equipment;
+    @Column(name="quantity",nullable=false) private int quantity;
+    public EquipmentBookingId getId(){return new EquipmentBookingId(meetingId,equipmentId);}
+    public String getMeetingId(){return meetingId;}
+    public void setMeetingId(String id){meetingId=id;}
+    public void setMeeting(Meeting value){meeting=value;meetingId=value.meetingId;}
+    public Meeting getMeeting(){return meeting;}
+    public Equipment getEquipment(){return equipment;}
+    public void setEquipment(Equipment value){equipment=value;equipmentId=value.getEquipmentId();}
+    public int getQuantity(){return quantity;}
+    public void setQuantity(int value){quantity=value;}
+    public String getRoom(){return meeting.roomId;}
+    public OffsetDateTime getStartTime(){return meeting.startTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime();}
+    public OffsetDateTime getEndTime(){return meeting.endTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toOffsetDateTime();}
+    public EquipmentBookingStatus getStatus(){return "CANCELLED".equals(meeting.status)?EquipmentBookingStatus.CANCELLED:EquipmentBookingStatus.BOOKED;}
 }

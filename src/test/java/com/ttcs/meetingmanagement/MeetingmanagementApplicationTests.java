@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 class MeetingmanagementApplicationTests {
 
+    @Autowired private com.ttcs.meetingmanagement.equipment.EquipmentReservationService reservations;
     @Autowired
     private EquipmentController equipmentController;
 
@@ -159,15 +160,6 @@ class MeetingmanagementApplicationTests {
                 EquipmentBookingStatus.BOOKED
         );
 
-        saveReservation(
-                equipment,
-                room,
-                1,
-                start,
-                start.plusHours(1),
-                EquipmentBookingStatus.MAINTENANCE
-        );
-
         EquipmentController.EquipmentStatusResponse during =
                 equipmentController
                         .status(room, start.plusMinutes(30))
@@ -175,17 +167,8 @@ class MeetingmanagementApplicationTests {
 
         assertEquals(3, during.totalQuantity());
         assertEquals(1, during.bookedQuantity());
-        assertEquals(1, during.maintenanceQuantity());
-        assertEquals(1, during.availableQuantity());
-
-        assertEquals(
-                List.of(
-                        EquipmentAvailabilityStatus.AVAILABLE,
-                        EquipmentAvailabilityStatus.BOOKED,
-                        EquipmentAvailabilityStatus.MAINTENANCE
-                ),
-                during.statuses()
-        );
+        assertEquals(0, during.maintenanceQuantity());
+        assertEquals(2, during.availableQuantity());
 
         EquipmentController.EquipmentStatusResponse after =
                 equipmentController
@@ -234,16 +217,11 @@ class MeetingmanagementApplicationTests {
         ResponseStatusException error =
                 assertThrows(
                         ResponseStatusException.class,
-                        () -> equipmentController.book(
-                                new EquipmentController.EquipmentBookingRequest(
-                                        equipment.getEquipmentId(),
-                                        null,
-                                        room,
-                                        1,
-                                        start.plusMinutes(15),
-                                        start.plusMinutes(45)
-                                )
-                        )
+                        () -> {
+                            Meeting m=new Meeting();m.meetingId="M-new";m.organizerId="U1";m.roomId=room;m.title="New";m.status="SCHEDULED";
+                            m.startTime=start.toLocalDateTime().plusMinutes(15);m.endTime=m.startTime.plusMinutes(30);meetingRepository.saveAndFlush(m);
+                            reservations.replace(m,List.of(new com.ttcs.meetingmanagement.equipment.EquipmentReservationService.Item(equipment.getEquipmentId(),1)));
+                        }
                 );
 
         assertEquals(
@@ -294,11 +272,12 @@ class MeetingmanagementApplicationTests {
                 new EquipmentBooking();
 
         reservation.setEquipment(equipment);
-        reservation.setRoom(room);
+        Meeting m=new Meeting();m.organizerId="U1";m.roomId=room;m.title="Reservation";m.startTime=start.toLocalDateTime();m.endTime=end.toLocalDateTime();m.status="SCHEDULED";
+        meetingRepository.saveAndFlush(m);reservation.setMeeting(m);
         reservation.setQuantity(quantity);
-        reservation.setStartTime(start);
-        reservation.setEndTime(end);
-        reservation.setStatus(status);
+
+
+
 
         bookingRepository.save(reservation);
     }

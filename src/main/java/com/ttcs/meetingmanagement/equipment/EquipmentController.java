@@ -34,6 +34,7 @@ public class EquipmentController {
     private static final ZoneId VN_ZONE =
             ZoneId.of("Asia/Ho_Chi_Minh");
 
+    private final EquipmentReservationService reservations;
     private final EquipmentService equipmentService;
     private final EquipmentRepository equipmentRepository;
     private final EquipmentBookingRepository bookingRepository;
@@ -43,7 +44,8 @@ public class EquipmentController {
             EquipmentService equipmentService,
             EquipmentRepository equipmentRepository,
             EquipmentBookingRepository bookingRepository,
-            MeetingRepository meetingRepository) {
+            MeetingRepository meetingRepository, EquipmentReservationService reservations) {
+        this.reservations=reservations;
 
         this.equipmentService = equipmentService;
         this.equipmentRepository = equipmentRepository;
@@ -132,516 +134,41 @@ public class EquipmentController {
         );
     }
 
-    // =========================================
-    // 7. KIEM TRA TINH TRANG THIET BI
-    // =========================================
 
-    @GetMapping("/status")
-    @Transactional(readOnly = true)
-    public List<EquipmentStatusResponse> status(
-            @RequestParam String room,
-            @RequestParam OffsetDateTime at) {
-
-        if (room == null || room.isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Room is required"
-            );
-        }
-
-        return equipmentRepository
-                .findByRoomIdIgnoreCaseOrderByEquipmentNameAsc(
-                        room.trim()
-                )
-                .stream()
-                .map(equipment -> statusAt(equipment, at))
-                .toList();
+    @GetMapping("/status") @Transactional(readOnly=true)
+    public List<EquipmentStatusResponse> status(@RequestParam String room,@RequestParam OffsetDateTime at){
+        return equipmentRepository.findByRoomIdIgnoreCaseOrderByEquipmentNameAsc(room.trim()).stream().map(e->{
+            int total=e.getTotalQuantity()==null?0:e.getTotalQuantity();
+            int available=reservations.available(e,at.atZoneSameInstant(VN_ZONE).toLocalDateTime(),at.plusNanos(1).atZoneSameInstant(VN_ZONE).toLocalDateTime(),java.util.Set.of());
+            int maintenance="AVAILABLE".equalsIgnoreCase(e.getStatus())?0:total;
+            return new EquipmentStatusResponse(e.getEquipmentId(),e.getEquipmentName(),e.getRoomId(),total,total-available-maintenance,maintenance,available,
+                List.of(maintenance>0?EquipmentAvailabilityStatus.MAINTENANCE:available>0?EquipmentAvailabilityStatus.AVAILABLE:EquipmentAvailabilityStatus.BOOKED));
+        }).toList();
     }
-
-    // =========================================
-    // 8. DAT THIET BI
-    // =========================================
-
-    @PostMapping("/bookings")
-    @Transactional
-    public BookingResponse book(
-            @RequestBody EquipmentBookingRequest request) {
-
-        return createReservation(
-                request,
-                EquipmentBookingStatus.BOOKED
-        );
+    @PostMapping("/bookings") @Transactional
+    public BookingResponse book(@RequestBody EquipmentBookingRequest request){
+        if(request==null||request.meetingId()==null)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Meeting ID is required");
+        Meeting m=meetingRepository.findByIdForUpdate(request.meetingId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Meeting not found"));
+        String actor=com.ttcs.meetingmanagement.security.BackendActor.requireUserId();
+        if(!actor.equals(m.organizerId))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Only the organizer can book equipment");
+        if(!"SCHEDULED".equals(m.status)||!m.startTime.isAfter(java.time.LocalDateTime.now(VN_ZONE)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Meeting cannot be modified");
+        if(!java.util.Objects.equals(request.room(),m.roomId)||request.startTime()==null||request.endTime()==null
+            ||!request.startTime().atZoneSameInstant(VN_ZONE).toLocalDateTime().equals(m.startTime)
+            ||!request.endTime().atZoneSameInstant(VN_ZONE).toLocalDateTime().equals(m.endTime))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Reservation must match meeting room and time");
+        var items=new ArrayList<>(reservations.items(m.meetingId));
+        items.removeIf(i->i.equipmentId().equals(request.equipmentId()));
+        items.add(new EquipmentReservationService.Item(request.equipmentId(),request.quantity()));
+        reservations.replace(m,items);
+        return new BookingResponse(m.meetingId+":"+request.equipmentId(),request.equipmentId(),m.meetingId,m.roomId,request.quantity(),request.startTime(),request.endTime(),EquipmentBookingStatus.BOOKED);
     }
-
-    // =========================================
-    // 9. DAT LICH BAO TRI
-    // =========================================
-
-    @PostMapping("/maintenance")
-    @Transactional
-    public BookingResponse scheduleMaintenance(
-            @RequestBody EquipmentBookingRequest request) {
-
-        return createReservation(
-                request,
-                EquipmentBookingStatus.MAINTENANCE
-        );
-    }
-
-    // =========================================
-    // 10. HUY DAT THIET BI
-    // =========================================
-
-    @DeleteMapping("/bookings/{id}")
-    @Transactional
-    public ResponseEntity<Void> cancelBooking(
-            @PathVariable Long id) {
-
-        EquipmentBooking booking =
-                bookingRepository.findById(id)
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND,
-                                        "Equipment booking not found"
-                                )
-                        );
-
-        booking.setStatus(
-                EquipmentBookingStatus.CANCELLED
-        );
-
-        bookingRepository.save(booking);
-
+    @DeleteMapping("/bookings/{meetingId}/{equipmentId}") @Transactional
+    public ResponseEntity<Void> cancelBooking(@PathVariable String meetingId,@PathVariable String equipmentId){
+        Meeting m=meetingRepository.findByIdForUpdate(meetingId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Meeting not found"));
+        if(!com.ttcs.meetingmanagement.security.BackendActor.requireUserId().equals(m.organizerId))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Only the organizer can cancel equipment");
+        var items=new ArrayList<>(reservations.items(meetingId));items.removeIf(i->i.equipmentId().equals(equipmentId));reservations.replace(m,items);
         return ResponseEntity.noContent().build();
     }
-
-    // =========================================
-    // 11. TAO LUOT DAT THIET BI
-    // =========================================
-
-    private BookingResponse createReservation(
-            EquipmentBookingRequest request,
-            EquipmentBookingStatus status) {
-
-        validateReservation(request);
-
-        Equipment equipment =
-                equipmentRepository.findByIdForUpdate(
-                        request.equipmentId()
-                )
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Equipment not found"
-                        )
-                );
-
-        String room = request.room().trim();
-
-        if (equipment.getRoomId() == null
-                || !equipment.getRoomId()
-                        .equalsIgnoreCase(room)) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Equipment does not belong to this room"
-            );
-        }
-
-        String meetingId = request.meetingId();
-
-        if (meetingId != null) {
-            if (meetingId.isBlank()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Meeting ID cannot be blank"
-                );
-            }
-
-            meetingId = meetingId.trim();
-
-            validateMeeting(request, meetingId, room);
-        }
-
-        ensureCapacity(equipment, request, status);
-
-        EquipmentBooking reservation =
-                new EquipmentBooking();
-
-        reservation.setEquipment(equipment);
-        reservation.setMeetingId(meetingId);
-        reservation.setRoom(room);
-        reservation.setQuantity(request.quantity());
-        reservation.setStartTime(request.startTime());
-        reservation.setEndTime(request.endTime());
-        reservation.setStatus(status);
-
-        return toResponse(
-                bookingRepository.save(reservation)
-        );
-    }
-
-    // =========================================
-    // 12. KIEM TRA DU LIEU DAT THIET BI
-    // =========================================
-
-    private void validateReservation(
-            EquipmentBookingRequest request) {
-
-        if (request == null
-                || request.equipmentId() == null
-                || request.equipmentId().isBlank()
-                || request.room() == null
-                || request.room().isBlank()
-                || request.quantity() == null
-                || request.quantity() < 1
-                || request.startTime() == null
-                || request.endTime() == null
-                || !request.endTime()
-                        .isAfter(request.startTime())) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Invalid equipment reservation"
-            );
-        }
-    }
-
-    // =========================================
-    // 13. KIEM TRA CUOC HOP
-    // =========================================
-
-    private void validateMeeting(
-            EquipmentBookingRequest request,
-            String meetingId,
-            String room) {
-
-        // Meeting ID trong ERD la String
-        Meeting meeting =
-                meetingRepository.findById(meetingId)
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND,
-                                        "Meeting not found"
-                                )
-                        );
-
-        // Status trong Meeting la String
-        if (!"SCHEDULED".equalsIgnoreCase(
-                meeting.getStatus())) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Meeting is not scheduled"
-            );
-        }
-
-        if (meeting.getStartTime() == null
-                || meeting.getEndTime() == null) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Meeting time is invalid"
-            );
-        }
-
-        // Meeting: LocalDateTime
-        // EquipmentBooking: OffsetDateTime
-        // Quy doi gio hop sang mui gio Viet Nam
-
-        OffsetDateTime meetingStart =
-                meeting.getStartTime()
-                        .atZone(VN_ZONE)
-                        .toOffsetDateTime();
-
-        OffsetDateTime meetingEnd =
-                meeting.getEndTime()
-                        .atZone(VN_ZONE)
-                        .toOffsetDateTime();
-
-        if (request.startTime().isBefore(meetingStart)
-                || request.endTime().isAfter(meetingEnd)) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Equipment booking must be within meeting time"
-            );
-        }
-
-        // getRoomId() thay cho getRoom()
-        if (meeting.getRoomId() == null
-                || !meeting.getRoomId()
-                        .equalsIgnoreCase(room)) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Equipment room does not match meeting room"
-            );
-        }
-    }
-
-    // =========================================
-    // 14. KIEM TRA SO LUONG THIET BI
-    // =========================================
-
-    private void ensureCapacity(
-            Equipment equipment,
-            EquipmentBookingRequest request,
-            EquipmentBookingStatus requestedStatus) {
-
-        List<UsageEvent> events = new ArrayList<>();
-
-        for (EquipmentBooking existing :
-                bookingRepository.findAllByEquipment_EquipmentId(
-                        equipment.getEquipmentId()
-                )) {
-
-            if (existing.getStatus()
-                    == EquipmentBookingStatus.CANCELLED) {
-                continue;
-            }
-
-            if (!overlaps(
-                    existing.getStartTime(),
-                    existing.getEndTime(),
-                    request.startTime(),
-                    request.endTime())) {
-                continue;
-            }
-
-            addEvents(
-                    events,
-                    existing.getStartTime(),
-                    existing.getEndTime(),
-                    existing.getQuantity(),
-                    request.startTime(),
-                    request.endTime()
-            );
-        }
-
-        addEvents(
-                events,
-                request.startTime(),
-                request.endTime(),
-                request.quantity(),
-                request.startTime(),
-                request.endTime()
-        );
-
-        events.sort(
-                Comparator.comparing(UsageEvent::time)
-                        .thenComparingInt(UsageEvent::change)
-        );
-
-        int inUse = 0;
-        int peak = 0;
-
-        for (UsageEvent event : events) {
-            inUse += event.change();
-            peak = Math.max(peak, inUse);
-        }
-
-        int totalQuantity =
-                equipment.getTotalQuantity() == null
-                        ? 0
-                        : equipment.getTotalQuantity();
-
-        if (peak > totalQuantity) {
-
-            String message =
-                    requestedStatus
-                            == EquipmentBookingStatus.MAINTENANCE
-                            ? "Not enough equipment for maintenance"
-                            : "Not enough equipment available";
-
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    message
-            );
-        }
-    }
-
-    // =========================================
-    // 15. THEM SU KIEN SU DUNG THIET BI
-    // =========================================
-
-    private void addEvents(
-            List<UsageEvent> events,
-            OffsetDateTime start,
-            OffsetDateTime end,
-            int quantity,
-            OffsetDateTime rangeStart,
-            OffsetDateTime rangeEnd) {
-
-        OffsetDateTime clippedStart =
-                start.isBefore(rangeStart)
-                        ? rangeStart
-                        : start;
-
-        OffsetDateTime clippedEnd =
-                end.isAfter(rangeEnd)
-                        ? rangeEnd
-                        : end;
-
-        events.add(
-                new UsageEvent(clippedStart, quantity)
-        );
-
-        events.add(
-                new UsageEvent(clippedEnd, -quantity)
-        );
-    }
-
-    // =========================================
-    // 16. KIEM TRA TRUNG THOI GIAN
-    // =========================================
-
-    private boolean overlaps(
-            OffsetDateTime firstStart,
-            OffsetDateTime firstEnd,
-            OffsetDateTime secondStart,
-            OffsetDateTime secondEnd) {
-
-        return firstStart.isBefore(secondEnd)
-                && firstEnd.isAfter(secondStart);
-    }
-
-    // =========================================
-    // 17. TRANG THAI THIET BI TAI THOI DIEM
-    // =========================================
-
-    private EquipmentStatusResponse statusAt(
-            Equipment equipment,
-            OffsetDateTime at) {
-
-        int booked = 0;
-        int maintenance = 0;
-
-        for (EquipmentBooking reservation :
-                bookingRepository.findAllByEquipment_EquipmentId(
-                        equipment.getEquipmentId()
-                )) {
-
-            if (!reservation.getStartTime().isAfter(at)
-                    && reservation.getEndTime().isAfter(at)) {
-
-                if (reservation.getStatus()
-                        == EquipmentBookingStatus.BOOKED) {
-
-                    booked += reservation.getQuantity();
-                }
-
-                if (reservation.getStatus()
-                        == EquipmentBookingStatus.MAINTENANCE) {
-
-                    maintenance += reservation.getQuantity();
-                }
-            }
-        }
-
-        int totalQuantity =
-                equipment.getTotalQuantity() == null
-                        ? 0
-                        : equipment.getTotalQuantity();
-
-        int available = Math.max(
-                0,
-                totalQuantity - booked - maintenance
-        );
-
-        List<EquipmentAvailabilityStatus> statuses =
-                new ArrayList<>();
-
-        if (available > 0) {
-            statuses.add(
-                    EquipmentAvailabilityStatus.AVAILABLE
-            );
-        }
-
-        if (booked > 0) {
-            statuses.add(
-                    EquipmentAvailabilityStatus.BOOKED
-            );
-        }
-
-        if (maintenance > 0) {
-            statuses.add(
-                    EquipmentAvailabilityStatus.MAINTENANCE
-            );
-        }
-
-        return new EquipmentStatusResponse(
-                equipment.getEquipmentId(),
-                equipment.getEquipmentName(),
-                equipment.getRoomId(),
-                totalQuantity,
-                booked,
-                maintenance,
-                available,
-                statuses
-        );
-    }
-
-    // =========================================
-    // 18. CHUYEN ENTITY SANG RESPONSE
-    // =========================================
-
-    private BookingResponse toResponse(
-            EquipmentBooking reservation) {
-
-        return new BookingResponse(
-                reservation.getId(),
-                reservation.getEquipment().getEquipmentId(),
-                reservation.getMeetingId(),
-                reservation.getRoom(),
-                reservation.getQuantity(),
-                reservation.getStartTime(),
-                reservation.getEndTime(),
-                reservation.getStatus()
-        );
-    }
-
-    // =========================================
-    // 19. DTO VA RECORD
-    // =========================================
-
-    private record UsageEvent(
-            OffsetDateTime time,
-            int change
-    ) {
-    }
-
-    public record EquipmentBookingRequest(
-            String equipmentId,
-            String meetingId,
-            String room,
-            Integer quantity,
-            OffsetDateTime startTime,
-            OffsetDateTime endTime
-    ) {
-    }
-
-    public record BookingResponse(
-            Long id,
-            String equipmentId,
-            String meetingId,
-            String room,
-            int quantity,
-            OffsetDateTime startTime,
-            OffsetDateTime endTime,
-            EquipmentBookingStatus status
-    ) {
-    }
-
-    public record EquipmentStatusResponse(
-            String equipmentId,
-            String name,
-            String room,
-            int totalQuantity,
-            int bookedQuantity,
-            int maintenanceQuantity,
-            int availableQuantity,
-            List<EquipmentAvailabilityStatus> statuses
-    ) {
-    }
+    public record EquipmentBookingRequest(String equipmentId,String meetingId,String room,Integer quantity,OffsetDateTime startTime,OffsetDateTime endTime){}
+    public record BookingResponse(String id,String equipmentId,String meetingId,String room,int quantity,OffsetDateTime startTime,OffsetDateTime endTime,EquipmentBookingStatus status){}
+    public record EquipmentStatusResponse(String equipmentId,String name,String room,int totalQuantity,int bookedQuantity,int maintenanceQuantity,int availableQuantity,List<EquipmentAvailabilityStatus> statuses){}
 }

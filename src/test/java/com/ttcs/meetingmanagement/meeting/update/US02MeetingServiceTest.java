@@ -30,11 +30,11 @@ class US02MeetingServiceTest {
         assertEquals(403, ex.getStatusCode().value()); assertEquals("SCHEDULED", meeting.status);
     }
     @Test void cancellationReleasesEquipment() {
-        var reservation = new EquipmentBooking(); reservation.setStatus(EquipmentBookingStatus.BOOKED);
+        var reservation = new EquipmentBooking(); reservation.setMeeting(meeting);
         when(equipment.findAllByMeetingId("M1")).thenReturn(List.of(reservation));
         service.cancel("M1", "U1", "Changed plans");
         assertEquals("CANCELLED", meeting.status); assertNotNull(meeting.cancelledAt);
-        assertEquals(EquipmentBookingStatus.CANCELLED, reservation.getStatus());
+        verify(equipment).deleteAll(List.of(reservation));
     }
     @Test void rejectsStartedMeeting() {
         meeting.startTime = LocalDateTime.now().minusMinutes(1);

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface EquipmentBookingRepository
-        extends JpaRepository<EquipmentBooking, Long> {
+        extends JpaRepository<EquipmentBooking, com.ttcs.meetingmanagement.model.EquipmentBookingId> {
 
     List<EquipmentBooking> findAllByEquipment_EquipmentId(
             String equipmentId

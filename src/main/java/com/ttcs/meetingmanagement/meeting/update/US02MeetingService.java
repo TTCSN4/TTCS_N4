@@ -63,8 +63,7 @@ public class US02MeetingService {
     }
     private void releaseEquipment(String id) {
         var bookings = equipment.findAllByMeetingId(id);
-        bookings.forEach(b -> b.setStatus(EquipmentBookingStatus.CANCELLED));
-        equipment.saveAll(bookings);
+        equipment.deleteAll(bookings);
     }
     private static ResponseStatusException error(HttpStatus status, String message) { return new ResponseStatusException(status, message); }
 }

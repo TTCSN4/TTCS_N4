@@ -32,17 +32,21 @@ public class MobileSecurityConfig {
     private final String issuer;
     private final String audience;
 
+    public String signingSecret(){return secretBase64;}
+    public String tokenIssuer(){return issuer;}
+    public String tokenAudience(){return audience;}
     // DOC CAU HINH JWT TU APPLICATION.PROPERTIES
     public MobileSecurityConfig(
-            @Value("${app.mobile.jwt.secret}")
+            @Value("${app.mobile.jwt.secret:}")
             String secretBase64,
 
-            @Value("${app.mobile.jwt.issuer}")
+            @Value("${app.mobile.jwt.issuer:meeting-management}")
             String issuer,
 
-            @Value("${app.mobile.jwt.audience}")
+            @Value("${app.mobile.jwt.audience:meeting-client}")
             String audience
     ) {
+        if(secretBase64.isBlank()) { byte[] generated=new byte[32];new java.security.SecureRandom().nextBytes(generated);secretBase64=Base64.getEncoder().encodeToString(generated); }
         this.secretBase64 = secretBase64;
         this.issuer = issuer;
         this.audience = audience;
@@ -122,12 +126,13 @@ public class MobileSecurityConfig {
     // 2. CAU HINH BAO MAT API MOBILE
     // ========================================
     @Bean
+    @org.springframework.core.annotation.Order(1)
     public SecurityFilterChain mobileFilterChain(
             HttpSecurity http,
             MobileJwtAuthenticationConverter converter
     ) throws Exception {
 
-        return http
+        return http.securityMatcher("/api/mobile/**")
 
                 // KHONG SU DUNG CSRF CHO API STATELESS
                 .csrf(csrf -> csrf.disable())
