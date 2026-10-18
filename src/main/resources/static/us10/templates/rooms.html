@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Quản lý sức chứa phòng · Meeting Management</title>
+    <link rel="stylesheet" href="../css/room-capacity.css" />
+    <script defer src="../js/room-capacity.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="rooms.html"
+        ><span class="brand-mark" data-icon="calendar"></span
+        ><span
+          ><strong>Meeting</strong><small>Meeting Management</small></span
+        ></a
+      >
+      <nav aria-label="Điều hướng chính">
+        <div class="nav-active">
+          <i data-icon="calendar"></i>Lịch họp<span>⌄</span>
+        </div>
+        <div class="subnav">
+          <button disabled>Tạo lịch họp</button><button disabled>Chỉnh sửa &amp; hủy lịch</button
+          ><button disabled>Lịch họp định kỳ</button
+          ><button disabled>Người tham gia</button
+          ><button disabled>Gợi ý thời gian</button
+          ><a class="current" href="rooms.html" aria-current="page"
+            >Quản lý sức chứa</a
+          >
+        </div>
+        <button class="nav-link" disabled><i data-icon="rooms"></i>Phòng &amp; thiết bị<span>⌄</span></button>
+        <button class="nav-link" disabled>
+          <i data-icon="clock"></i>Lịch của tôi<span>⌄</span>
+        </button>
+        <button class="nav-link" disabled>
+          <i data-icon="users"></i>Người dùng &amp; quyền<span>⌄</span>
+        </button>
+        <button class="nav-link" disabled>
+          <i data-icon="chart"></i>Báo cáo<span>⌄</span>
+        </button>
+      </nav>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button
+          id="menu-toggle"
+          class="icon-button mobile-menu"
+          aria-label="Ẩn hoặc hiện menu"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          <i data-icon="menu"></i>
+        </button>
+        <nav class="breadcrumb" aria-label="Đường dẫn">
+          <span>Trang chủ</span><b>›</b><span>Lịch họp</span><b>›</b
+          ><strong>Quản lý sức chứa phòng</strong>
+        </nav>
+        <div class="account">
+          <i data-icon="bell"></i><span class="avatar">NA</span>
+          <div>
+            <strong>Nguyễn Văn An</strong><small id="role-label">PM</small>
+          </div>
+          <span>⌄</span>
+        </div>
+      </header>
+      <main>
+        <div class="page-heading">
+          <h1>Quản lý sức chứa phòng</h1>
+          <p>
+            Theo dõi sức chứa, tình trạng sử dụng và kiểm tra phù hợp với số
+            người tham dự.
+          </p>
+        </div>
+        <section class="stats" aria-label="Thống kê phòng">
+          <article class="stat">
+            <span class="stat-icon blue" data-icon="rooms"></span>
+            <div>
+              <span>Tổng số phòng</span><strong id="stat-total">0</strong>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon green" data-icon="users"></span>
+            <div>
+              <span>Sức chứa trung bình</span
+              ><strong><span id="stat-average">0</span><em> người</em></strong>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon blue" data-icon="calendar"></span>
+            <div>
+              <span>Phòng đang sử dụng</span><strong id="stat-busy">0</strong
+              ><small id="percent-busy">0%</small>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon red" data-icon="alert"></span>
+            <div>
+              <span>Phòng trống</span><strong id="stat-free">0</strong
+              ><small id="percent-free">0%</small>
+            </div>
+          </article>
+          <article class="stat">
+            <span class="stat-icon gray" data-icon="tools"></span>
+            <div>
+              <span>Phòng bảo trì</span><strong id="stat-maintenance">0</strong
+              ><small id="percent-maintenance">0%</small>
+            </div>
+          </article>
+        </section>
+        <form id="filters" class="card filters" novalidate>
+          <label
+            >Ngày<input
+              type="date"
+              id="date"
+              required
+              aria-describedby="filter-error"
+          /></label>
+          <label
+            >Khoảng thời gian<select id="time-range">
+              <option value="08:00,17:00">Cả ngày (08:00–17:00)</option>
+              <option value="09:00,10:00">09:00–10:00</option>
+              <option value="10:00,11:00">10:00–11:00</option>
+              <option value="13:00,17:00">Buổi chiều (13:00–17:00)</option>
+            </select></label
+          >
+          <label
+            >Tòa nhà / Khu vực<select id="building">
+              <option value="">Tất cả</option>
+              <option>Tòa A</option>
+              <option>Tòa B</option>
+              <option>Tòa C</option>
+              <option>Tòa D</option>
+            </select></label
+          >
+          <label
+            >Sức chứa tối thiểu<select id="min-capacity">
+              <option value="0">Tất cả</option>
+              <option value="10">10 người</option>
+              <option value="20">20 người</option>
+              <option value="30">30 người</option>
+              <option value="40">40 người</option>
+            </select></label
+          >
+          <label
+            >Trạng thái<select id="status">
+              <option value="">Tất cả</option>
+              <option value="AVAILABLE">Còn trống</option>
+              <option value="BUSY">Đã đặt</option>
+              <option value="MAINTENANCE">Bảo trì</option>
+            </select></label
+          >
+          <button id="reset-filters" class="primary-button" type="button">
+            <i data-icon="refresh"></i>Làm mới
+          </button>
+          <p id="filter-error" class="error" role="alert" hidden></p>
+        </form>
+        <div class="dashboard-grid">
+          <div class="main-column">
+            <div class="charts">
+              <section class="card bar-panel">
+                <h2>Tình trạng sử dụng phòng theo sức chứa</h2>
+                <div
+                  id="capacity-chart"
+                  class="capacity-chart"
+                  role="img"
+                  aria-label="Biểu đồ số phòng theo nhóm sức chứa"
+                ></div>
+              </section>
+              <section class="card donut-panel">
+                <h2>Tỷ lệ sử dụng phòng trong ngày</h2>
+                <div class="donut-content">
+                  <div id="usage-chart" class="donut" role="img">
+                    <div>
+                      <strong id="donut-total">0</strong><span>phòng</span>
+                    </div>
+                  </div>
+                  <dl id="chart-legend"></dl>
+                </div>
+              </section>
+            </div>
+            <section class="card table-panel">
+              <div class="table-heading">
+                <div>
+                  <h2>Danh sách phòng họp</h2>
+                  <p>
+                    Hiển thị sức chứa và tình trạng sử dụng của các phòng họp.
+                  </p>
+                </div>
+                <label class="search"
+                  ><i data-icon="search"></i
+                  ><input
+                    id="search"
+                    type="search"
+                    placeholder="Tìm kiếm tên phòng, tòa nhà..."
+                    aria-label="Tìm kiếm phòng"
+                /></label>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Tên phòng</th>
+                      <th>Tòa nhà / Khu vực</th>
+                      <th>Sức chứa</th>
+                      <th>Thiết bị</th>
+                      <th>Trạng thái</th>
+                      <th>Đánh giá phù hợp</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="room-table"></tbody>
+                </table>
+              </div>
+              <p id="empty-state" class="empty-state" role="status" hidden>
+                Không có phòng đáp ứng bộ lọc. Hãy thay đổi điều kiện tìm kiếm.
+              </p>
+              <p class="demo-note">
+                Dữ liệu phòng được truy vấn từ API theo ngày và khoảng thời gian
+                đã chọn.
+              </p>
+            </section>
+          </div>
+          <aside class="right-column">
+            <section class="card check-panel">
+              <h2><i data-icon="users"></i>Kiểm tra sức chứa</h2>
+              <div class="attendee-summary">
+                <i data-icon="users"></i>
+                <div>
+                  <span>Số người tham dự</span
+                  ><strong id="attendee-count">Chưa có dữ liệu</strong
+                  ><small id="attendee-source"
+                    >Nhận từ US01, không nhập thủ công.</small
+                  >
+                </div>
+              </div>
+              <div id="fit-state" class="fit-state" role="status"></div>
+              <div id="selected-brief" class="selected-brief" hidden></div>
+
+              <p id="permission-note" class="error" hidden></p>
+            </section>
+            <section class="card detail-panel">
+              <h2><i data-icon="rooms"></i>Thông tin phòng</h2>
+              <div id="detail-empty" class="detail-empty">
+                Chọn phòng trong danh sách để xem thông tin chi tiết.
+              </div>
+              <div id="room-detail" hidden>
+                <div id="detail-photo" class="room-photo"></div>
+                <dl id="detail-info"></dl>
+                <button
+                  id="prepare-selection"
+                  class="primary-button"
+                  type="button"
+                >
+                  Chuẩn bị phòng cho US01
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
+        <p
+          id="page-status"
+          class="page-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </main>
+    </div>
+  </body>
+</html>
