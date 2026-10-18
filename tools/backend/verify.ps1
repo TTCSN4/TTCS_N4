@@ -1,6 +1,6 @@
 param(
     [string]$Repository = '',
-    [string]$Tests = 'MeetingmanagementApplicationTests,EquipmentReservationTest,EquipmentConcurrencyTest,US02MeetingServiceTest,US02EditIntegrationTest,US18UserServiceTest,US18AccountHttpTest'
+    [string]$Tests = 'MeetingmanagementApplicationTests,EquipmentReservationTest,EquipmentConcurrencyTest,US02MeetingServiceTest,US02EditIntegrationTest,US12CreateIntegrationTest,US13AvailabilityIntegrationTest,US18UserServiceTest,US18AccountHttpTest'
 )
 $ErrorActionPreference = 'Stop'
 $project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
