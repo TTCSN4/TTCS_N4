@@ -221,7 +221,7 @@
                             </div>
                             <div class="rp-rule">
                                 <strong>
-                                    Nhân viên
+                                    Người đặt lịch
                                 </strong>
                                 <p>
                                     Chỉ được đặt các phòng được cấp quyền nhân viên.
@@ -229,7 +229,7 @@
                             </div>
                             <div class="rp-rule">
                                 <strong>
-                                    Khách
+                                    Người tham dự
                                 </strong>
                                 <p>
                                     Chỉ được đặt phòng khi được cấp quyền khách.
@@ -264,13 +264,13 @@
                                 Vai trò dùng thử
                                 <select id="check-role">
                                     <option value="USER">
-                                        Nhân viên
+                                        Người đặt lịch
                                     </option>
                                     <option value="ADMIN">
-                                        Quản trị viên
+                                        Admin
                                     </option>
                                     <option value="GUEST">
-                                        Khách
+                                        Người tham dự
                                     </option>
                                 </select>
                             </label>
@@ -298,7 +298,7 @@
                             ▣ Đặt lịch họp dùng thử
                         </h2>
                         <p class="rp-helper">
-                            Dùng vai trò đã chọn để kiểm tra quyền trước khi lưu lịch. Chưa kiểm tra lịch trống.
+                            Dùng vai trò đã chọn để kiểm tra quyền, sức chứa và lịch trống trong dữ liệu trình duyệt.
                         </p>
                         <form id="booking-form"><label>
                             Phòng họp
@@ -309,6 +309,7 @@
 <label for="booking-title">Tên cuộc họp</label><input id="booking-title" required maxlength="150">
 <label for="booking-start">Bắt đầu</label><input id="booking-start" type="datetime-local" required>
 <label for="booking-end">Kết thúc</label><input id="booking-end" type="datetime-local" required>
+<label for="booking-people">Số người tham dự</label><input id="booking-people" type="number" min="1" step="1" value="1" required>
 <button id="book-button" class="rp-primary rp-full" type="submit" disabled>Lưu lịch họp</button>
 <p id="booking-result" role="status"></p></form>
                     </section>
