@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Trạng thái thiết bị · TTCS_N4</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../css/create-meeting.css" />
+    <script defer src="../js/create-meeting.js"></script>
+  </head>
+  <body class="status-page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" data-icon="cube"></span>
+        <div>
+          <strong class="brand-name">TTCS_N4</strong
+          ><small class="brand-sub">Quản lý cuộc họp</small>
+        </div>
+      </div>
+      <button
+        class="icon-button"
+        id="menu-toggle"
+        aria-label="Mở menu"
+        aria-controls="sidebar"
+        aria-expanded="false"
+        type="button"
+      >
+        <i data-icon="menu"></i>
+      </button>
+      <div class="header-actions">
+        <label class="header-search"
+          ><i data-icon="search"></i
+          ><input
+            id="globalSearch"
+            type="search"
+            placeholder="Tìm kiếm thiết bị, loại thiết bị, phòng..."
+            aria-label="Tìm thiết bị, loại thiết bị hoặc phòng" /></label
+        ><button
+          type="button"
+          id="notifications"
+          class="icon-button"
+          aria-label="Thông báo"
+        >
+          <i data-icon="bell"></i>
+        </button>
+        <div class="account">
+          <span class="avatar">?</span>
+          <div class="profile-text">
+            <strong>Người dùng</strong
+            ><small id="roleLabel">Chưa có phiên đăng nhập</small>
+          </div>
+          <i data-icon="chevron"></i>
+        </div>
+      </div>
+    </header>
+    <aside class="sidebar" id="sidebar">
+      <nav aria-label="Điều hướng chính">
+        <span class="nav-item" aria-disabled="true"
+          ><i data-icon="home"></i>Trang chủ</span
+        ><span class="nav-item" aria-disabled="true"
+          ><i data-icon="plus"></i>Tạo cuộc họp</span
+        ><span class="nav-item" aria-disabled="true"
+          ><i data-icon="calendar"></i>Lịch họp của tôi</span
+        ><span class="nav-item" aria-disabled="true"
+          ><i data-icon="room"></i>Phòng họp</span
+        ><button
+          type="button"
+          class="nav-item"
+          id="openBookingNav"
+          disabled
+          title="Đặt thiết bị thuộc US12; trang US13 chỉ tra cứu trạng thái"
+        >
+          <i data-icon="equipment"></i>Đặt thiết bị</button
+        ><a class="nav-item active" aria-current="page" href="#main"
+          ><i data-icon="status"></i>Trạng thái thiết bị</a
+        ><span class="nav-item" aria-disabled="true"
+          ><i data-icon="chart"></i>Báo cáo</span
+        ><span class="nav-item" aria-disabled="true"
+          ><i data-icon="settings"></i>Quản trị</span
+        ><span class="nav-item" aria-disabled="true"
+          ><i data-icon="settings"></i>Cài đặt</span
+        >
+      </nav>
+    </aside>
+    <main class="main-content" id="main">
+      <nav class="breadcrumb" aria-label="Đường dẫn">
+        <span>Trang chủ</span><span>›</span><strong>Trạng thái thiết bị</strong>
+      </nav>
+      <div class="page-title">
+        <h1><i data-icon="cube"></i>Trạng thái thiết bị</h1>
+        <p>
+          Xem số lượng, tình trạng sử dụng và khả năng sẵn sàng của các thiết bị
+          trong hệ thống.
+        </p>
+      </div>
+      <form class="filters panel" id="statusFilters" novalidate>
+        <label
+          ><span class="sr-only">Ngày kiểm tra</span
+          ><input
+            type="date"
+            id="statusDate"
+            required
+            aria-label="Ngày kiểm tra"
+        /></label>
+        <div class="time-field">
+          <label
+            ><span class="sr-only">Giờ bắt đầu</span
+            ><input
+              type="time"
+              id="statusStart"
+              required
+              aria-label="Giờ bắt đầu" /></label
+          ><span class="time-arrow" aria-hidden="true">→</span
+          ><label
+            ><span class="sr-only">Giờ kết thúc</span
+            ><input
+              type="time"
+              id="statusEnd"
+              required
+              aria-label="Giờ kết thúc"
+          /></label>
+        </div>
+        <label
+          ><span class="sr-only">Loại thiết bị</span
+          ><select id="typeFilter" aria-label="Loại thiết bị">
+            <option value="">Tất cả loại thiết bị</option>
+          </select></label
+        ><label
+          ><span class="sr-only">Trạng thái</span
+          ><select id="stateFilter" aria-label="Trạng thái">
+            <option value="">Tất cả trạng thái</option>
+            <option value="available">Còn trống</option>
+            <option value="low">Sắp hết</option>
+            <option value="unavailable">Hết thiết bị</option>
+            <option value="maintenance">Có bảo trì</option>
+            <option value="inactive">Ngừng sử dụng</option>
+            <option value="broken">Hỏng</option>
+            <option value="reserved">Đã đặt (trạng thái quản trị)</option>
+            <option value="inuse">Đang sử dụng (trạng thái quản trị)</option>
+          </select></label
+        ><button type="submit" id="checkStatus" class="primary-button">
+          <i data-icon="search"></i>Kiểm tra trạng thái
+        </button>
+      </form>
+      <p id="scopeNotice" class="scope-notice" role="note"></p>
+      <p id="filterError" class="filter-error" role="alert" hidden></p>
+      <p
+        id="message"
+        class="message"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></p>
+      <section class="stats" aria-label="Thống kê số lượng thiết bị">
+        <article class="stat-card">
+          <span class="stat-icon blue" data-icon="cube"></span>
+          <div>
+            <p>Tổng thiết bị</p>
+            <strong id="totalCount">—</strong
+            ><small id="totalHint">Tất cả thiết bị trong hệ thống</small>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon green" data-icon="check"></span>
+          <div>
+            <p>Đang khả dụng</p>
+            <strong id="availableCount">—</strong
+            ><small>Số lượng tại giờ bắt đầu đã chọn</small>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon orange" data-icon="clock"></span>
+          <div>
+            <p>Đang được đặt</p>
+            <strong id="bookedCount">—</strong
+            ><small>Số lượng tại giờ bắt đầu đã chọn</small>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon red" data-icon="close"></span>
+          <div>
+            <p>Không khả dụng</p>
+            <strong id="blockedCount">—</strong
+            ><small>Bảo trì, hỏng hoặc trạng thái khác</small>
+          </div>
+        </article>
+      </section>
+      <div class="dashboard-grid">
+        <section class="panel list-panel" aria-label="Danh sách thiết bị">
+          <div class="list-toolbar">
+            <label class="table-search"
+              ><i data-icon="search"></i
+              ><input
+                type="search"
+                id="equipmentSearch"
+                placeholder="Tìm kiếm tên thiết bị, loại thiết bị..."
+                aria-label="Tìm trong danh sách thiết bị" /></label
+            ><button
+              type="button"
+              id="advancedToggle"
+              class="outline-button"
+              aria-expanded="false"
+              aria-controls="advancedPanel"
+            >
+              <i data-icon="filter"></i>Bộ lọc nâng cao</button
+            ><button type="button" id="resetFilters" class="outline-button">
+              <i data-icon="refresh"></i>Đặt lại
+            </button>
+          </div>
+          <div id="advancedPanel" class="advanced-panel" hidden>
+            <label
+              >Vị trí lưu trữ<select id="locationFilter">
+                <option value="">Tất cả vị trí</option>
+              </select></label
+            ><label
+              >Tình trạng<select id="conditionFilter">
+                <option value="">Tất cả tình trạng</option>
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="MAINTENANCE">Đang bảo trì</option>
+                <option value="INACTIVE">Ngừng sử dụng</option>
+                <option value="BROKEN">Hỏng</option>
+                <option value="BOOKED">Đã đặt</option>
+                <option value="IN_USE">Đang sử dụng</option>
+              </select></label
+            >
+          </div>
+          <div class="table-scroll">
+            <table class="equipment-table">
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Thiết bị</th>
+                  <th>Loại thiết bị</th>
+                  <th>Tổng số</th>
+                  <th>Đã đặt</th>
+                  <th>Còn lại</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="equipmentTable"></tbody>
+            </table>
+          </div>
+          <div id="emptyState" class="empty-state" hidden>
+            Không tìm thấy thiết bị phù hợp. Hãy thay đổi bộ lọc.
+          </div>
+          <footer class="pagination">
+            <span id="resultCount"></span>
+            <div class="pagination-pages" id="paginationPages"></div>
+            <label
+              ><span class="sr-only">Số dòng mỗi trang</span
+              ><select id="pageSize" aria-label="Số dòng mỗi trang">
+                <option value="8">Hiển thị 8 dòng</option>
+                <option value="4">Hiển thị 4 dòng</option>
+                <option value="16">Hiển thị 16 dòng</option>
+              </select></label
+            >
+          </footer>
+        </section>
+        <aside
+          class="panel detail-panel"
+          id="detailPanel"
+          aria-labelledby="detailTitle"
+        >
+          <div class="detail-heading">
+            <h2 id="detailTitle"><i data-icon="cube"></i>Chi tiết thiết bị</h2>
+            <button
+              type="button"
+              id="closeDetail"
+              class="icon-button"
+              aria-label="Đóng chi tiết"
+            >
+              <i data-icon="close"></i>
+            </button>
+          </div>
+          <div class="detail-hero" id="detailHero"></div>
+          <dl class="detail-fields" id="detailFields"></dl>
+          <div class="detail-actions" hidden>
+            <button type="button" id="bookSelected" class="outline-button">
+              <i data-icon="plus"></i>Đặt thiết bị
+            </button>
+          </div>
+          <div class="history-heading">
+            <h3>Lịch sử thiết bị</h3>
+            <button type="button" id="showAllHistory" class="text-button">
+              Xem tất cả →
+            </button>
+          </div>
+          <div class="table-scroll device-history">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ngày</th>
+                  <th>Thời gian</th>
+                  <th>Cuộc họp</th>
+                  <th>Số lượng</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="deviceHistory"></tbody>
+            </table>
+          </div>
+          <p id="historyEmpty" class="history-empty" hidden>
+            Backend chưa cung cấp API lịch sử thiết bị. Trang không hiển thị
+            lịch sử mô phỏng.
+          </p>
+        </aside>
+      </div>
+      <p class="demo-note" id="rangeNote"></p>
+      <p class="demo-note">
+        Dữ liệu được đọc trực tiếp từ API cùng máy chủ. US13 chỉ tra cứu; không
+        tạo, sửa hoặc hủy lượt đặt mô phỏng.
+      </p>
+    </main>
+  </body>
+</html>
