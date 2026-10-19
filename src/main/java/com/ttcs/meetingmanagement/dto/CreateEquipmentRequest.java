@@ -25,8 +25,8 @@ public class CreateEquipmentRequest {
 
     @NotBlank(message = "Trạng thái thiết bị không được để trống")
     @Pattern(
-            regexp = "^\\s*(AVAILABLE|IN_USE|MAINTENANCE|OUT_OF_SERVICE|BROKEN)\\s*$",
-            message = "Trạng thái thiết bị không hợp lệ (chỉ chấp nhận: AVAILABLE, IN_USE, MAINTENANCE, OUT_OF_SERVICE, BROKEN)"
+            regexp = "^\\s*(AVAILABLE|BOOKED|IN_USE|MAINTENANCE|BROKEN)\\s*$",
+            message = "Trạng thái thiết bị không hợp lệ (chỉ chấp nhận: AVAILABLE, BOOKED, IN_USE, MAINTENANCE, BROKEN)"
     )
     private String status;
 

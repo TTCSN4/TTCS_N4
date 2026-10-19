@@ -42,12 +42,16 @@ public class RbacSecurityConfig {
                 )
             )
 
-            // US21: Quan ly dat phong (dat, sua, huy) duoc phan quyen boi RoomBookingPermissionService
+            // Chi Admin hoac Nguoi dat lich duoc dat phong
             .requestMatchers(
-                "/api/room-bookings",
-                "/api/room-bookings/**"
+                HttpMethod.POST,
+                "/api/room-bookings"
             )
-            .permitAll()
+            .access((authentication, context) ->
+                new AuthorizationDecision(
+                    rbacAccess.canBook(authentication.get())
+                )
+            )
 
             // Goi y lich hop danh cho nguoi co quyen dat lich
             .requestMatchers(

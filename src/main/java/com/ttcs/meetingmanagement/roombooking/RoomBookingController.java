@@ -32,19 +32,7 @@ public class RoomBookingController {
         return ResponseEntity.ok(response);
     }
 
-    // US21: Chinh sua dat phong
-    @PutMapping("/{meetingId}")
-    public ResponseEntity<RoomBookingResponse> updateRoomBooking(
-            @PathVariable String meetingId,
-            @Valid @RequestBody RoomBookingRequest request) {
-
-        RoomBookingResponse response =
-                roomBookingService.updateRoomBooking(meetingId, request);
-
-        return ResponseEntity.ok(response);
-    }
-
-    // US09 + US21: Huy dat phong
+    // US09: Huy dat phong
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<RoomBookingResponse> cancelRoomBooking(
             @PathVariable String meetingId) {
