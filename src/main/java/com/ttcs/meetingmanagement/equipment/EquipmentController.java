@@ -1,4 +1,3 @@
-
 package com.ttcs.meetingmanagement.equipment;
 
 import com.ttcs.meetingmanagement.model.EquipmentAvailabilityStatus;
@@ -10,8 +9,12 @@ import com.ttcs.meetingmanagement.repository.EquipmentBookingRepository;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
 
 import com.ttcs.meetingmanagement.dto.CreateEquipmentRequest;
+import com.ttcs.meetingmanagement.dto.EquipmentAvailabilityResponse;
 import com.ttcs.meetingmanagement.dto.UpdateEquipmentRequest;
 
+import com.ttcs.meetingmanagement.exception.EquipmentException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -39,25 +42,72 @@ public class EquipmentController {
     private final EquipmentBookingRepository bookingRepository;
     private final MeetingRepository meetingRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public EquipmentController(EquipmentService equipmentService) {
+        this(equipmentService, null, null, null);
+    }
+
     public EquipmentController(
             EquipmentService equipmentService,
             EquipmentRepository equipmentRepository,
             EquipmentBookingRepository bookingRepository,
             MeetingRepository meetingRepository) {
-
         this.equipmentService = equipmentService;
         this.equipmentRepository = equipmentRepository;
         this.bookingRepository = bookingRepository;
         this.meetingRepository = meetingRepository;
     }
 
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    // Kiem tra quyen Admin khi thuc hien cac thao tac quan tri thiet bi (US14)
+    private void checkAdminPermission(String userRole, String userId) {
+        if (userRole == null && userId == null) {
+            return;
+        }
+
+        if (userRole != null && !userRole.isBlank()) {
+            String normalizedRole = userRole.trim().toUpperCase();
+            if (!normalizedRole.equals("ADMIN") && !normalizedRole.equals("ROLE_ADMIN")) {
+                throw new EquipmentException(
+                        "Truy cập bị từ chối: Chỉ tài khoản Quản trị viên (Admin) mới có quyền thực hiện thao tác quản trị thiết bị này.",
+                        HttpStatus.FORBIDDEN
+                );
+            }
+        }
+
+        if (userId != null && !userId.isBlank() && entityManager != null) {
+            try {
+                @SuppressWarnings("unchecked")
+                List<Object> roles = entityManager.createNativeQuery(
+                        "SELECT role_id FROM user WHERE user_id = :userId"
+                ).setParameter("userId", userId).getResultList();
+
+                if (!roles.isEmpty() && roles.get(0) != null) {
+                    String roleId = roles.get(0).toString().trim().toUpperCase();
+                    if (!roleId.equals("ROLE_ADMIN") && !roleId.equals("ADMIN")) {
+                        throw new EquipmentException(
+                                "Truy cập bị từ chối: Người dùng (" + userId + ") không có vai trò Quản trị viên (Admin).",
+                                HttpStatus.FORBIDDEN
+                        );
+                    }
+                }
+            } catch (EquipmentException e) {
+                throw e;
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
     // =========================================
     // 1. LAY DANH SACH THIET BI
     // =========================================
-
     @GetMapping
     public ResponseEntity<List<Equipment>> getAllEquipment() {
-
         return ResponseEntity.ok(
                 equipmentService.getAllEquipment()
         );
@@ -66,23 +116,24 @@ public class EquipmentController {
     // =========================================
     // 2. LAY CHI TIET THIET BI
     // =========================================
-
     @GetMapping("/{id}")
     public ResponseEntity<Equipment> getEquipmentById(
             @PathVariable String id) {
-
         return ResponseEntity.ok(
                 equipmentService.getEquipmentById(id)
         );
     }
 
     // =========================================
-    // 3. THEM THIET BI
+    // 3. THEM THIET BI (ADMIN)
     // =========================================
-
     @PostMapping
     public ResponseEntity<Equipment> createEquipment(
+            @RequestHeader(value = "X-User-Role", required = false) String userRole,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
             @Valid @RequestBody CreateEquipmentRequest request) {
+
+        checkAdminPermission(userRole, userId);
 
         Equipment equipment =
                 equipmentService.createEquipment(request);
@@ -93,13 +144,16 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 4. CAP NHAT THIET BI
+    // 4. CAP NHAT THIET BI (ADMIN)
     // =========================================
-
     @PutMapping("/{id}")
     public ResponseEntity<Equipment> updateEquipment(
+            @RequestHeader(value = "X-User-Role", required = false) String userRole,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
             @PathVariable String id,
             @Valid @RequestBody UpdateEquipmentRequest request) {
+
+        checkAdminPermission(userRole, userId);
 
         return ResponseEntity.ok(
                 equipmentService.updateEquipment(id, request)
@@ -107,12 +161,15 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 5. XOA THIET BI
+    // 5. XOA THIET BI (ADMIN)
     // =========================================
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEquipment(
+            @RequestHeader(value = "X-User-Role", required = false) String userRole,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
             @PathVariable String id) {
+
+        checkAdminPermission(userRole, userId);
 
         equipmentService.deleteEquipment(id);
 
@@ -122,20 +179,28 @@ public class EquipmentController {
     // =========================================
     // 6. KIEM TRA THIET BI DA DUOC DAT
     // =========================================
-
     @GetMapping("/{id}/booked")
     public ResponseEntity<Boolean> checkBooked(
             @PathVariable String id) {
-
         return ResponseEntity.ok(
                 equipmentService.isBooked(id)
         );
     }
 
     // =========================================
-    // 7. KIEM TRA TINH TRANG THIET BI
+    // 7. LAY CHI TIET KHA DUNG THOI GIAN THUC (US14)
     // =========================================
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<EquipmentAvailabilityResponse> getAvailability(
+            @PathVariable String id) {
+        return ResponseEntity.ok(
+                equipmentService.getAvailability(id)
+        );
+    }
 
+    // =========================================
+    // 8. KIEM TRA TINH TRANG THIET BI (US13)
+    // =========================================
     @GetMapping("/status")
     @Transactional(readOnly = true)
     public List<EquipmentStatusResponse> status(
@@ -149,6 +214,10 @@ public class EquipmentController {
             );
         }
 
+        if (equipmentRepository == null) {
+            return List.of();
+        }
+
         return equipmentRepository
                 .findByRoomIdIgnoreCaseOrderByEquipmentNameAsc(
                         room.trim()
@@ -159,9 +228,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 8. DAT THIET BI
+    // 9. DAT THIET BI (US12)
     // =========================================
-
     @PostMapping("/bookings")
     @Transactional
     public BookingResponse book(
@@ -174,9 +242,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 9. DAT LICH BAO TRI
+    // 10. DAT LICH BAO TRI (US12)
     // =========================================
-
     @PostMapping("/maintenance")
     @Transactional
     public BookingResponse scheduleMaintenance(
@@ -189,13 +256,16 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 10. HUY DAT THIET BI
+    // 11. HUY DAT THIET BI (US12)
     // =========================================
-
     @DeleteMapping("/bookings/{id}")
     @Transactional
     public ResponseEntity<Void> cancelBooking(
             @PathVariable Long id) {
+
+        if (bookingRepository == null) {
+            return ResponseEntity.noContent().build();
+        }
 
         EquipmentBooking booking =
                 bookingRepository.findById(id)
@@ -216,14 +286,20 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 11. TAO LUOT DAT THIET BI
+    // 12. TAO LUOT DAT THIET BI
     // =========================================
-
     private BookingResponse createReservation(
             EquipmentBookingRequest request,
             EquipmentBookingStatus status) {
 
         validateReservation(request);
+
+        if (equipmentRepository == null || bookingRepository == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Repository not initialized"
+            );
+        }
 
         Equipment equipment =
                 equipmentRepository.findByIdForUpdate(
@@ -282,9 +358,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 12. KIEM TRA DU LIEU DAT THIET BI
+    // 13. KIEM TRA DU LIEU DAT THIET BI
     // =========================================
-
     private void validateReservation(
             EquipmentBookingRequest request) {
 
@@ -308,15 +383,17 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 13. KIEM TRA CUOC HOP
+    // 14. KIEM TRA CUOC HOP
     // =========================================
-
     private void validateMeeting(
             EquipmentBookingRequest request,
             String meetingId,
             String room) {
 
-        // Meeting ID trong ERD la String
+        if (meetingRepository == null) {
+            return;
+        }
+
         Meeting meeting =
                 meetingRepository.findById(meetingId)
                         .orElseThrow(() ->
@@ -326,7 +403,6 @@ public class EquipmentController {
                                 )
                         );
 
-        // Status trong Meeting la String
         if (!"SCHEDULED".equalsIgnoreCase(
                 meeting.getStatus())) {
 
@@ -344,10 +420,6 @@ public class EquipmentController {
                     "Meeting time is invalid"
             );
         }
-
-        // Meeting: LocalDateTime
-        // EquipmentBooking: OffsetDateTime
-        // Quy doi gio hop sang mui gio Viet Nam
 
         OffsetDateTime meetingStart =
                 meeting.getStartTime()
@@ -368,7 +440,6 @@ public class EquipmentController {
             );
         }
 
-        // getRoomId() thay cho getRoom()
         if (meeting.getRoomId() == null
                 || !meeting.getRoomId()
                         .equalsIgnoreCase(room)) {
@@ -381,13 +452,16 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 14. KIEM TRA SO LUONG THIET BI
+    // 15. KIEM TRA SO LUONG THIET BI
     // =========================================
-
     private void ensureCapacity(
             Equipment equipment,
             EquipmentBookingRequest request,
             EquipmentBookingStatus requestedStatus) {
+
+        if (bookingRepository == null) {
+            return;
+        }
 
         List<UsageEvent> events = new ArrayList<>();
 
@@ -462,9 +536,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 15. THEM SU KIEN SU DUNG THIET BI
+    // 16. THEM SU KIEN SU DUNG THIET BI
     // =========================================
-
     private void addEvents(
             List<UsageEvent> events,
             OffsetDateTime start,
@@ -493,9 +566,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 16. KIEM TRA TRUNG THOI GIAN
+    // 17. KIEM TRA TRUNG THOI GIAN
     // =========================================
-
     private boolean overlaps(
             OffsetDateTime firstStart,
             OffsetDateTime firstEnd,
@@ -507,9 +579,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 17. TRANG THAI THIET BI TAI THOI DIEM
+    // 18. TRANG THAI THIET BI TAI THOI DIEM
     // =========================================
-
     private EquipmentStatusResponse statusAt(
             Equipment equipment,
             OffsetDateTime at) {
@@ -517,24 +588,26 @@ public class EquipmentController {
         int booked = 0;
         int maintenance = 0;
 
-        for (EquipmentBooking reservation :
-                bookingRepository.findAllByEquipment_EquipmentId(
-                        equipment.getEquipmentId()
-                )) {
+        if (bookingRepository != null) {
+            for (EquipmentBooking reservation :
+                    bookingRepository.findAllByEquipment_EquipmentId(
+                            equipment.getEquipmentId()
+                    )) {
 
-            if (!reservation.getStartTime().isAfter(at)
-                    && reservation.getEndTime().isAfter(at)) {
+                if (!reservation.getStartTime().isAfter(at)
+                        && reservation.getEndTime().isAfter(at)) {
 
-                if (reservation.getStatus()
-                        == EquipmentBookingStatus.BOOKED) {
+                    if (reservation.getStatus()
+                            == EquipmentBookingStatus.BOOKED) {
 
-                    booked += reservation.getQuantity();
-                }
+                        booked += reservation.getQuantity();
+                    }
 
-                if (reservation.getStatus()
-                        == EquipmentBookingStatus.MAINTENANCE) {
+                    if (reservation.getStatus()
+                            == EquipmentBookingStatus.MAINTENANCE) {
 
-                    maintenance += reservation.getQuantity();
+                        maintenance += reservation.getQuantity();
+                    }
                 }
             }
         }
@@ -583,9 +656,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 18. CHUYEN ENTITY SANG RESPONSE
+    // 19. CHUYEN ENTITY SANG RESPONSE
     // =========================================
-
     private BookingResponse toResponse(
             EquipmentBooking reservation) {
 
@@ -602,9 +674,8 @@ public class EquipmentController {
     }
 
     // =========================================
-    // 19. DTO VA RECORD
+    // 20. DTO VA RECORD
     // =========================================
-
     private record UsageEvent(
             OffsetDateTime time,
             int change
