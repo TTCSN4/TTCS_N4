@@ -7,7 +7,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 class RecurringScheduleTest {
  RecurringMeetingRequest request(RecurrenceFrequency f,int interval,Integer count,List<Integer> days,Integer monthDay,LocalDate until){
- return new RecurringMeetingRequest(1L,"R1","Test meeting",null,OffsetDateTime.parse("2099-01-05T09:00:00+07:00"),OffsetDateTime.parse("2099-01-05T10:00:00+07:00"),f,interval,count,days,monthDay,until,List.of());
+ return new RecurringMeetingRequest("1","R1","Test meeting",null,OffsetDateTime.parse("2099-01-05T09:00:00+07:00"),OffsetDateTime.parse("2099-01-05T10:00:00+07:00"),f,interval,count,days,monthDay,until,List.of());
  }
  @Test void weeklyMultipleDaysAndInterval(){var result=new RecurringScheduleCalculator().generate(request(RecurrenceFrequency.WEEKLY,2,4,List.of(1,3),null,null));assertEquals(List.of(LocalDate.of(2099,1,5),LocalDate.of(2099,1,7),LocalDate.of(2099,1,19),LocalDate.of(2099,1,21)),result.stream().map(s->s.startTime().toLocalDate()).toList());}
  @Test void monthlySkipsMissingDay(){var result=new RecurringScheduleCalculator().generate(request(RecurrenceFrequency.MONTHLY,1,3,null,31,null));assertEquals(List.of(LocalDate.of(2099,1,31),LocalDate.of(2099,3,31),LocalDate.of(2099,5,31)),result.stream().map(s->s.startTime().toLocalDate()).toList());}

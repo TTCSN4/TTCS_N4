@@ -1,0 +1,196 @@
+{
+  "cards": 28,
+  "homeErrors": [],
+  "mobileOverflow": false,
+  "modules": [
+    {
+      "id": "us01",
+      "status": 200,
+      "title": "Tạo lịch họp · Meeting Management",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us02",
+      "status": 200,
+      "title": "US02 · Chỉnh sửa và hủy lịch họp | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us03",
+      "status": 200,
+      "title": "Tạo cuộc họp · TTCS_N4",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us04",
+      "status": 200,
+      "title": "US04 - Quản lý người tham dự",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us05",
+      "status": 200,
+      "title": "US05 · Gợi ý thời gian họp | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us06",
+      "status": 200,
+      "title": "Lịch sử cuộc họp · Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us07",
+      "status": 200,
+      "title": "Phòng họp trống · Meeting Management",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us08",
+      "status": 200,
+      "title": "US08 · Đặt phòng họp | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us09",
+      "status": 200,
+      "title": "US09 · Hủy đặt phòng | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us10",
+      "status": 200,
+      "title": "Quản lý sức chứa phòng · Meeting Management",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us11",
+      "status": 200,
+      "title": "Quản lý phòng họp · Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us12",
+      "status": 200,
+      "title": "Đặt thiết bị · Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us13",
+      "status": 200,
+      "title": "Trạng thái thiết bị · TTCS_N4",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us14",
+      "status": 200,
+      "title": "US14 · Quản lý thiết bị | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us16",
+      "status": 200,
+      "title": "US16 · Thông báo nhắc nhở | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us17",
+      "status": 200,
+      "title": "Lịch họp của tôi · Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us18",
+      "status": 200,
+      "title": "Quản lý tài khoản · TTCS_N4",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us19",
+      "status": 200,
+      "title": "Danh sách tài khoản · TTCS_N4",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us20",
+      "status": 200,
+      "title": "US20 · Phân quyền người dùng | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us21",
+      "status": 200,
+      "title": "Phân quyền đặt phòng · Meeting Management",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us22",
+      "status": 200,
+      "title": "Báo cáo sử dụng phòng · Meeting M",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us23",
+      "status": 200,
+      "title": "US23 · Thống kê hủy họp | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us24",
+      "status": 200,
+      "title": "Tải báo cáo · Meeting Management",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us25",
+      "status": 200,
+      "title": "US25 · Đặt phòng qua chatbot | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us26",
+      "status": 200,
+      "title": "US26 · Gợi ý phòng họp | Meeting",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us27",
+      "status": 200,
+      "title": "QR Check-in / Check-out · Meeting M",
+      "errors": [],
+      "assets": []
+    },
+    {
+      "id": "us28",
+      "status": 200,
+      "title": "Tích hợp HRM/ERP · Meeting M",
+      "errors": [],
+      "assets": []
+    }
+  ]
+}

@@ -55,8 +55,8 @@ public final class RecurringMeetingRules {
                     "Khoang lap phai lon hon 0");
         }
 
-        if (request.occurrences() == null
-                || request.occurrences() < 1) {
+        if (request.occurrences() == null && request.until() == null
+                || request.occurrences() != null && request.occurrences() < 1) {
             throw new IllegalArgumentException(
                     "So lan hop phai lon hon 0");
         }
@@ -69,6 +69,8 @@ public final class RecurringMeetingRules {
 
         return "FREQ=" + request.frequency()
                 + ";INTERVAL=" + request.interval()
-                + ";COUNT=" + request.occurrences();
+                + (request.occurrences() != null ? ";COUNT=" + request.occurrences() : ";UNTIL=" + request.until())
+                + (request.weekdays() != null ? ";BYDAY=" + request.weekdays() : "")
+                + (request.monthDay() != null ? ";BYMONTHDAY=" + request.monthDay() : "");
     }
 }

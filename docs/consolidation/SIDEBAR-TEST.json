@@ -1,0 +1,14 @@
+{
+  "layout": {
+    "nav": 230,
+    "frameLeft": 230,
+    "active": "Tạo lịch họp",
+    "groups": 6
+  },
+  "nested": {
+    "sidebar": "none",
+    "mainLeft": 0
+  },
+  "mobileOverflow": false,
+  "errors": []
+}

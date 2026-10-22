@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head><script data-shared-navigation>if(window.parent!==window)document.documentElement.classList.add('ttcs-embedded');</script><style>html.ttcs-embedded body.export-report-page > aside{display:none!important}html.ttcs-embedded .export-report-workspace{margin-left:0!important;width:100%!important;max-width:none!important}</style><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>
+            Tải báo cáo · Meeting Management
+        </title>
+        <link rel="stylesheet" href="../css/export-report.css?v=2" th:href="@{/css/export-report.css(v=2)}">
+        <script defer src="../js/export-report.js?v=2" th:src="@{/js/export-report.js(v=2)}">
+        </script>
+    </head>
+    <body class="export-report-page">
+        <aside>
+            <div class="export-report-brand">
+                <b>
+                    M
+                </b>
+                <span>
+                    Meeting
+                    <small>
+                        Meeting Management
+                    </small>
+                </span>
+            </div>
+            <nav>
+                <a href="export-report.html" aria-current="page">
+                    ▥ Báo cáo sử dụng phòng
+                </a>
+            </nav>
+            <p>
+                Nguyễn Văn A
+                <br>
+                <small>
+                    Quản trị viên
+                </small>
+            </p>
+        </aside>
+        <div class="export-report-workspace">
+            <header>
+                Meeting Management
+                <span>
+                    US24 · Dữ liệu mẫu
+                </span>
+            </header>
+            <main>
+                <p class="export-report-breadcrumb">
+                    Trang chủ / Báo cáo / Tải báo cáo
+                </p>
+                <h1>
+                    Báo cáo sử dụng phòng họp
+                </h1>
+                <p class="export-report-description">
+                    Xem số liệu theo kỳ và tải báo cáo phục vụ tổng hợp.
+                </p>
+                <form id="report-filter" class="export-report-filter">
+                    <label>
+                        Từ ngày
+                        <input id="report-from" type="date" required value="2026-10-01">
+                    </label>
+                    <label>
+                        Đến ngày
+                        <input id="report-to" type="date" required value="2026-10-31">
+                    </label>
+                    <label>
+                        Phòng họp
+                        <select id="report-room">
+                            <option value="all">
+                                Tất cả phòng
+                            </option>
+                            <option>
+                                A101
+                            </option>
+                            <option>
+                                B201
+                            </option>
+                            <option>
+                                C301
+                            </option>
+                            <option>
+                                D401
+                            </option>
+                        </select>
+                    </label>
+                    <button class="export-report-primary">
+                        Áp dụng bộ lọc
+                    </button>
+                </form>
+                <p id="report-error" role="alert" hidden>
+                </p>
+                <section class="export-report-kpis">
+                    <article>
+                        <span>
+                            Tổng cuộc họp
+                        </span>
+                        <strong id="report-count">
+                            —
+                        </strong>
+                    </article>
+                    <article>
+                        <span>
+                            Giờ sử dụng
+                        </span>
+                        <strong id="report-hours">
+                            —
+                        </strong>
+                    </article>
+                    <article>
+                        <span>
+                            Phòng được sử dụng
+                        </span>
+                        <strong id="report-rooms">
+                            —
+                        </strong>
+                    </article>
+                </section>
+                <section class="export-report-card export-report-download">
+                    <div>
+                        <h2>
+                            Tải báo cáo
+                        </h2>
+                        <p>
+                            Dữ liệu xuất theo bộ lọc đã áp dụng, bao gồm tất cả hàng trong bảng.
+                        </p>
+                    </div>
+                    <div class="export-report-download-controls">
+                        <label>
+                            Định dạng
+                            <select id="report-format">
+                                <option value="xlsx">
+                                    Excel (.xlsx)
+                                </option>
+                                <option value="pdf">
+                                    PDF (.pdf)
+                                </option>
+                            </select>
+                        </label>
+                        <button id="report-download" class="export-report-primary" type="button">
+                            ↓ Tải báo cáo
+                        </button>
+                    </div>
+                    <p id="report-download-hint">
+                        Excel: tải tệp bảng tính để tiếp tục xử lý số liệu.
+                    </p>
+                </section>
+                <section class="export-report-charts"><article class="export-report-card"><h2>Số cuộc họp theo phòng</h2><div id="report-bar" class="export-report-bar"></div></article><article class="export-report-card"><h2>Tỷ trọng giờ sử dụng phòng</h2><div class="export-report-donut-layout"><div id="report-donut" class="export-report-donut" role="img"></div><ul id="report-legend"></ul></div></article></section><section class="export-report-card"><h2>Chi tiết sử dụng phòng
+                    </h2>
+                    <p id="report-period">
+                    </p>
+                    <div class="export-report-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Phòng họp
+                                    </th>
+                                    <th>
+                                        Số cuộc họp
+                                    </th>
+                                    <th>
+                                        Giờ sử dụng
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="report-empty" hidden>
+                        Không có dữ liệu trong kỳ đã chọn.
+                    </p>
+                </section>
+                <p class="export-report-footnote">
+                    Chỉ dùng dữ liệu mẫu Frontend. Chưa kết nối API báo cáo hoặc xuất tệp từ máy chủ.
+                </p>
+            </main>
+        </div>
+        <div id="report-toast" role="status" hidden>
+        </div>
+    </body>
+</html>

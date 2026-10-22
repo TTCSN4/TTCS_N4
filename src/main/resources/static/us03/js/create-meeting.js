@@ -3,6 +3,7 @@
  const $=id=>document.getElementById(id),form=$('createMeetingForm'),API='/api/meetings';
  let rooms=[],schedules=[],busy=false,ready=false,needsRefresh=false;
  const fields=['meetingTitle','meetingDate','meetingRoom','startTime','endTime','participantEmails','meetingNotes'];
+ if(window.TTCSDemo){const box=$('participantEmails');box.placeholder=window.TTCSDemo.state.users.map(u=>u.email).join(', ');}
  const participantEmails=()=>$('participantEmails').value.split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean);
  const days=['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','Chủ nhật'];
  function status(text,error=false){$('formStatus').hidden=false;$('formStatus').dataset.error=String(error);$('formStatus').textContent=text;}

@@ -1,0 +1,222 @@
+{
+  "mode": "demo",
+  "generatedAt": "2026-10-19T23:51:49.699Z",
+  "apiChecks": [
+    "Create meeting",
+    "Reject overlapping meeting",
+    "Complete equipment stock fields",
+    "Booking ID matches UI contract",
+    "Stock decreases after booking",
+    "Edit booking quantity",
+    "Meeting update preserves equipment quantity",
+    "Reject excess equipment",
+    "Cancel restores stock",
+    "Legacy cancel shared with API",
+    "Cancel frees room",
+    "US18 user appears in shared catalogue",
+    "Reject duplicate email",
+    "Create full recurring series",
+    "Respect recurring interval and weekday",
+    "Check-out requires check-in",
+    "Reject duplicate check-in",
+    "Attendance history persists across pages",
+    "Report excludes cancelled meeting and counts shared schedule",
+    "HRM simulation stores shared history"
+  ],
+  "pages": [
+    {
+      "id": "us03",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 2236
+    },
+    {
+      "id": "us02",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 2484
+    },
+    {
+      "id": "us01",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 4296
+    },
+    {
+      "id": "us04",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 466
+    },
+    {
+      "id": "us05",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 613
+    },
+    {
+      "id": "us06",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1569
+    },
+    {
+      "id": "us09",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 3673
+    },
+    {
+      "id": "us08",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1799
+    },
+    {
+      "id": "us07",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1508
+    },
+    {
+      "id": "us10",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 2324
+    },
+    {
+      "id": "us12",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1844
+    },
+    {
+      "id": "us11",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1271
+    },
+    {
+      "id": "us13",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 2192
+    },
+    {
+      "id": "us16",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 600
+    },
+    {
+      "id": "us14",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 2780
+    },
+    {
+      "id": "us17",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 2807
+    },
+    {
+      "id": "us19",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1505
+    },
+    {
+      "id": "us21",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1082
+    },
+    {
+      "id": "us20",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1140
+    },
+    {
+      "id": "us22",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1830
+    },
+    {
+      "id": "us23",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 719
+    },
+    {
+      "id": "us18",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1607
+    },
+    {
+      "id": "us24",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1048
+    },
+    {
+      "id": "us26",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1184
+    },
+    {
+      "id": "us25",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 621
+    },
+    {
+      "id": "us28",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1643
+    },
+    {
+      "id": "us27",
+      "errors": [],
+      "failures": [],
+      "demo": true,
+      "bodyText": 1858
+    }
+  ],
+  "limits": [
+    "US15 has no frontend source",
+    "No real email, AI, MySQL or external HRM"
+  ],
+  "passed": true
+}

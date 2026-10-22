@@ -1,0 +1,52 @@
+{
+  "completedAt": "2026-10-22T23:12:10.494448+07:00",
+  "baseProject": "TTCS_N4-WEB-20261020",
+  "excludedDirectory": "TTCS_N4",
+  "sourceFolders": [
+    "src",
+    "US01",
+    "US07",
+    "US10",
+    "US11",
+    "US11-clean",
+    "US12",
+    "US12-clean",
+    "US13",
+    "US18",
+    "US18-clean",
+    "US19"
+  ],
+  "sourceFilesArchived": 1462,
+  "referenceImages": 31,
+  "availableModules": 27,
+  "missingModules": [
+    "us15"
+  ],
+  "defaultStorage": "file",
+  "port": 8090,
+  "apiTests": {
+    "passed": 8,
+    "failed": 0,
+    "includes": [
+      "module entries and local assets",
+      "meeting create/edit/cancel",
+      "equipment availability",
+      "role authorization",
+      "new account email login",
+      "persistence after restart",
+      "rollback after disk-write failure",
+      "concurrent requests"
+    ]
+  },
+  "browserTests": {
+    "pages": 27,
+    "passed": true,
+    "javascriptErrors": 0,
+    "failedLocalResponses": 0
+  },
+  "externalServices": [
+    "Email, AI/chatbot, HRM/ERP and QR simulation retain their existing limitations"
+  ],
+  "originalSourceFoldersPreserved": true,
+  "mysqlDataModified": false
+}

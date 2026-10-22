@@ -31,7 +31,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = {
+@SpringBootTest(classes=com.ttcs.meetingmanagement.MeetingmanagementApplication.class, properties = {
         "spring.datasource.url=jdbc:h2:mem:meeting_test;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.datasource.username=sa",

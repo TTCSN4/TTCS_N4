@@ -1,0 +1,285 @@
+{
+  "created": "2026-10-19T19:21:47.249Z",
+  "modules": [
+    {
+      "id": "us01",
+      "number": 1,
+      "title": "Tạo lịch họp",
+      "group": "meeting",
+      "entry": "/us01/templates/create-meeting.html",
+      "source": "C:/TTCS-FIX/US01/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us02",
+      "number": 2,
+      "title": "Chỉnh sửa & hủy lịch",
+      "group": "meeting",
+      "entry": "/us02/update-cancel-meeting.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us03",
+      "number": 3,
+      "title": "Lịch họp định kỳ",
+      "group": "meeting",
+      "entry": "/us03/create-meeting.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static/us03",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us04",
+      "number": 4,
+      "title": "Người tham gia",
+      "group": "meeting",
+      "entry": "/us04/us04.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us05",
+      "number": 5,
+      "title": "Gợi ý thời gian",
+      "group": "meeting",
+      "entry": "/us05/available-time-slots.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us06",
+      "number": 6,
+      "title": "Lịch sử cuộc họp",
+      "group": "meeting",
+      "entry": "/us06/templates/meeting-history.html",
+      "source": "C:/us06/TTCS_N4/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us07",
+      "number": 7,
+      "title": "Phòng trống",
+      "group": "rooms",
+      "entry": "/us07/templates/rooms.html",
+      "source": "C:/TTCS-FIX/US07/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us08",
+      "number": 8,
+      "title": "Đặt phòng",
+      "group": "rooms",
+      "entry": "/us08/room-booking.html",
+      "source": "C:/Users/ADMIN/AppData/Local/Temp/ttcs-web-imports-20261020-022026/us08/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us09",
+      "number": 9,
+      "title": "Hủy đặt phòng",
+      "group": "rooms",
+      "entry": "/us09/cancel-room-booking.html",
+      "source": "C:/Users/ADMIN/AppData/Local/Temp/ttcs-web-imports-20261020-022026/us09/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us10",
+      "number": 10,
+      "title": "Kiểm tra sức chứa phòng",
+      "group": "rooms",
+      "entry": "/us10/templates/rooms.html",
+      "source": "C:/TTCS-FIX/US10/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us11",
+      "number": 11,
+      "title": "Admin quản lý phòng",
+      "group": "rooms",
+      "entry": "/us11/templates/rooms.html",
+      "source": "C:/TTCS-FIX/US11/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us12",
+      "number": 12,
+      "title": "Đặt thiết bị",
+      "group": "rooms",
+      "entry": "/us12/templates/create-meeting.html",
+      "source": "C:/TTCS-FIX/US12/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us13",
+      "number": 13,
+      "title": "Trạng thái thiết bị",
+      "group": "rooms",
+      "entry": "/us13/templates/create-meeting.html",
+      "source": "C:/TTCS-FIX/US13/src/main/resources/static",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us14",
+      "number": 14,
+      "title": "Quản lý thiết bị",
+      "group": "rooms",
+      "entry": "/us14/equipment-management.html",
+      "source": "C:/Users/ADMIN/AppData/Local/Temp/ttcs-web-imports-20261020-022026/us14/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us15",
+      "number": 15,
+      "title": "Đồng bộ lịch",
+      "group": "meeting",
+      "available": false,
+      "entry": null,
+      "source": "Chưa tìm thấy frontend US15 trong các nguồn local"
+    },
+    {
+      "id": "us16",
+      "number": 16,
+      "title": "Nhắc lịch & thông báo",
+      "group": "meeting",
+      "entry": "/us16/meeting-reminder.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us17",
+      "number": 17,
+      "title": "Lịch họp trên di động",
+      "group": "meeting",
+      "entry": "/us17/mobile-meetings.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static/us17",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us18",
+      "number": 18,
+      "title": "Tạo tài khoản",
+      "group": "users",
+      "entry": "/us18/templates/create-account.html",
+      "source": "C:/TTCS-FIX/US18/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us19",
+      "number": 19,
+      "title": "Danh sách tài khoản",
+      "group": "users",
+      "entry": "/us19/templates/user-list.html",
+      "source": "C:/TTCS-FIX/US19/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us20",
+      "number": 20,
+      "title": "Quản lý vai trò",
+      "group": "users",
+      "entry": "/us20/user-permission.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us21",
+      "number": 21,
+      "title": "Quyền đặt phòng",
+      "group": "users",
+      "entry": "/us21/templates/room-permissions.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static/us21",
+      "available": true,
+      "mode": "api"
+    },
+    {
+      "id": "us22",
+      "number": 22,
+      "title": "Báo cáo sử dụng phòng",
+      "group": "reports",
+      "entry": "/us22/templates/room-usage-report.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static/us22",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us23",
+      "number": 23,
+      "title": "Thống kê lịch đã hủy",
+      "group": "reports",
+      "entry": "/us23/cancelled-meeting-statistics.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us24",
+      "number": 24,
+      "title": "Xuất báo cáo",
+      "group": "reports",
+      "entry": "/us24/templates/export-report.html",
+      "source": "C:/Users/ADMIN/AppData/Local/Temp/ttcs-web-imports-20261020-022026/us24/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us25",
+      "number": 25,
+      "title": "Chatbot đặt phòng",
+      "group": "reports",
+      "entry": "/us25/chatbot-room-booking.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us26",
+      "number": 26,
+      "title": "Gợi ý phòng họp",
+      "group": "rooms",
+      "entry": "/us26/room-recommendation.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us27",
+      "number": 27,
+      "title": "QR check-in / check-out",
+      "group": "reports",
+      "entry": "/us27/templates/qr-attendance.html",
+      "source": "C:/TTCS-FIX/TTCS_N4/src/main/resources/static/us27",
+      "available": true,
+      "mode": "local"
+    },
+    {
+      "id": "us28",
+      "number": 28,
+      "title": "Đồng bộ HRM / ERP",
+      "group": "reports",
+      "entry": "/us28/templates/hrm-integration.html",
+      "source": "C:/giaodienus28/TTCS_N4/src/main/resources/static",
+      "available": true,
+      "mode": "local"
+    }
+  ],
+  "missingAssets": []
+}

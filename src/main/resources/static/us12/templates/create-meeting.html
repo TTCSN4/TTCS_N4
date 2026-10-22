@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="vi">
+  <head><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Đặt thiết bị · Meeting</title>
+    <link rel="stylesheet" href="/us12/css/create-meeting.css" />
+    <script defer src="/us12/js/create-meeting.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" data-icon="equipment"></span>
+        <div>
+          <strong class="brand-name">Meeting</strong
+          ><small class="brand-sub">Meeting Management</small>
+        </div>
+      </div>
+      <button
+        id="menu-toggle"
+        class="icon-button mobile-menu"
+        type="button"
+        aria-label="Mở menu"
+        aria-expanded="false"
+        aria-controls="sidebar"
+      >
+        <i data-icon="menu"></i></button
+      ><label class="header-search"
+        ><i data-icon="search"></i
+        ><input
+          id="search"
+          type="search"
+          placeholder="Tìm thiết bị, lịch đặt..."
+          aria-label="Tìm thiết bị hoặc lịch đặt" /></label
+      ><button
+        id="notifications"
+        type="button"
+        class="icon-button"
+        aria-label="Thông báo"
+      >
+        <i data-icon="bell"></i><span class="notification-dot"></span>
+      </button>
+      <div class="account">
+        <span class="avatar">N</span>
+        <div class="profile-text">
+          <strong id="currentUserName">Chưa đăng nhập</strong><small id="currentUserRole">Chưa đăng nhập</small>
+        </div>
+        <i data-icon="chevron"></i>
+      </div>
+    </header>
+    <aside class="sidebar" id="sidebar">
+      <nav aria-label="Điều hướng chính">
+        <button class="menu-item" disabled>
+          <i data-icon="home"></i>Trang chủ</button
+        ><button class="menu-item" disabled>
+          <i data-icon="plus"></i>Tạo cuộc họp</button
+        ><button class="menu-item" disabled>
+          <i data-icon="calendar"></i>Lịch họp của tôi</button
+        ><button class="menu-item" disabled>
+          <i data-icon="room"></i>Phòng họp</button
+        ><a
+          class="menu-item active"
+          href="create-meeting.html"
+          aria-current="page"
+          ><i data-icon="equipment"></i>Đặt thiết bị</a
+        ><button class="menu-item" disabled>
+          <i data-icon="chart"></i>Báo cáo</button
+        ><button class="menu-item" disabled>
+          <i data-icon="settings"></i>Quản trị</button
+        ><button class="menu-item" disabled>
+          <i data-icon="settings"></i>Cài đặt
+        </button>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <nav class="breadcrumb" aria-label="Đường dẫn">
+        <span>Trang chủ</span><span>›</span><strong>Đặt thiết bị</strong>
+      </nav>
+      <div class="page-heading">
+        <h1><i data-icon="equipment"></i>Đặt thiết bị</h1>
+        <p>
+          Chọn cuộc họp đã tạo và số lượng thiết bị cần đặt. Tồn kho được kiểm tra
+          trong toàn thời gian cuộc họp.
+        </p>
+      </div>
+      <div id="permissionStatus" class="form-status error" role="status" hidden>
+        Chỉ Admin và PM được đặt, sửa hoặc hủy thiết bị. Bạn có thể xem tình
+        trạng và lịch sử.
+      </div>
+      <p
+        id="formStatus"
+        class="form-status"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></p>
+      <div class="page-grid">
+        <section class="panel booking-card">
+          <form id="createMeetingForm" novalidate>
+            <div class="section-title">
+              <span class="step">1</span>
+              <h2 id="formTitle">Thông tin cuộc họp</h2>
+              <span id="editing-label" class="status-label" hidden
+                >Đang sửa lịch đặt</span
+              >
+            </div>
+            <div class="form-grid two">
+              <label class="field"
+                >Tên cuộc họp <span class="required">*</span
+                ><select id="meetingTitle" required aria-describedby="meetingTitleError"><option value="">Chọn cuộc họp đã tạo</option></select><small
+                  id="meetingTitleError"
+                  class="field-error"
+                ></small></label
+              ><label class="field"
+                >Phòng họp <span class="required">*</span
+                ><select
+                  id="meetingRoom"
+                  disabled
+                  aria-describedby="meetingRoomError"
+                >
+                  <option value="">Chọn phòng họp</option></select
+                ><small id="meetingRoomError" class="field-error"></small
+              ></label>
+            </div>
+            <div class="form-grid three">
+              <label class="field"
+                >Ngày họp <span class="required">*</span
+                ><input
+                  id="meetingDate" readonly
+                  type="date"
+                  required
+                  aria-describedby="meetingDateError" /><small
+                  id="meetingDateError"
+                  class="field-error"
+                ></small></label
+              ><label class="field"
+                >Giờ bắt đầu <span class="required">*</span
+                ><input
+                  id="startTime" readonly
+                  type="time"
+                  required
+                  aria-describedby="startTimeError" /><small
+                  id="startTimeError"
+                  class="field-error"
+                ></small></label
+              ><label class="field"
+                >Giờ kết thúc <span class="required">*</span
+                ><input
+                  id="endTime" readonly
+                  type="time"
+                  required
+                  aria-describedby="endTimeError" /><small
+                  id="endTimeError"
+                  class="field-error"
+                ></small
+              ></label>
+            </div>
+            <label class="field"
+              >Mô tả<textarea
+                id="meetingNotes" readonly
+                rows="3"
+                maxlength="500"
+                placeholder="Nội dung cuộc họp..."
+              ></textarea
+              ><span class="char-count" id="descriptionCount"
+                >0/500</span
+              ></label
+            >
+            <div class="section-title">
+              <span class="step">2</span>
+              <h2>Chọn thiết bị</h2>
+            </div>
+            <div class="table-scroll equipment-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Thiết bị</th>
+                    <th>Mô tả</th>
+                    <th>Tổng số</th>
+                    <th>Đã đặt</th>
+                    <th>Còn lại</th>
+                    <th>Số lượng đặt</th>
+                  </tr>
+                </thead>
+                <tbody id="equipmentOptions"></tbody>
+              </table>
+            </div>
+            <p id="equipmentError" class="field-error" role="alert"></p>
+            <div id="availabilityNote" class="stock-warning" role="status">
+              <i data-icon="info"></i
+              ><span
+                >Chọn ngày và giờ hợp lệ để kiểm tra số lượng khả dụng.</span
+              >
+            </div>
+            <div class="form-actions">
+              <button class="btn secondary" id="reloadData" type="button">Tải lại dữ liệu</button>
+              <button class="btn secondary" id="cancelBtn" type="button">
+                Hủy</button
+              ><button class="btn primary" id="submitBtn" type="submit" disabled>
+                <i data-icon="check"></i
+                ><span id="submitBtnText">Xác nhận đặt thiết bị</span>
+              </button>
+            </div>
+          </form>
+        </section>
+        <aside class="right-column">
+          <section class="panel stock-panel">
+            <div class="panel-heading">
+              <h2>
+                <span class="step" data-icon="equipment"></span>Tình trạng thiết
+                bị
+              </h2>
+              <span class="time-chip" id="stockRange"
+                ><i data-icon="calendar"></i>Chưa chọn thời gian</span
+              >
+            </div>
+            <div id="stockList" class="stock-list" aria-live="polite"></div>
+          </section>
+          <section class="panel history-panel">
+            <div class="panel-heading">
+              <h2>
+                <span class="step" data-icon="clock"></span>Lịch sử đặt thiết bị
+              </h2>
+              <button id="showAllHistory" type="button" class="text-button">
+                Xem tất cả　→
+              </button>
+            </div>
+            <div class="table-scroll">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Ngày</th>
+                    <th>Cuộc họp</th>
+                    <th>Thiết bị</th>
+                    <th>Số lượng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="bookingHistory"></tbody>
+              </table>
+            </div>
+            <p id="historySummary" class="history-summary"></p>
+          </section>
+        </aside>
+      </div>
+      <p id="integrationHint" class="demo-note">Ngày giờ, phòng và mô tả được lấy từ cuộc họp đã chọn. Tạo hoặc sửa cuộc họp tại US01.</p>
+      <p class="demo-note">
+        Trang kết nối API máy chủ. Lịch sử hiển thị các kết quả gửi trong phiên hiện tại;
+        máy chủ chưa cung cấp API xem toàn bộ lịch sử hoặc sửa lượt đặt thiết bị.
+      </p>
+    </main>
+    <dialog
+      id="cancel-dialog"
+      class="confirm-dialog"
+      aria-labelledby="cancel-title"
+    >
+      <h2 id="cancel-title">Hủy lịch đặt thiết bị?</h2>
+      <p id="cancel-message"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn secondary" id="keep-booking">
+          Giữ lịch đặt</button
+        ><button type="button" class="btn primary" id="confirm-cancel">
+          Xác nhận hủy
+        </button>
+      </div>
+    </dialog>
+  </body>
+</html>

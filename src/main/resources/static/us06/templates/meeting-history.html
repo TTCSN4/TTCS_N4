@@ -1,0 +1,266 @@
+﻿<!doctype html>
+<html lang="vi">
+  <head><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Lịch sử cuộc họp · Meeting</title>
+    <link rel="stylesheet" href="/us06/css/meeting-history.css" />
+    <script src="/us06/js/meeting-history.js" defer></script>
+  </head>
+  <body data-history-api="/api/meetings/history">
+    <aside class="sidebar">
+      <a class="brand" href="/"
+        ><b
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path d="M7 3v4m10-4v4M3 11h18" /></svg></b
+        ><span>Quản lý cuộc họp</span></a
+      >
+      <nav aria-label="Điều hướng">
+        <a href="/"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" /></svg
+          ><span>Trang chủ</span></a
+        ><a href="/create-meeting.html"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path d="M7 3v4m10-4v4M3 11h18" /></svg
+          ><span>Tạo cuộc họp</span></a
+        ><a href="/index.html"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path d="M7 3v4m10-4v4M3 11h18" /></svg
+          ><span>Danh sách cuộc họp</span></a
+        ><a class="active" href="/meeting-history.html" aria-current="page"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 6v6l4 3" /></svg
+          ><span>Lịch sử cuộc họp</span></a
+        ><a href="/index.html#rooms"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="4" y="3" width="12" height="18" rx="2" />
+            <path d="M16 8h4v13M8 7h4m-4 5h4m-4 5h4" /></svg
+          ><span>Phòng họp</span></a
+        ><a href="/index.html#equipment"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4" width="18" height="13" rx="2" />
+            <path d="M8 21h8m-4-4v4" /></svg
+          ><span>Thiết bị</span></a
+        ><a href="/index.html#users"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="7" r="4" />
+            <path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg
+          ><span>Người dùng</span></a
+        ><a href="/index.html#reports"
+          ><svg
+            viewBox="0 0 24 24"
+            class="ui-icon"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 3v18h17M8 16v-5m5 5V7m5 9v-8" /></svg
+          ><span>Báo cáo</span></a
+        >
+      </nav>
+      <div class="sidebar-foot">
+        Không gian làm việc<small>Xem lại những cuộc họp của bạn</small>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <span></span>
+        <div class="account"><span class="avatar">U</span><span>Tài khoản</span><span>⌄</span></div>
+      </header>
+      <div class="content">
+        <div class="heading">
+          <div>
+            <h1>Lịch sử cuộc họp</h1>
+            <p>Xem lại các cuộc họp đã diễn ra trong hệ thống.</p>
+          </div>
+          <button id="refresh" class="button" title="Tải lại dữ liệu từ API">↻ Làm mới</button>
+        </div>
+        <section hidden class="metrics" aria-label="Tổng quan">
+          <article>
+            <span>Tổng cuộc họp</span><strong id="total">—</strong
+            ><small>Trong dữ liệu lịch sử từ API</small>
+          </article>
+          <article>
+            <span>Đã hoàn thành</span><strong id="completed">—</strong
+            ><small>Theo trạng thái backend</small>
+          </article>
+          <article>
+            <span>Đã hủy</span><strong id="cancelled">—</strong><small>Trong phạm vi lịch sử</small>
+          </article>
+        </section>
+        <details class="identity-settings">
+          <summary>Thiết lập tài khoản xem lịch sử</summary>
+          <form id="identity" class="card">
+            <label for="history-user">Mã người dùng theo hệ thống</label>
+            <div class="identity-row">
+              <input
+                id="history-user"
+                required
+                placeholder="Nhập mã người dùng có bản ghi check-in"
+              /><button class="button primary">Tải lịch sử</button>
+            </div>
+            <p class="footnote">Chỉ xem cuộc họp đã kết thúc và có check-in của người dùng này.</p>
+          </form>
+        </details>
+        <form id="filters" class="card">
+          <div class="filter-heading"><h2>Bộ lọc lịch sử</h2></div>
+          <div class="filter-grid">
+            <label
+              >Tìm tên cuộc họp<input
+                id="keyword"
+                type="search"
+                placeholder="Nhập tên cuộc họp…" /></label
+            ><label>Từ ngày<input id="from" type="date" /></label
+            ><label>Đến ngày<input id="to" type="date" /></label
+            ><label
+              >Phòng họp<select id="room">
+                <option value="">Tất cả phòng</option>
+              </select></label
+            ><label
+              >Trạng thái<select id="status">
+                <option value="">Tất cả trạng thái</option>
+              </select></label
+            ><button class="button primary" type="submit">⌕ Tìm kiếm</button
+            ><button type="button" id="reset" class="button">↻ Đặt lại</button>
+          </div>
+          <p id="filter-error" class="error" role="alert" hidden></p>
+        </form>
+        <section class="card results" aria-labelledby="list-title">
+          <div class="list-heading">
+            <h2 id="list-title">Danh sách cuộc họp <span id="count">0</span></h2>
+            <span>Mới nhất trước</span>
+          </div>
+          <div id="state" class="state" role="status">
+            <span class="spinner"></span><strong>Đang tải lịch sử…</strong>
+          </div>
+          <button id="retry" class="button" hidden>Thử lại</button>
+          <div id="table-wrap" class="table-wrap" hidden>
+            <table>
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Tên cuộc họp</th>
+                  <th>Ngày họp</th>
+                  <th>Thời gian</th>
+                  <th>Phòng họp</th>
+                  <th>Người tổ chức</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <footer class="pagination">
+            <span id="page-info"></span>
+            <div>
+              <button id="previous" aria-label="Trang trước">‹</button>
+              <div id="page-buttons"></div>
+              <span id="page-number" class="sr-only"></span
+              ><button id="next" aria-label="Trang sau">›</button>
+            </div>
+          </footer>
+        </section>
+        <p class="footnote">
+          Giờ hiển thị theo múi giờ Việt Nam (UTC+7). Trạng thái và phạm vi lịch sử tuân theo
+          backend.
+        </p>
+      </div>
+    </main>
+    <dialog id="detail" aria-labelledby="detail-title">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">CHI TIẾT CUỘC HỌP</p>
+          <h2>Chi tiết cuộc họp</h2>
+          <p id="detail-title" class="sr-only"></p>
+        </div>
+        <button id="close" aria-label="Đóng chi tiết">×</button>
+      </div>
+      <div id="detail-body"></div>
+      <div class="dialog-footer">
+        <button id="back" class="button">← Quay lại danh sách</button
+        ><button id="minutes" class="button primary" disabled>▤ Xem biên bản (nếu có)</button>
+      </div>
+    </dialog>
+  </body>
+</html>

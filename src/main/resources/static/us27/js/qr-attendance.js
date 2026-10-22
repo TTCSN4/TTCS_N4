@@ -1,9 +1,10 @@
 (() => {
   "use strict";
   const $ = (id) => document.getElementById(id);
-  const meetings = { M01: { title: "Họp triển khai dự án", room: "Phòng A1" }, M02: { title: "Họp báo cáo tuần", room: "Phòng B2" }, M03: { title: "Đánh giá tiến độ", room: "Phòng C1" } };
+  const meetings = window.TTCSDemo?Object.fromEntries(window.TTCSDemo.state.meetings.map(m=>[m.meetingId,{title:m.title,room:"Phòng "+m.roomId}])):{ M01: { title: "Họp triển khai dự án", room: "Phòng A1" }, M02: { title: "Họp báo cáo tuần", room: "Phòng B2" }, M03: { title: "Đánh giá tiến độ", room: "Phòng C1" } };
   const attendance = new Map();
-  const history = [];
+  const history = window.TTCSDemo?window.TTCSDemo.state.attendance.map(a=>({id:a.meetingId,action:a.action,time:new Date(a.time)})):[];
+if(window.TTCSDemo){const select=$('meeting');select.replaceChildren(...Object.entries(meetings).map(([id,m])=>new Option(m.title,id)));for(const h of history){const rec=attendance.get(h.id)||{};rec[h.action]=h.time;attendance.set(h.id,rec);}}
   let stream = null, cameraVersion = 0, scanTimer = null;
   const mode = () => document.querySelector('input[name="mode"]:checked').value;
   const dateText = (value) => new Intl.DateTimeFormat("vi-VN", { timeZone: "Asia/Ho_Chi_Minh", dateStyle: "short", timeStyle: "medium" }).format(value);
@@ -42,7 +43,8 @@
     $("codeError").textContent = error;
     $("code").setAttribute("aria-invalid", String(Boolean(error)));
     if (error) { result("Không thể điểm danh", error, true); return; }
-    const time = new Date();
+    let time = new Date();
+    if(window.TTCSDemo){try{const saved=window.TTCSDemo.request(action==='in'?'/api/check-in':'/api/check-out','POST',{meetingId:id,userId:window.TTCSDemo.state.actor.id});time=new Date(saved.time);}catch(e){result('Không thể điểm danh',e.message,true);return;}}
     record[action] = time;
     attendance.set(id, record);
     history.unshift({ id, action, time });

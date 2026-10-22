@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest @Transactional
+@SpringBootTest(classes=com.ttcs.meetingmanagement.MeetingmanagementApplication.class) @Transactional
 class US28HrmSyncIntegrationTest {
     @Autowired US28HrmSyncService service;@Autowired UserRepository users;@Autowired RoleRepository roles;
     @BeforeEach void roles(){var role=new Role();role.roleId="ATTENDEE";role.roleName="Người tham dự";roles.saveAndFlush(role);}

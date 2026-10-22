@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="vi">
+  <head><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Danh sách tài khoản · TTCS_N4</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../css/user-list.css" />
+    <script src="../js/user-list.js" defer></script>
+  </head>
+  <body class="us19-page" data-story="US19">
+    <a class="u19-skip-link" href="#main-content">Đến nội dung chính</a>
+    <header class="u19-topbar">
+      <button
+        class="u19-icon-button u19-menu-toggle"
+        id="menu-toggle"
+        type="button"
+        aria-label="Ẩn hoặc hiện thanh điều hướng"
+        aria-controls="sidebar"
+        aria-expanded="true"
+      >
+        <i data-icon="menu"></i>
+      </button>
+      <label class="u19-global-search"
+        ><i data-icon="search"></i
+        ><input
+          id="site-search"
+          type="search"
+          placeholder="Tìm kiếm tài khoản, tên hoặc email..."
+          aria-label="Tìm kiếm tài khoản"
+      /></label>
+      <div class="u19-header-actions">
+        <button
+          class="u19-icon-button u19-notifications"
+          id="notifications"
+          type="button"
+          aria-label="Thông báo"
+          aria-expanded="false"
+          aria-controls="header-popover"
+        >
+          <i data-icon="bell"></i><span class="u19-notification-dot"></span>
+        </button>
+        <button
+          class="u19-profile"
+          id="profile-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="header-popover"
+        >
+          <span class="u19-avatar" aria-hidden="true">N</span
+          ><span class="u19-profile-copy"
+            ><strong>Nguyễn Văn A</strong
+            ><small id="viewer-role">Admin</small></span
+          ><i data-icon="chevron"></i>
+        </button>
+      </div>
+      <div class="u19-popover" id="header-popover" hidden></div>
+    </header>
+    <button
+      class="u19-backdrop"
+      id="sidebar-backdrop"
+      type="button"
+      aria-label="Đóng thanh điều hướng"
+      tabindex="-1"
+      hidden
+    ></button>
+    <aside
+      class="u19-sidebar"
+      id="sidebar"
+      aria-label="Thanh điều hướng Meeting Management"
+    >
+      <a
+        class="u19-brand"
+        href="#main-content"
+        aria-label="Meeting Management – Danh sách tài khoản"
+      >
+        <span class="u19-brand-mark"><i data-icon="calendar"></i></span>
+        <span><strong>Meeting</strong><small>Meeting Management</small></span>
+      </a>
+      <nav aria-label="Điều hướng chính">
+        <div class="u19-nav-group">
+          <button
+            class="u19-nav-item"
+            id="meeting-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="true"
+            aria-controls="meeting-menu"
+          >
+            <i data-icon="calendar"></i><span>Lịch họp</span
+            ><i data-icon="chevron" class="u19-nav-chevron"></i>
+          </button>
+          <div class="u19-submenu" id="meeting-menu">
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Tạo lịch họp"
+            >
+              Tạo lịch họp
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Chỉnh sửa &amp; hủy lịch"
+            >
+              Chỉnh sửa &amp; hủy lịch
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Lịch họp định kỳ"
+            >
+              Lịch họp định kỳ
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Người tham gia"
+            >
+              Người tham gia
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Gợi ý thời gian"
+            >
+              Gợi ý thời gian
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Lịch sử cuộc họp"
+            >
+              Lịch sử cuộc họp
+            </button>
+          </div>
+        </div>
+        <div class="u19-nav-group">
+          <button
+            class="u19-nav-item"
+            id="room-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="room-menu"
+          >
+            <i data-icon="building"></i><span>Phòng &amp; thiết bị</span
+            ><i data-icon="chevron" class="u19-nav-chevron"></i>
+          </button>
+          <div class="u19-submenu" id="room-menu" hidden>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Quản lý phòng họp"
+            >
+              Quản lý phòng họp
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Quản lý thiết bị"
+            >
+              Quản lý thiết bị
+            </button>
+          </div>
+        </div>
+        <div class="u19-nav-group">
+          <button
+            class="u19-nav-item"
+            id="personal-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="personal-menu"
+          >
+            <i data-icon="clock"></i><span>Lịch của tôi</span
+            ><i data-icon="chevron" class="u19-nav-chevron"></i>
+          </button>
+          <div class="u19-submenu" id="personal-menu" hidden>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Cuộc họp của tôi"
+            >
+              Cuộc họp của tôi
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Lịch sử đặt phòng"
+            >
+              Lịch sử đặt phòng
+            </button>
+          </div>
+        </div>
+        <div class="u19-nav-group">
+          <button
+            class="u19-nav-item is-section"
+            id="admin-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="true"
+            aria-controls="admin-menu"
+          >
+            <i data-icon="users"></i><span>Người dùng &amp; quyền</span
+            ><i data-icon="chevron" class="u19-nav-chevron"></i>
+          </button>
+          <div class="u19-submenu" id="admin-menu">
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Quản lý tài khoản"
+            >
+              Quản lý tài khoản
+            </button>
+            <a
+              class="u19-nav-item is-active"
+              href="#main-content"
+              aria-current="page"
+              >Danh sách tài khoản</a
+            >
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Cấu hình quyền"
+            >
+              Cấu hình quyền
+            </button>
+          </div>
+        </div>
+        <div class="u19-nav-group">
+          <button
+            class="u19-nav-item"
+            id="report-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="report-menu"
+          >
+            <i data-icon="chart"></i><span>Báo cáo</span
+            ><i data-icon="chevron" class="u19-nav-chevron"></i>
+          </button>
+          <div class="u19-submenu" id="report-menu" hidden>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Thống kê cuộc họp"
+            >
+              Thống kê cuộc họp
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Báo cáo sử dụng phòng"
+            >
+              Báo cáo sử dụng phòng
+            </button>
+            <button
+              class="u19-nav-item"
+              type="button"
+              data-module="Báo cáo thiết bị"
+            >
+              Báo cáo thiết bị
+            </button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <main class="u19-main" id="main-content">
+      <nav class="u19-breadcrumb" aria-label="Đường dẫn">
+        <span>Trang chủ</span><i data-icon="right"></i
+        ><span>Người dùng &amp; quyền</span><i data-icon="right"></i
+        ><strong>Danh sách tài khoản</strong>
+      </nav>
+      <div class="u19-heading">
+        <div>
+          <h1><i data-icon="users"></i>Danh sách tài khoản</h1>
+          <p>Xem, tìm kiếm, lọc tài khoản theo vai trò và trạng thái.</p>
+        </div>
+        <button class="u19-button is-primary" id="add-account" type="button">
+          <i data-icon="plus"></i>Thêm tài khoản
+        </button>
+      </div>
+      <p class="u19-alert" id="access-message" role="alert" hidden></p>
+      <p class="u19-alert" id="data-message" role="status" hidden></p>
+      <section
+        class="u19-card"
+        id="accounts-panel"
+        aria-label="Danh sách tài khoản"
+      >
+        <form
+          class="u19-filters"
+          id="filter-form"
+          role="search"
+          aria-label="Bộ lọc tài khoản"
+        >
+          <label class="u19-search-field"
+            ><i data-icon="search"></i
+            ><input
+              id="user-search"
+              type="search"
+              placeholder="Tìm theo tên, email, tên đăng nhập..."
+              aria-label="Tìm theo tên, email hoặc tên đăng nhập"
+          /></label>
+          <label class="u19-sr-only" for="role-filter">Lọc theo vai trò</label>
+          <select id="role-filter">
+            <option value="">Tất cả vai trò</option>
+            <option value="ADMIN">Admin</option>
+            <option value="PM">PM</option>
+            <option value="MEMBER">Member</option>
+          </select>
+          <label class="u19-sr-only" for="status-filter"
+            >Lọc theo trạng thái</label
+          >
+          <select id="status-filter">
+            <option value="">Tất cả trạng thái</option>
+            <option value="ACTIVE">Kích hoạt</option>
+            <option value="LOCKED">Tạm khóa</option>
+          </select>
+          <button class="u19-button is-primary" type="submit">
+            <i data-icon="search"></i>Tìm kiếm
+          </button>
+          <button
+            class="u19-button is-secondary"
+            id="reset-filters"
+            type="reset"
+          >
+            <i data-icon="refresh"></i>Làm mới
+          </button>
+        </form>
+        <p class="u19-scroll-hint">Vuốt ngang để xem đầy đủ bảng →</p>
+        <div
+          class="u19-table-wrap"
+          role="region"
+          tabindex="0"
+          aria-label="Bảng danh sách tài khoản, có thể cuộn ngang"
+        >
+          <table class="u19-table">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <input
+                    id="select-page"
+                    type="checkbox"
+                    aria-label="Chọn tất cả tài khoản trên trang hiện tại"
+                  />
+                </th>
+                <th scope="col">STT</th>
+                <th scope="col">Tên đăng nhập</th>
+                <th scope="col">Họ và tên</th>
+                <th scope="col">Email</th>
+                <th scope="col">Vai trò</th>
+                <th scope="col">Phòng ban</th>
+                <th scope="col">Ngày tạo</th>
+                <th scope="col">Đăng nhập lần cuối</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="accounts-body"></tbody>
+          </table>
+        </div>
+        <div class="u19-table-footer">
+          <div class="u19-bulk-actions">
+            <label class="u19-sr-only" for="bulk-action"
+              >Thao tác với các tài khoản đã chọn</label
+            ><select id="bulk-action">
+              <option value="">Chọn hành động</option>
+              <option value="LOCKED">Khóa tài khoản đã chọn</option>
+              <option value="ACTIVE">Mở khóa tài khoản đã chọn</option></select
+            ><button
+              class="u19-button is-secondary"
+              id="apply-bulk"
+              type="button"
+              disabled
+            >
+              Áp dụng</button
+            ><span
+              class="u19-selection-count"
+              id="selection-count"
+              aria-live="polite"
+              >Chưa chọn tài khoản</span
+            >
+          </div>
+          <div class="u19-pagination-tools">
+            <span id="pagination-summary" aria-live="polite"></span
+            ><label class="u19-page-size" for="page-size"
+              >Hiển thị<select id="page-size">
+                <option value="10">10 dòng</option>
+                <option value="20">20 dòng</option>
+                <option value="50">50 dòng</option>
+              </select></label
+            >
+            <nav
+              class="u19-pagination"
+              id="pagination"
+              aria-label="Phân trang tài khoản"
+            ></nav>
+          </div>
+        </div>
+      </section>
+      <footer class="u19-demo-note">
+        <i data-icon="info"></i
+        ><span
+          >Dữ liệu mẫu để kiểm thử Frontend, không kết nối API. Các thay đổi
+          trên trang được đặt lại khi tải lại; mật khẩu không được lưu.</span
+        >
+      </footer>
+    </main>
+    <div
+      class="u19-row-menu"
+      id="row-menu"
+      role="menu"
+      aria-label="Thao tác tài khoản"
+      hidden
+    ></div>
+    <dialog
+      class="u19-dialog"
+      id="account-dialog"
+      aria-labelledby="account-title"
+    >
+      <div class="u19-dialog-heading">
+        <h2 id="account-title">Thêm tài khoản</h2>
+        <button
+          class="u19-icon-button"
+          id="close-account"
+          type="button"
+          aria-label="Đóng form tài khoản"
+        >
+          <i data-icon="close"></i>
+        </button>
+      </div>
+      <form id="account-form" novalidate>
+        <div class="u19-form-fields">
+          <div class="u19-field">
+            <label for="username">Tên đăng nhập <em>*</em></label
+            ><input
+              id="username"
+              name="username"
+              autocomplete="username"
+              maxlength="40"
+              required
+              aria-describedby="username-error"
+            />
+            <p class="u19-error" id="username-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="fullName">Họ và tên <em>*</em></label
+            ><input
+              id="fullName"
+              name="fullName"
+              autocomplete="name"
+              maxlength="100"
+              required
+              aria-describedby="fullName-error"
+            />
+            <p class="u19-error" id="fullName-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="email">Email <em>*</em></label
+            ><input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              required
+              aria-describedby="email-error"
+            />
+            <p class="u19-error" id="email-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="phone">Số điện thoại</label
+            ><input
+              id="phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              maxlength="20"
+              aria-describedby="phone-error"
+            />
+            <p class="u19-error" id="phone-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="department">Phòng ban</label
+            ><input
+              id="department"
+              name="department"
+              maxlength="80"
+              placeholder="Ví dụ: IT"
+              aria-describedby="department-error"
+            />
+            <p class="u19-error" id="department-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="account-status">Trạng thái <em>*</em></label
+            ><select
+              id="account-status"
+              name="status"
+              aria-describedby="status-error"
+            >
+              <option value="ACTIVE">Kích hoạt</option>
+              <option value="LOCKED">Tạm khóa</option>
+            </select>
+            <p class="u19-error" id="status-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="password"
+              >Mật khẩu <em id="password-required">*</em></label
+            >
+            <div class="u19-password-wrap">
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                minlength="8"
+                maxlength="128"
+                required
+                aria-describedby="password-error password-hint"
+              /><button
+                class="u19-password-toggle"
+                type="button"
+                data-password="password"
+                aria-label="Hiện mật khẩu"
+                aria-pressed="false"
+              >
+                <i data-icon="eye"></i>
+              </button>
+            </div>
+            <p class="u19-error" id="password-error" hidden></p>
+          </div>
+          <div class="u19-field">
+            <label for="confirmPassword"
+              >Xác nhận mật khẩu <em id="confirm-required">*</em></label
+            >
+            <div class="u19-password-wrap">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autocomplete="new-password"
+                maxlength="128"
+                required
+                aria-describedby="confirmPassword-error"
+              /><button
+                class="u19-password-toggle"
+                type="button"
+                data-password="confirmPassword"
+                aria-label="Hiện mật khẩu xác nhận"
+                aria-pressed="false"
+              >
+                <i data-icon="eye"></i>
+              </button>
+            </div>
+            <p class="u19-error" id="confirmPassword-error" hidden></p>
+          </div>
+        </div>
+        <p class="u19-form-hint" id="password-hint">
+          Mật khẩu từ 8 đến 128 ký tự. Tên đăng nhập và email không được trùng.
+        </p>
+        <fieldset
+          class="u19-choice-group"
+          id="roles-group"
+          aria-describedby="roles-error"
+        >
+          <legend>Vai trò <em>*</em></legend>
+          <label class="u19-choice"
+            ><input type="checkbox" name="roles" value="ADMIN" />Admin</label
+          ><label class="u19-choice"
+            ><input type="checkbox" name="roles" value="PM" />PM</label
+          ><label class="u19-choice"
+            ><input
+              type="checkbox"
+              name="roles"
+              value="MEMBER"
+              checked
+            />Member</label
+          >
+          <p class="u19-error" id="roles-error" hidden></p>
+        </fieldset>
+        <p class="u19-form-status" id="form-status" role="alert" hidden></p>
+        <div class="u19-dialog-actions">
+          <button
+            class="u19-button is-secondary"
+            id="cancel-account"
+            type="button"
+          >
+            Hủy</button
+          ><button
+            class="u19-button is-primary"
+            id="save-account"
+            type="submit"
+          >
+            <i data-icon="check"></i><span>Tạo tài khoản</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog
+      class="u19-dialog is-confirm"
+      id="confirm-dialog"
+      aria-labelledby="confirm-title"
+    >
+      <div class="u19-dialog-heading">
+        <h2 id="confirm-title">Xác nhận thay đổi</h2>
+      </div>
+      <p id="confirm-message"></p>
+      <p class="u19-form-status" id="confirm-error" role="alert" hidden></p>
+      <div class="u19-dialog-actions">
+        <button
+          class="u19-button is-secondary"
+          id="cancel-confirm"
+          type="button"
+          autofocus
+        >
+          Hủy</button
+        ><button
+          class="u19-button is-primary"
+          id="confirm-action"
+          type="button"
+        >
+          Xác nhận
+        </button>
+      </div>
+    </dialog>
+    <dialog
+      class="u19-dialog"
+      id="detail-dialog"
+      aria-labelledby="detail-title"
+    >
+      <div class="u19-dialog-heading">
+        <h2 id="detail-title">Chi tiết tài khoản</h2>
+        <button
+          class="u19-icon-button"
+          id="close-details"
+          type="button"
+          aria-label="Đóng chi tiết tài khoản"
+        >
+          <i data-icon="close"></i>
+        </button>
+      </div>
+      <dl class="u19-detail-grid" id="account-details"></dl>
+    </dialog>
+    <div
+      class="u19-toast"
+      id="toast"
+      role="status"
+      aria-live="polite"
+      hidden
+    ></div>
+  </body>
+</html>

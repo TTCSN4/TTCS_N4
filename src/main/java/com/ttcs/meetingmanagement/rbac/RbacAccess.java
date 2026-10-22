@@ -1,11 +1,11 @@
-
 package com.ttcs.meetingmanagement.rbac;
 
 import com.ttcs.meetingmanagement.model.User;
 import com.ttcs.meetingmanagement.repository.UserRepository;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +21,14 @@ public class RbacAccess {
         this.userRepository = userRepository;
     }
 
-    // Admin duoc quan ly vai tro nguoi dung
+    // Admin duoc quan ly phong va vai tro nguoi dung
     public boolean isAdmin(Authentication authentication) {
-        return hasRole(authentication, "Admin");
+        return hasRole(
+                authentication,
+                "Admin",
+                "ROLE_ADMIN",
+                "ADMIN"
+        );
     }
 
     // Admin va Nguoi dat lich duoc tao lich hop
@@ -31,17 +36,25 @@ public class RbacAccess {
         return hasRole(
                 authentication,
                 "Admin",
-                "Người đặt lịch"
+                "ROLE_ADMIN",
+                "ADMIN",
+                "Người đặt lịch",
+                "BOOKER"
         );
     }
 
-    // Cac vai tro duoc phep tham gia cuoc hop
+    // Cac vai tro duoc phep tham gia va xem phong hop
     public boolean canAttend(Authentication authentication) {
         return hasRole(
                 authentication,
                 "Admin",
+                "ROLE_ADMIN",
+                "ADMIN",
                 "Người đặt lịch",
-                "Người tham dự"
+                "BOOKER",
+                "Người tham dự",
+                "ATTENDEE",
+                "USER"
         );
     }
 
@@ -58,12 +71,18 @@ public class RbacAccess {
 
         // Identity must come from trusted authentication.
         // Do not trust a client-provided userId.
-        if (!(authentication.getPrincipal()
-                instanceof AuthenticatedUserIdentity identity)) {
-            return false;
-        }
+        String userId = null;
+        Object principal = authentication.getPrincipal();
 
-        String userId = identity.getUserId();
+        if (principal instanceof AuthenticatedUserIdentity identity) {
+            userId = identity.getUserId();
+        } else if (principal instanceof Jwt jwt) {
+            userId = jwt.getSubject();
+        } else if (principal instanceof String s && !s.isBlank()) {
+            userId = s;
+        } else if (authentication.getName() != null && !authentication.getName().isBlank()) {
+            userId = authentication.getName();
+        }
 
         if (userId == null || userId.isBlank()) {
             return false;
@@ -75,7 +94,8 @@ public class RbacAccess {
                 .filter(role -> role != null)
                 .map(role -> Arrays.stream(allowedRoles)
                         .anyMatch(name ->
-                                name.equals(role.getRoleName())))
+                                name.equalsIgnoreCase(role.getRoleName())
+                                || name.equalsIgnoreCase(role.getRoleId())))
                 .orElse(false);
     }
 }
