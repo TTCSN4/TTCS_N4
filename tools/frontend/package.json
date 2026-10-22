@@ -1,0 +1,11 @@
+{
+  "name": "ttcs-frontend-checks",
+  "private": true,
+  "scripts": {
+    "preview": "node preview.cjs",
+    "test": "node test-ui.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0"
+  }
+}

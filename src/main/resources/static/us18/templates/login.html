@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Đăng nhập · Meeting Management</title><link rel="stylesheet" href="../css/meeting-ui.css"><script src="../js/meeting-ui.js" defer></script></head>
+<body class="login-page">
+<main class="login-layout">
+  <section class="intro"><div class="intro-content">
+    <a class="brand" href="login.html"><span class="brand-mark"><i data-icon="calendar"></i></span><span>Meeting<br>Management</span></a>
+    <h1>Quản lý cuộc họp<br>dễ dàng và hiệu quả</h1><p class="intro-description">Hệ thống giúp bạn đặt phòng, quản lý lịch họp,<br class="desktop-break"> theo dõi cuộc họp và tối ưu quy trình làm việc.</p>
+    <ul class="features">
+      <li><span class="feature-icon"><i data-icon="calendar"></i></span><div><strong>Đặt phòng họp nhanh chóng</strong><p>Kiểm tra phòng trống, đặt lịch dễ dàng.</p></div></li>
+      <li><span class="feature-icon"><i data-icon="users"></i></span><div><strong>Quản lý lịch họp thông minh</strong><p>Theo dõi và quản lý tất cả cuộc họp.</p></div></li>
+      <li><span class="feature-icon"><i data-icon="chart"></i></span><div><strong>Báo cáo và thống kê</strong><p>Tổng hợp dữ liệu, hỗ trợ ra quyết định.</p></div></li>
+    </ul>
+  </div></section>
+  <section class="login-area" aria-labelledby="login-title"><div class="login-card">
+    <div class="login-brand"><span class="brand-mark"><i data-icon="calendar"></i></span><div><h2 id="login-title">Meeting<br>Management</h2><p>Đăng nhập vào hệ thống</p></div></div>
+    <form id="login-form" novalidate>
+      <div class="field"><label for="identity">Tên đăng nhập hoặc Email</label><div class="input-wrap"><i data-icon="user"></i><input id="identity" autocomplete="username" placeholder="Nhập tên đăng nhập hoặc email" required aria-describedby="identity-error"></div><p class="error" id="identity-error" hidden>Vui lòng nhập tên đăng nhập hoặc email.</p></div>
+      <div class="field"><label for="login-password">Mật khẩu</label><div class="input-wrap"><i data-icon="lock"></i><input id="login-password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" required aria-describedby="login-password-error"><button class="password-toggle" type="button" data-password="login-password" aria-label="Hiện mật khẩu" aria-pressed="false"><i data-icon="eye-off"></i></button></div><p class="error" id="login-password-error" hidden>Vui lòng nhập mật khẩu.</p></div>
+      <div class="login-options"><label class="remember"><input id="remember" type="checkbox" checked>Ghi nhớ đăng nhập</label><button class="text-button" type="button" id="forgot-password">Quên mật khẩu?</button></div>
+      <button class="login-button" type="submit"><i data-icon="user-plus"></i>Đăng nhập</button>
+      <div class="divider"><span>hoặc</span></div>
+      <button class="google-button" id="google-login" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" stroke="none" d="M22 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.6a4.8 4.8 0 0 1-2.1 3.1v2.6H19c1.9-1.8 3-4.3 3-7.6z"/><path fill="#34A853" stroke="none" d="M12 22c2.7 0 5-.9 7-2.2l-3.5-2.6c-1 .7-2.1 1-3.5 1-2.7 0-5-1.8-5.8-4.2H2.6v2.7A10 10 0 0 0 12 22z"/><path fill="#FBBC05" stroke="none" d="M6.2 14a6 6 0 0 1 0-4V7.3H2.6a10 10 0 0 0 0 9.4z"/><path fill="#EA4335" stroke="none" d="M12 5.8c1.5 0 2.8.5 3.9 1.5l2.9-2.8A10 10 0 0 0 2.6 7.3L6.2 10C7 7.6 9.3 5.8 12 5.8z"/></svg>Đăng nhập với Google</button>
+      <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+      <a id="preview-link" class="preview-link" href="create-account.html" hidden>Xem giao diện quản trị →</a>
+    </form>
+    <p class="signup">Chưa có tài khoản? <a href="create-account.html">Tạo tài khoản mới</a></p>
+  </div><footer>© 2024 Meeting Management. Tất cả quyền được bảo lưu.</footer></section>
+</main>
+</body></html>

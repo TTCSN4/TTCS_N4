@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Báo cáo sử dụng phòng · Meeting M</title>
+    <link rel="stylesheet" href="../css/room-usage-report.css" />
+    <script src="../js/room-usage-report.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="../index.html"
+        ><b
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="3" />
+            <path d="M7 3v4m10-4v4M3 11h18" /></svg></b
+        ><span><strong>Meeting M</strong><small>Hệ thống quản lý cuộc họp</small></span></a
+      >
+      <nav aria-label="Điều hướng">
+        <a href="../index.html"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" /></svg
+          ><span>Trang chủ</span></a
+        ><a href="../../us01/templates/create-meeting.html"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="3" />
+            <path d="M7 3v4m10-4v4M3 11h18" /></svg
+          ><span>Tạo cuộc họp</span></a
+        ><a href="../index.html"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M8 5h13M8 12h13M8 19h13" />
+            <circle cx="3" cy="5" r="1" />
+            <circle cx="3" cy="12" r="1" />
+            <circle cx="3" cy="19" r="1" /></svg
+          ><span>Danh sách cuộc họp</span></a
+        ><a href="../../us06/templates/meeting-history.html"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l4 2" /></svg
+          ><span>Lịch sử cuộc họp</span></a
+        ><a href="../index.html#rooms"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="4" y="3" width="12" height="18" rx="2" />
+            <path d="M16 8h4v13M8 7h4m-4 5h4" /></svg
+          ><span>Phòng họp</span></a
+        ><a href="../index.html#equipment"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="4" y="3" width="12" height="18" rx="2" />
+            <path d="M16 8h4v13M8 7h4m-4 5h4" /></svg
+          ><span>Thiết bị</span></a
+        ><a href="../../us18/variants/us18_1/templates/create-user.html"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="7" r="4" />
+            <path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg
+          ><span>Quản lý người dùng</span></a
+        ><a href="room-usage-report.html" class="active" aria-current="page"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 21h18M6 17V9h3v8m3 0V3h3v14m3 0v-5h3v5" /></svg
+          ><span>Báo cáo sử dụng phòng</span></a
+        ><a href="../index.html#notifications"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l4 2" /></svg
+          ><span>Thông báo</span></a
+        ><a href="../index.html#settings">⚙ <span>Cài đặt</span></a>
+      </nav>
+    </aside>
+    <main>
+      <header class="topbar">
+        <button id="menuToggle" aria-label="Ẩn hoặc hiện menu">☰</button>
+        <div class="profile">
+          <span class="notification">♧<b>3</b></span
+          ><span class="avatar">U</span
+          ><span><strong>Tài khoản quản trị</strong><small>Quản trị viên</small></span
+          ><span>⌄</span>
+        </div>
+      </header>
+      <div class="content">
+        <div class="page-heading">
+          <span class="heading-icon"
+            ><svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 21h18M6 17V9h3v8m3 0V3h3v14m3 0v-5h3v5" /></svg
+          ></span>
+          <div>
+            <h1>Báo cáo sử dụng phòng</h1>
+            <p>Thống kê tình hình sử dụng các phòng họp trong hệ thống · Dữ liệu demo.</p>
+          </div>
+          <details class="export">
+            <summary>⇩ &nbsp; Xuất báo cáo &nbsp;⌄</summary>
+            <div>
+              <button id="exportCsv">Tải bảng CSV</button
+              ><button id="printReport">In / Lưu PDF</button>
+            </div>
+          </details>
+        </div>
+        <form id="filters" class="panel filter-panel">
+          <h2>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 4h18l-7 8v8l-4-2v-6Z" />
+            </svg>
+            Bộ lọc
+          </h2>
+          <div class="filter-grid">
+            <div>
+              <label>Khoảng thời gian</label>
+              <div class="date-range">
+                <input id="fromDate" type="date" aria-label="Từ ngày" required /><span>→</span
+                ><input id="toDate" type="date" aria-label="Đến ngày" required />
+              </div>
+            </div>
+            <label
+              >Phòng họp<select id="roomFilter">
+                <option value="">Tất cả phòng</option>
+              </select></label
+            ><label
+              >Trạng thái sử dụng<select id="statusFilter">
+                <option value="">Tất cả</option>
+                <option value="ACTIVE">Đang hoạt động</option>
+                <option value="MAINTENANCE">Đang bảo trì</option>
+              </select></label
+            ><button id="applyFilter" type="submit" class="button primary">
+              ⌕ &nbsp; Lọc dữ liệu
+            </button>
+          </div>
+          <div class="presets">
+            <button type="button" data-days="7">7 ngày qua</button
+            ><button type="button" data-days="30">30 ngày qua</button
+            ><button type="button" data-days="90">3 tháng qua</button
+            ><button type="button" data-days="180">6 tháng qua</button
+            ><button type="button" data-days="365">1 năm qua</button>
+          </div>
+          <p id="filterError" class="error" role="alert" hidden></p>
+        </form>
+        <p id="reportStatus" class="report-status" role="status">
+          Dữ liệu minh họa · Chưa tích hợp API
+        </p>
+        <section class="metrics" aria-label="Thống kê tổng quan">
+          <article class="metric">
+            <span class="metric-icon blue"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="4" y="3" width="12" height="18" rx="2" />
+                <path d="M16 8h4v13M8 7h4m-4 5h4" /></svg
+            ></span>
+            <div>
+              <span>Tổng số phòng họp</span><strong><span id="roomTotal">0</span> phòng</strong
+              ><small id="roomTotalTrend">So với kỳ trước</small>
+            </div>
+          </article>
+          <article class="metric">
+            <span class="metric-icon green"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="5" width="18" height="16" rx="3" />
+                <path d="M7 3v4m10-4v4M3 11h18" /></svg
+            ></span>
+            <div>
+              <span>Tổng số lượt đặt</span><strong><span id="bookingTotal">0</span> </strong
+              ><small id="bookingTotalTrend">So với kỳ trước</small>
+            </div>
+          </article>
+          <article class="metric">
+            <span class="metric-icon orange"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l4 2" /></svg
+            ></span>
+            <div>
+              <span>Tổng giờ sử dụng</span><strong><span id="hoursTotal">0</span> giờ</strong
+              ><small id="hoursTotalTrend">So với kỳ trước</small>
+            </div>
+          </article>
+          <article class="metric">
+            <span class="metric-icon purple"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 21h18M6 17V9h3v8m3 0V3h3v14m3 0v-5h3v5" /></svg
+            ></span>
+            <div>
+              <span>Tỷ lệ sử dụng trung bình</span><strong><span id="usageTotal">0</span> %</strong
+              ><small id="usageTotalTrend">So với kỳ trước</small>
+            </div>
+          </article>
+        </section>
+        <div class="charts">
+          <section class="panel">
+            <h2>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 21h18M6 17V9h3v8m3 0V3h3v14m3 0v-5h3v5" />
+              </svg>
+              Số lượt sử dụng phòng theo thời gian
+            </h2>
+            <div class="chart-legend">
+              <span><i class="blue-dot"></i>Số lượt sử dụng</span
+              ><span><i class="green-dot"></i>Số giờ sử dụng</span>
+            </div>
+            <div
+              id="trendChart"
+              class="trend-chart"
+              role="img"
+              aria-label="Biểu đồ lượt đặt và số giờ theo thời gian"
+            ></div>
+          </section>
+          <section class="panel">
+            <h2>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 21h18M6 17V9h3v8m3 0V3h3v14m3 0v-5h3v5" />
+              </svg>
+              Tỷ lệ sử dụng theo từng phòng
+            </h2>
+            <div class="donut-layout">
+              <div id="donut" class="donut" role="img">
+                <div>
+                  <small>Tổng</small><strong id="donutTotal">0</strong><small>giờ sử dụng</small>
+                </div>
+              </div>
+              <div id="donutLegend" class="donut-legend"></div>
+            </div>
+          </section>
+          <section class="panel">
+            <h2>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 21h18M6 17V9h3v8m3 0V3h3v14m3 0v-5h3v5" />
+              </svg>
+              Top 5 phòng được sử dụng nhiều nhất
+            </h2>
+            <div id="topRooms" class="top-rooms"></div>
+          </section>
+        </div>
+        <section class="panel table-panel">
+          <div class="table-heading">
+            <h2>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M8 5h13M8 12h13M8 19h13" />
+                <circle cx="3" cy="5" r="1" />
+                <circle cx="3" cy="12" r="1" />
+                <circle cx="3" cy="19" r="1" />
+              </svg>
+              Chi tiết sử dụng phòng
+            </h2>
+            <label class="search"
+              >⌕
+              <input
+                id="searchRoom"
+                type="search"
+                placeholder="Tìm kiếm phòng…"
+                aria-label="Tìm kiếm trong bảng"
+            /></label>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Tên phòng</th>
+                  <th>Sức chứa</th>
+                  <th><button id="sortBookings" type="button">Số lượt đặt ↕</button></th>
+                  <th>Số giờ sử dụng</th>
+                  <th>Tỷ lệ sử dụng</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="roomRows"></tbody>
+            </table>
+          </div>
+          <p id="tableCount" class="table-count"></p>
+        </section>
+        <p class="footnote">
+          Dữ liệu minh họa được tạo trên trình duyệt. Tỷ lệ sử dụng tính theo 8 giờ/ngày làm việc,
+          thứ Hai đến thứ Sáu. Bộ lọc cập nhật toàn bộ báo cáo; ô tìm kiếm chỉ lọc bảng.
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
