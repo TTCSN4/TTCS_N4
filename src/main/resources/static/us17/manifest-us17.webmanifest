@@ -1,0 +1,16 @@
+{
+  "id": "./mobile-meetings.html",
+  "name": "Meeting – Lịch họp của tôi",
+  "short_name": "Meeting",
+  "description": "Xem lịch họp, chi tiết và theo dõi trạng thái trên di động.",
+  "lang": "vi",
+  "start_url": "./mobile-meetings.html",
+  "scope": "./mobile-meetings.html",
+  "display": "standalone",
+  "theme_color": "#193453",
+  "background_color": "#f3f5f8",
+  "icons": [
+    {"src": "./icons/meeting-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/meeting-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
+}

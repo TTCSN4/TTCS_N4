@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tích hợp HRM/ERP · Meeting M</title>
+    <link rel="stylesheet" href="../css/hrm-integration.css" />
+    <script src="../js/hrm-integration.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="../index.html"
+        ><span class="brand-icon">▦</span
+        ><span>Meeting M<small>Hệ thống quản lý cuộc họp</small></span></a
+      >
+      <nav aria-label="Điều hướng chính">
+        <a href="../index.html"><span>⌂</span>Trang chủ</a>
+        <a href="../create-meeting.html"><span>▦</span>Tạo cuộc họp</a>
+        <button type="button" disabled><span>◷</span>Danh sách cuộc họp</button>
+        <button type="button" disabled><span>◴</span>Lịch của tôi</button>
+        <button type="button" disabled><span>▦</span>Lịch phòng họp</button>
+        <button type="button" disabled><span>♧</span>Người tham gia</button>
+        <button type="button" disabled><span>▣</span>Thiết bị</button>
+        <button type="button" disabled><span>▥</span>Báo cáo</button>
+        <a href="hrm-integration.html" class="active" aria-current="page"
+          ><span>↗</span>Tích hợp hệ thống</a
+        >
+        <button type="button" disabled><span>♧</span>Thông báo</button>
+        <button type="button" disabled><span>⚙</span>Cài đặt</button>
+      </nav>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button
+          type="button"
+          id="menu"
+          class="icon-button"
+          aria-label="Đóng/mở menu"
+          aria-expanded="true"
+        >
+          ☰
+        </button>
+        <div class="profile">
+          <span class="avatar">NA</span><span>Nguyễn Văn A<small>Người tổ chức</small></span>
+        </div>
+      </header>
+      <main>
+        <div class="breadcrumb">
+          <a href="../index.html">Trang chủ</a><span>›</span>Tích hợp hệ thống<span>›</span>Tích hợp
+          HRM/ERP
+        </div>
+        <div class="page-title">
+          <span class="title-icon">↗</span>
+          <div>
+            <h1>Tích hợp HRM/ERP</h1>
+            <p>
+              Quản lý kết nối, đồng bộ dữ liệu người dùng, phòng ban và thông tin tổ chức từ hệ
+              thống HRM/ERP.
+            </p>
+          </div>
+        </div>
+        <div class="demo-note">
+          Bản giao diện: kiểm tra kết nối và đồng bộ đang được mô phỏng, chưa gọi API thực tế.
+        </div>
+        <div id="notice" class="notice" role="status" hidden></div>
+        <div class="dashboard-grid">
+          <section class="card configuration">
+            <div class="section-heading">
+              <span>⚙</span>
+              <div>
+                <h2>Cấu hình kết nối</h2>
+                <p>Thiết lập thông tin kết nối đến hệ thống HRM/ERP của tổ chức.</p>
+              </div>
+            </div>
+            <form id="configuration" novalidate>
+              <div class="form-grid">
+                <label
+                  >Loại hệ thống <b>*</b
+                  ><select id="systemType">
+                    <option>HRM</option>
+                    <option>ERP</option>
+                  </select></label
+                >
+                <label
+                  >Tên hệ thống <b>*</b
+                  ><input
+                    id="systemName"
+                    maxlength="100"
+                    placeholder="HRM Công ty"
+                    required /><small class="error" id="systemNameError"></small
+                ></label>
+                <label
+                  >Base URL <b>*</b
+                  ><input
+                    id="baseUrl"
+                    type="url"
+                    placeholder="https://hrm.company.com"
+                    required /><small>Địa chỉ API của hệ thống HRM/ERP</small
+                  ><small class="error" id="baseUrlError"></small
+                ></label>
+                <label
+                  >Phương thức xác thực <b>*</b
+                  ><select id="authMethod">
+                    <option value="bearer">Bearer Token</option>
+                    <option value="key">API Key</option>
+                  </select></label
+                >
+                <label class="full"
+                  >Token/API Key <b>*</b>
+                  <div class="secret-input">
+                    <input
+                      id="token"
+                      type="password"
+                      autocomplete="off"
+                      placeholder="Nhập token hoặc API key"
+                      required
+                    /><button
+                      type="button"
+                      id="toggleToken"
+                      aria-label="Hiện token"
+                      aria-pressed="false"
+                    >
+                      ◉
+                    </button>
+                  </div>
+                  <small class="error" id="tokenError"></small
+                ></label>
+                <label
+                  >Thời gian đồng bộ tự động<select id="schedule">
+                    <option value="daily">Hằng ngày</option>
+                    <option value="weekly">Hằng tuần</option>
+                    <option value="off">Tắt đồng bộ tự động</option>
+                  </select></label
+                >
+                <label
+                  >Giờ đồng bộ<input id="syncTime" type="time" value="02:00" /><small
+                    class="error"
+                    id="syncTimeError"
+                  ></small
+                ></label>
+              </div>
+              <fieldset>
+                <legend>Dữ liệu đồng bộ</legend>
+                <div class="checks">
+                  <label
+                    ><input type="checkbox" name="configData" value="Người dùng" checked />Người
+                    dùng</label
+                  ><label
+                    ><input type="checkbox" name="configData" value="Phòng ban" checked />Phòng
+                    ban</label
+                  ><label
+                    ><input
+                      type="checkbox"
+                      name="configData"
+                      value="Thông tin tổ chức"
+                      checked
+                    />Thông tin tổ chức</label
+                  ><label
+                    ><input type="checkbox" name="configData" value="Thông tin phòng họp" />Thông
+                    tin phòng họp</label
+                  >
+                </div>
+                <small class="error" id="dataError"></small>
+              </fieldset>
+              <div class="form-actions">
+                <button type="button" id="testConnection" class="outline">
+                  ↗ Kiểm tra kết nối
+                </button>
+                <div>
+                  <button type="button" id="cancel">Hủy</button
+                  ><button type="submit" class="primary" id="save">▣ Lưu cấu hình</button>
+                </div>
+              </div>
+            </form>
+          </section>
+          <div class="right-stack">
+            <section class="card">
+              <div class="status-heading">
+                <h2><span>◉</span> Trạng thái kết nối</h2>
+                <span id="connectionBadge" class="badge neutral">Chưa kiểm tra</span>
+              </div>
+              <div id="connectionBanner" class="connection-banner neutral">
+                <span id="connectionIcon">○</span>
+                <div>
+                  <strong id="connectionTitle">Chưa có kết nối</strong>
+                  <p id="connectionDescription">Nhập cấu hình và kiểm tra kết nối để bắt đầu.</p>
+                </div>
+              </div>
+              <dl class="connection-info">
+                <dt>Loại hệ thống:</dt>
+                <dd id="statusType">—</dd>
+                <dt>Base URL:</dt>
+                <dd id="statusUrl">—</dd>
+                <dt>Thời gian phản hồi:</dt>
+                <dd id="responseTime">—</dd>
+                <dt>Lần đồng bộ cuối:</dt>
+                <dd id="lastSync">—</dd>
+                <dt>Trạng thái:</dt>
+                <dd id="statusText">Chưa kiểm tra</dd>
+              </dl>
+              <button type="button" id="recheck" class="outline recheck">⟳ Kiểm tra lại</button>
+            </section>
+            <section class="card manual">
+              <div class="section-heading">
+                <span>⟳</span>
+                <div>
+                  <h2>Đồng bộ thủ công</h2>
+                  <p>Chủ động đồng bộ dữ liệu từ hệ thống HRM/ERP.</p>
+                </div>
+                <button type="button" id="help" class="help">ⓘ Hướng dẫn</button>
+              </div>
+              <div class="manual-controls">
+                <div class="checks">
+                  <label
+                    ><input type="checkbox" name="manualData" value="Người dùng" checked />Người
+                    dùng</label
+                  ><label
+                    ><input type="checkbox" name="manualData" value="Phòng ban" checked />Phòng
+                    ban</label
+                  ><label
+                    ><input type="checkbox" name="manualData" value="Thông tin tổ chức" />Thông tin
+                    tổ chức</label
+                  ><label
+                    ><input type="checkbox" name="manualData" value="Thông tin phòng họp" />Thông
+                    tin phòng họp</label
+                  >
+                </div>
+                <button id="syncNow" type="button" class="primary" disabled>⟳ Đồng bộ ngay</button>
+              </div>
+              <div class="info-box">
+                ⓘ
+                <span
+                  >Lưu cấu hình, kiểm tra kết nối rồi chọn dữ liệu để đồng bộ. Kết quả mô phỏng sẽ
+                  xuất hiện trong lịch sử bên dưới.</span
+                >
+              </div>
+              <div id="helpText" class="help-text" hidden>
+                Token chỉ được giữ trong bộ nhớ của trang, không lưu vào trình duyệt. Bản frontend
+                không gửi dữ liệu đến hệ thống bên ngoài.
+              </div>
+            </section>
+          </div>
+        </div>
+        <section class="card history">
+          <div class="history-heading">
+            <div class="section-heading">
+              <span>☷</span>
+              <div>
+                <h2>Lịch sử đồng bộ</h2>
+                <p>Danh sách các lần đồng bộ dữ liệu với hệ thống HRM/ERP.</p>
+              </div>
+            </div>
+            <div class="history-filters">
+              <select id="historyStatus" aria-label="Lọc trạng thái">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="success">Thành công</option>
+                <option value="failed">Thất bại</option>
+                <option value="running">Đang đồng bộ</option></select
+              ><label>Từ ngày<input type="date" id="fromDate" /></label
+              ><label>Đến ngày<input type="date" id="toDate" /></label>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Thời gian bắt đầu</th>
+                  <th>Thời gian kết thúc</th>
+                  <th>Loại dữ liệu</th>
+                  <th>Số bản ghi</th>
+                  <th>Trạng thái</th>
+                  <th>Thông báo</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+          <div class="history-footer">
+            <span id="historyCount"></span
+            ><button type="button" id="loadDemo" class="outline">Xem lịch sử mẫu</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <dialog id="detailDialog">
+      <div class="dialog-heading">
+        <h2>Chi tiết đồng bộ</h2>
+        <button id="closeDetail" type="button" aria-label="Đóng">×</button>
+      </div>
+      <dl id="detailContent"></dl>
+      <p class="demo-note">Thông tin mô phỏng cho bản giao diện.</p>
+    </dialog>
+  </body>
+</html>
