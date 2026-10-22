@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id),
     DAY = 86400000,
     colors = ["#3a87ff", "#32baa1", "#ffb51b", "#aab4a3", "#b262d5"];
-  const rooms = [
+  const rooms = window.TTCSDemo ? window.TTCSDemo.state.rooms.map(r=>({id:r.roomId,name:r.roomName,capacity:r.capacity,status:["AVAILABLE","ACTIVE"].includes(r.status)?"ACTIVE":r.status})) : [
     { id: "alpha", name: "Phòng Alpha", capacity: 20, status: "ACTIVE" },
     { id: "beta", name: "Phòng Beta", capacity: 15, status: "ACTIVE" },
     { id: "gamma", name: "Phòng Gamma", capacity: 10, status: "ACTIVE" },
@@ -11,7 +11,7 @@
     { id: "epsilon", name: "Phòng Epsilon", capacity: 6, status: "ACTIVE" },
   ];
   const events = [];
-  for (let day = Date.UTC(2025, 0, 1); day <= Date.UTC(2026, 9, 31); day += DAY) {
+  if(!window.TTCSDemo)for (let day = Date.UTC(2025, 0, 1); day <= Date.UTC(2026, 9, 31); day += DAY) {
     const date = new Date(day),
       weekday = date.getUTCDay();
     if (!weekday || weekday === 6) continue;
@@ -25,6 +25,7 @@
         });
     });
   }
+  if(window.TTCSDemo)for(const m of window.TTCSDemo.state.meetings){if(m.status!=="CANCELLED")events.push({roomId:m.roomId,date:m.startTime.slice(0,10),hours:(Date.parse(m.endTime)-Date.parse(m.startTime))/3600000});}
   let report,
     descending = true,
     busy = false;
@@ -216,7 +217,7 @@
     let start = 0;
     const segments = report.rows.map((r) => {
       const end = start + (report.hours ? (r.hours / report.hours) * 100 : 0),
-        color = colors[rooms.findIndex((room) => room.id === r.id)];
+        color = colors[rooms.findIndex((room) => room.id === r.id)%colors.length];
       const s = color + " " + start + "% " + end + "%";
       start = end;
       return s;
@@ -230,7 +231,7 @@
     report.rows.forEach((r) => {
       const line = node("div", null, "legend-row"),
         dot = node("i");
-      dot.style.background = colors[rooms.findIndex((room) => room.id === r.id)];
+      dot.style.background = colors[rooms.findIndex((room) => room.id === r.id)%colors.length];
       line.append(
         dot,
         node("span", r.name),
@@ -276,7 +277,7 @@
       wrap.append(node("span", num(r.utilization) + "%"), track);
       usage.append(wrap);
       const status = node("td"),
-        badge = node("span", r.status === "ACTIVE" ? "Đang hoạt động" : "Đang bảo trì", "badge");
+        badge = node("span", r.status === "ACTIVE" ? "Đang hoạt động" : r.status === "MAINTENANCE" ? "Đang bảo trì" : "Ngừng sử dụng", "badge");
       badge.dataset.status = r.status;
       status.append(badge);
       tr.append(usage, status);

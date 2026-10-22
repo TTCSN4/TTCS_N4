@@ -26,6 +26,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Configuration
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="app.mobile.jwt.enabled", havingValue="true")
 public class MobileSecurityConfig {
 
     private final String secretBase64;
@@ -122,12 +123,13 @@ public class MobileSecurityConfig {
     // 2. CAU HINH BAO MAT API MOBILE
     // ========================================
     @Bean
+    @org.springframework.core.annotation.Order(1)
     public SecurityFilterChain mobileFilterChain(
             HttpSecurity http,
             MobileJwtAuthenticationConverter converter
     ) throws Exception {
 
-        return http
+        return http.securityMatcher("/api/mobile/**")
 
                 // KHONG SU DUNG CSRF CHO API STATELESS
                 .csrf(csrf -> csrf.disable())

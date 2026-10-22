@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="vi">
+  <head><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Danh sách tài khoản · TTCS_N4</title>
+    <link rel="icon" href="data:," />
+    <script>
+      (() => {
+        const target = new URL("templates/user-list.html", window.location.href);
+        target.search = window.location.search;
+        target.hash = window.location.hash;
+        window.location.replace(target.href);
+      })();
+    </script>
+  </head>
+  <body>
+    <p><a href="templates/user-list.html">Mở giao diện US19</a></p>
+  </body>
+</html>

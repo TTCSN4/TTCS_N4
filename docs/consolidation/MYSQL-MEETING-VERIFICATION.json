@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-20",
+  "storage": "mysql",
+  "tables": [
+    "web_state",
+    "web_room",
+    "web_user",
+    "web_equipment",
+    "web_meeting",
+    "web_equipment_booking"
+  ],
+  "verified": [
+    "UI: select TV and quantity",
+    "SQL: total 2, reserve 1, available 1",
+    "UI + SQL: edit quantity to 2, available 0",
+    "UI + SQL: remove equipment, available 2",
+    "UI + SQL: edit room, time, participants and notes",
+    "UI + SQL: cancel meeting releases equipment",
+    "SQL: reject quantity above capacity without changing saved data",
+    "SQL: failed write rolls back meeting and equipment together",
+    "Restart: saved meeting, notes and selections persist",
+    "Mobile: no horizontal overflow in edited form",
+    "Concurrency: simultaneous room booking returns 201 and 409",
+    "Legacy meetings table: 35 rows before and after"
+  ],
+  "javascriptErrors": [],
+  "limitations": [
+    "Local demo identity/roles, not production authentication",
+    "Separate web_* tables; no migration of legacy meeting tables",
+    "No real email, AI or external HRM"
+  ]
+}

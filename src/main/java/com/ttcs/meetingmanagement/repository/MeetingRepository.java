@@ -57,4 +57,18 @@ public interface MeetingRepository
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
+    // US11 - Lay cac cuoc hop tuong lai hoac dang dien ra chua bi huy cua phong
+    @Query("""
+        SELECT m
+        FROM Meeting m
+        WHERE m.roomId = :roomId
+          AND (m.status IS NULL
+               OR UPPER(TRIM(m.status)) NOT IN ('CANCELLED', 'CANCELED', 'REJECTED'))
+          AND m.endTime > :now
+        ORDER BY m.startTime ASC
+        """)
+    List<Meeting> findUpcomingActiveMeetingsByRoomId(
+            @Param("roomId") String roomId,
+            @Param("now") LocalDateTime now
+    );
 }

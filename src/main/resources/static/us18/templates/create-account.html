@@ -1,44 +1,603 @@
 <!doctype html>
 <html lang="vi">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tạo tài khoản mới · Meeting Management</title><link rel="stylesheet" href="../css/meeting-ui.css"><script src="../js/meeting-ui.js" defer></script></head>
-<body class="account-page">
-<aside class="sidebar" id="sidebar">
-  <a class="brand" href="login.html"><span class="brand-mark"><i data-icon="calendar"></i></span><span>Meeting<br>Management</span></a>
-  <nav aria-label="Điều hướng chính">
-    <a class="nav-item" href="login.html"><i data-icon="home"></i>Trang chủ</a>
-    <button class="nav-item" data-unavailable="Đặt phòng họp"><i data-icon="calendar"></i>Đặt phòng họp</button>
-    <button class="nav-item" data-unavailable="Danh sách phòng"><i data-icon="rooms"></i>Danh sách phòng</button>
-    <button class="nav-item" data-unavailable="Lịch họp của tôi"><i data-icon="calendar"></i>Lịch họp của tôi</button>
-    <button class="nav-item" data-unavailable="Duyệt cuộc họp"><i data-icon="check-circle"></i>Duyệt cuộc họp</button>
-    <button class="nav-item" data-unavailable="Báo cáo sử dụng phòng"><i data-icon="chart"></i>Báo cáo sử dụng phòng</button>
-    <button class="nav-item section-active" id="admin-toggle" aria-expanded="true" aria-controls="admin-menu"><i data-icon="settings"></i>Quản trị hệ thống<i data-icon="chevron" class="nav-chevron"></i></button>
-    <div id="admin-menu"><button class="nav-item" data-unavailable="Quản lý người dùng"><i data-icon="users"></i>Quản lý người dùng</button><a class="nav-item active" href="create-account.html" aria-current="page"><i data-icon="user-plus"></i>Tạo tài khoản mới</a></div>
-    <button class="nav-item" data-unavailable="Cài đặt"><i data-icon="settings"></i>Cài đặt</button>
-  </nav>
-  <a class="nav-item logout" href="login.html"><i data-icon="logout"></i>Đăng xuất</a>
-</aside>
-<div class="workspace">
-  <header class="topbar"><button class="icon-button menu-button" id="menu-toggle" aria-label="Ẩn hoặc hiện menu" aria-controls="sidebar" aria-expanded="true"><i data-icon="menu"></i></button><label class="search"><i data-icon="search"></i><input id="site-search" type="search" placeholder="Tìm kiếm phòng họp, cuộc họp..." aria-label="Tìm kiếm phòng họp, cuộc họp"></label>
-    <div class="header-account"><button class="icon-button notification" id="notifications" aria-label="Thông báo, 3 thông báo mới" aria-expanded="false"><i data-icon="bell"></i><span>3</span></button><button class="profile" id="profile-button" aria-expanded="false"><span class="avatar" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#c7d5e4"/><path d="M9 48c0-13 5-17 15-17s15 4 15 17" fill="#49627c"/><path d="M15 21c-3-19 22-19 19 0l-3 12H18z" fill="#172335"/><ellipse cx="24" cy="25" rx="9" ry="12" fill="#8a949f"/><path d="M15 21c-2-17 20-17 19 0l-6-9-13 5" fill="#182333"/></svg></span><span class="profile-copy"><strong>Admin</strong><small>Quản trị viên</small></span><i data-icon="chevron"></i></button></div><div class="header-popover" id="header-popover" hidden></div>
-  </header>
-  <main class="account-content">
-    <nav class="breadcrumb" aria-label="Đường dẫn"><a href="login.html" aria-label="Trang chủ"><i data-icon="home"></i></a><i data-icon="right"></i><a href="login.html">Trang chủ</a><i data-icon="right"></i><span>Quản trị hệ thống</span><i data-icon="right"></i><strong>Tạo tài khoản mới</strong></nav>
-    <div class="page-heading"><span class="heading-icon"><i data-icon="user-plus"></i></span><div><h1>Tạo tài khoản mới</h1><p>Thêm tài khoản người dùng mới vào hệ thống Meeting Management.</p></div></div>
-    <div class="content-grid"><section class="card account-card" aria-labelledby="form-heading"><h2 id="form-heading">Thông tin tài khoản</h2><p class="card-subtitle">Vui lòng nhập đầy đủ và chính xác các thông tin bên dưới.</p>
-      <form id="account-form" novalidate><div class="fields">
-        <div class="field"><label for="fullName">Họ và tên <em>*</em></label><div class="input-wrap"><i data-icon="user"></i><input id="fullName" name="fullName" placeholder="Nhập họ và tên" autocomplete="name" required aria-describedby="fullName-error"></div><p class="error" id="fullName-error"><i data-icon="user"></i><span>Vui lòng nhập họ và tên.</span></p></div>
-        <div class="field"><label for="email">Email <em>*</em></label><div class="input-wrap"><i data-icon="mail"></i><input id="email" name="email" type="email" placeholder="example@gmail.com" autocomplete="email" required aria-describedby="email-error"></div><p class="error" id="email-error"><i data-icon="user"></i><span>Vui lòng nhập email.</span></p></div>
-        <div class="field"><label for="username">Tên đăng nhập <em>*</em></label><div class="input-wrap"><i data-icon="user"></i><input id="username" name="username" placeholder="Nhập tên đăng nhập" autocomplete="username" required aria-describedby="username-error"></div><p class="error" id="username-error"><i data-icon="user"></i><span>Vui lòng nhập tên đăng nhập.</span></p></div>
-        <div class="field"><label for="role">Vai trò tài khoản <em>*</em></label><div class="input-wrap"><i data-icon="shield"></i><select id="role" name="role" required aria-describedby="role-error"><option value="USER">Người dùng (USER)</option><option value="ADMIN">Quản trị viên (ADMIN)</option></select><i data-icon="chevron" class="select-chevron"></i></div><p class="error" id="role-error"><i data-icon="user"></i><span>Vui lòng chọn vai trò.</span></p></div>
-        <div class="field"><label for="password">Mật khẩu <em>*</em></label><div class="input-wrap"><i data-icon="lock"></i><input id="password" name="password" type="password" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" minlength="8" required aria-describedby="password-error"><button class="password-toggle" type="button" data-password="password" aria-label="Hiện mật khẩu" aria-pressed="false"><i data-icon="eye-off"></i></button></div><p class="error" id="password-error"><i data-icon="user"></i><span>Mật khẩu phải có ít nhất 8 ký tự.</span></p></div>
-        <div class="field"><label for="confirmPassword">Xác nhận mật khẩu <em>*</em></label><div class="input-wrap"><i data-icon="lock"></i><input id="confirmPassword" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required aria-describedby="confirmPassword-error"><button class="password-toggle" type="button" data-password="confirmPassword" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false"><i data-icon="eye-off"></i></button></div><p class="error" id="confirmPassword-error"><i data-icon="user"></i><span>Mật khẩu xác nhận không khớp.</span></p></div>
-      </div><div class="notice"><i data-icon="info"></i><div><strong>Lưu ý</strong><ul><li>Mật khẩu phải có ít nhất 8 ký tự.</li><li>Tên đăng nhập không được chứa khoảng trắng.</li><li>Email và tên đăng nhập phải là duy nhất trong hệ thống.</li></ul></div></div><p id="form-status" class="form-status" role="status" aria-live="polite" hidden></p>
-      <div class="actions"><a class="back-login" href="login.html">← Đăng nhập</a><button class="button secondary" type="reset"><i data-icon="refresh"></i>Làm mới</button><button class="button primary" type="submit"><i data-icon="user-plus"></i>Tạo tài khoản</button></div></form>
-    </section><aside class="card guide-card" aria-labelledby="guide-heading"><span class="guide-icon"><i data-icon="user-plus"></i></span><h2 id="guide-heading">Tạo tài khoản người dùng</h2><p>Tài khoản mới sẽ được thêm vào hệ thống với vai trò và quyền tương ứng.</p><hr><h3>Vai trò tài khoản</h3>
-      <div class="role-card"><span class="role-icon user-role"><i data-icon="user"></i></span><div><strong>Người dùng (USER)</strong><p>Có thể đặt phòng họp, xem lịch họp của mình và tham gia các cuộc họp.</p></div></div>
-      <div class="role-card"><span class="role-icon admin-role"><i data-icon="shield"></i></span><div><strong>Quản trị viên (ADMIN)</strong><p>Có toàn quyền quản lý hệ thống, duyệt cuộc họp, quản lý người dùng và phòng họp.</p></div></div>
-      <div class="security notice"><i data-icon="shield-check"></i><div><strong>Bảo mật thông tin</strong><ul><li>Mật khẩu được mã hóa và lưu trữ an toàn.</li><li>Không chia sẻ tài khoản với người khác.</li><li>Tài khoản chỉ được tạo khi thông tin hợp lệ.</li></ul></div></div>
-    </aside></div>
-  </main>
-</div><div class="toast" id="toast" role="status" hidden></div>
-</body></html>
+  <head><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quản lý tài khoản · TTCS_N4</title>
+    <link rel="stylesheet" href="../css/meeting-ui.css" />
+    <script src="../js/meeting-ui.js" defer></script>
+    <link rel="icon" href="data:," />
+  </head>
+  <body class="us18-management">
+    <a class="u18-skip-link" href="#main-content">Đến nội dung chính</a>
+    <header class="u18-topbar">
+      <button
+        class="u18-icon-button u18-menu-toggle"
+        id="menu-toggle"
+        type="button"
+        aria-label="Ẩn hoặc hiện thanh điều hướng"
+        aria-controls="sidebar"
+        aria-expanded="true"
+      >
+        <i data-icon="menu"></i>
+      </button>
+      <label class="u18-search">
+        <i data-icon="search"></i>
+        <input
+          id="site-search"
+          type="search"
+          placeholder="Tìm mã tài khoản, tên hoặc email..."
+          aria-label="Tìm kiếm theo mã tài khoản, họ tên hoặc email"
+        />
+      </label>
+      <div class="u18-header-actions">
+        <button
+          class="u18-icon-button u18-notification"
+          id="notifications"
+          type="button"
+          aria-label="Thông báo"
+          aria-expanded="false"
+          aria-controls="header-popover"
+        >
+          <i data-icon="bell"></i><span class="u18-notification-dot"></span>
+        </button>
+        <button
+          class="u18-profile"
+          id="profile-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="header-popover"
+        >
+          <span class="u18-avatar" aria-hidden="true">N</span>
+          <span class="u18-profile-copy"
+            ><strong id="viewer-name">Người dùng</strong
+            ><small id="viewer-role">Chưa xác nhận phiên</small></span
+          >
+          <i data-icon="chevron"></i>
+        </button>
+      </div>
+      <div class="u18-popover" id="header-popover" hidden></div>
+    </header>
+    <button
+      class="u18-backdrop"
+      id="sidebar-backdrop"
+      type="button"
+      tabindex="-1"
+      aria-label="Đóng thanh điều hướng"
+      hidden
+    ></button>
+    <aside
+      class="u18-sidebar"
+      id="sidebar"
+      aria-label="Thanh điều hướng Meeting Management"
+    >
+      <a
+        class="u18-brand"
+        href="#main-content"
+        aria-label="Meeting Management – Quản lý tài khoản"
+      >
+        <span class="u18-brand-mark"><i data-icon="calendar"></i></span>
+        <span><strong>Meeting</strong><small>Meeting Management</small></span>
+      </a>
+      <nav aria-label="Điều hướng chính">
+        <div class="u18-nav-group">
+          <button
+            class="u18-nav-item"
+            id="meeting-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="true"
+            aria-controls="meeting-menu"
+          >
+            <i data-icon="calendar"></i><span>Lịch họp</span
+            ><i data-icon="chevron" class="u18-nav-chevron"></i>
+          </button>
+          <div class="u18-submenu" id="meeting-menu">
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Tạo lịch họp"
+            >
+              Tạo lịch họp
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Chỉnh sửa &amp; hủy lịch"
+            >
+              Chỉnh sửa &amp; hủy lịch
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Lịch họp định kỳ"
+            >
+              Lịch họp định kỳ
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Người tham gia"
+            >
+              Người tham gia
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Gợi ý thời gian"
+            >
+              Gợi ý thời gian
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Lịch sử cuộc họp"
+            >
+              Lịch sử cuộc họp
+            </button>
+          </div>
+        </div>
+        <div class="u18-nav-group">
+          <button
+            class="u18-nav-item"
+            id="room-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="room-menu"
+          >
+            <i data-icon="building"></i><span>Phòng &amp; thiết bị</span
+            ><i data-icon="chevron" class="u18-nav-chevron"></i>
+          </button>
+          <div class="u18-submenu" id="room-menu" hidden>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Quản lý phòng họp"
+            >
+              Quản lý phòng họp
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Quản lý thiết bị"
+            >
+              Quản lý thiết bị
+            </button>
+          </div>
+        </div>
+        <div class="u18-nav-group">
+          <button
+            class="u18-nav-item"
+            id="personal-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="personal-menu"
+          >
+            <i data-icon="clock"></i><span>Lịch của tôi</span
+            ><i data-icon="chevron" class="u18-nav-chevron"></i>
+          </button>
+          <div class="u18-submenu" id="personal-menu" hidden>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Cuộc họp của tôi"
+            >
+              Cuộc họp của tôi
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Lịch sử đặt phòng"
+            >
+              Lịch sử đặt phòng
+            </button>
+          </div>
+        </div>
+        <div class="u18-nav-group">
+          <button
+            class="u18-nav-item is-section"
+            id="admin-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="true"
+            aria-controls="admin-menu"
+          >
+            <i data-icon="users"></i><span>Người dùng &amp; quyền</span
+            ><i data-icon="chevron" class="u18-nav-chevron"></i>
+          </button>
+          <div class="u18-submenu" id="admin-menu">
+            <a
+              class="u18-nav-item is-active"
+              href="#main-content"
+              aria-current="page"
+              >Quản lý tài khoản</a
+            >
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Danh sách tài khoản"
+            >
+              Danh sách tài khoản
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Cấu hình quyền"
+            >
+              Cấu hình quyền
+            </button>
+          </div>
+        </div>
+        <div class="u18-nav-group">
+          <button
+            class="u18-nav-item"
+            id="report-toggle"
+            type="button"
+            data-nav-toggle
+            aria-expanded="false"
+            aria-controls="report-menu"
+          >
+            <i data-icon="chart"></i><span>Báo cáo</span
+            ><i data-icon="chevron" class="u18-nav-chevron"></i>
+          </button>
+          <div class="u18-submenu" id="report-menu" hidden>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Thống kê cuộc họp"
+            >
+              Thống kê cuộc họp
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Báo cáo sử dụng phòng"
+            >
+              Báo cáo sử dụng phòng
+            </button>
+            <button
+              class="u18-nav-item"
+              type="button"
+              data-module="Báo cáo thiết bị"
+            >
+              Báo cáo thiết bị
+            </button>
+          </div>
+        </div>
+      </nav>
+      <a class="u18-nav-item u18-login-link" href="login.html"
+        ><i data-icon="logout"></i><span>Trang đăng nhập</span></a
+      >
+    </aside>
+    <main class="u18-main" id="main-content">
+      <nav class="u18-breadcrumb" aria-label="Đường dẫn">
+        <span>Trang chủ</span><i data-icon="right"></i
+        ><span>Người dùng &amp; quyền</span><i data-icon="right"></i
+        ><strong>Quản lý tài khoản</strong>
+      </nav>
+      <div class="u18-page-heading">
+        <h1><i data-icon="users"></i>Quản lý tài khoản</h1>
+        <p>Tạo tài khoản và chọn vai trò, phòng ban từ dữ liệu Backend.</p>
+      </div>
+      <p class="u18-alert" id="access-message" role="alert" hidden></p>
+      <div class="u18-api-toolbar">
+        <button class="u18-button is-secondary" type="button" id="reload-data">
+          <i data-icon="refresh"></i>Tải lại dữ liệu API
+        </button>
+      </div>
+      <div class="u18-grid" id="management-grid">
+        <section
+          class="u18-card u18-account-card"
+          aria-labelledby="form-heading"
+        >
+          <header class="u18-card-heading">
+            <h2 id="form-heading">
+              <i data-icon="user-plus"></i>Thông tin tài khoản
+            </h2>
+            <span class="u18-mode-badge" id="form-mode">Tạo mới</span>
+          </header>
+          <form id="account-form" novalidate>
+            <fieldset class="u18-form-controls" id="account-fields" disabled>
+              <legend class="u18-sr-only">
+                Thông tin tài khoản và phân quyền
+              </legend>
+              <div class="u18-fields">
+                <div class="u18-field">
+                  <label for="department">Phòng ban</label
+                  ><select
+                    id="department"
+                    name="department"
+                    aria-describedby="department-error"
+                  >
+                    <option value="">Không chọn phòng ban</option>
+                  </select>
+                  <p class="u18-error" id="department-error" hidden></p>
+                </div>
+                <div class="u18-field">
+                  <label for="fullName">Họ và tên <em>*</em></label>
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Nhập họ và tên"
+                    autocomplete="name"
+                    maxlength="100"
+                    required
+                    aria-describedby="fullName-error"
+                  />
+                  <p class="u18-error" id="fullName-error" hidden></p>
+                </div>
+                <div class="u18-field">
+                  <label for="email">Email <em>*</em></label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Nhập email"
+                    autocomplete="email"
+                    maxlength="254"
+                    required
+                    aria-describedby="email-error"
+                  />
+                  <p class="u18-error" id="email-error" hidden></p>
+                </div>
+                <div class="u18-field">
+                  <label for="phone">Số điện thoại</label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="Nhập số điện thoại"
+                    autocomplete="tel"
+                    maxlength="20"
+                    aria-describedby="phone-error"
+                  />
+                  <p class="u18-error" id="phone-error" hidden></p>
+                </div>
+                <div class="u18-field">
+                  <label for="password"
+                    >Mật khẩu <em id="password-required">*</em></label
+                  >
+                  <div class="u18-input-wrap">
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Tối thiểu 8 ký tự"
+                      autocomplete="new-password"
+                      minlength="8"
+                      maxlength="72"
+                      required
+                      aria-describedby="password-error password-hint"
+                    />
+                    <button
+                      class="u18-password-toggle"
+                      type="button"
+                      data-password="password"
+                      aria-label="Hiện mật khẩu"
+                      aria-pressed="false"
+                    >
+                      <i data-icon="eye-off"></i>
+                    </button>
+                  </div>
+                  <p class="u18-error" id="password-error" hidden></p>
+                </div>
+                <div class="u18-field">
+                  <label for="confirmPassword"
+                    >Xác nhận mật khẩu <em id="confirm-required">*</em></label
+                  >
+                  <div class="u18-input-wrap">
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      placeholder="Nhập lại mật khẩu"
+                      autocomplete="new-password"
+                      maxlength="72"
+                      required
+                      aria-describedby="confirmPassword-error"
+                    />
+                    <button
+                      class="u18-password-toggle"
+                      type="button"
+                      data-password="confirmPassword"
+                      aria-label="Hiện mật khẩu xác nhận"
+                      aria-pressed="false"
+                    >
+                      <i data-icon="eye-off"></i>
+                    </button>
+                  </div>
+                  <p class="u18-error" id="confirmPassword-error" hidden></p>
+                </div>
+              </div>
+              <p class="u18-form-hint" id="password-hint">
+                Mật khẩu từ 8 ký tự và tối đa 72 byte UTF-8. Email phải duy
+                nhất. API hiện chưa hỗ trợ tên đăng nhập riêng.
+              </p>
+              <div class="u18-choices">
+                <fieldset
+                  class="u18-choice-group"
+                  id="roles-group"
+                  aria-describedby="roles-error"
+                >
+                  <legend>Vai trò <em>*</em></legend>
+                  <div id="role-options"></div>
+                  <p class="u18-error" id="roles-error" hidden></p>
+                </fieldset>
+                <fieldset class="u18-choice-group" id="status-group">
+                  <legend>Trạng thái khi tạo</legend>
+                  <p class="u18-form-hint">
+                    Backend mặc định Kích hoạt. API tạo tài khoản chưa hỗ trợ
+                    khóa/mở khóa trong form này.
+                  </p>
+                </fieldset>
+              </div>
+              <div class="u18-actions">
+                <button
+                  class="u18-button is-primary"
+                  id="save-account"
+                  type="submit"
+                >
+                  <i data-icon="user-plus"></i><span>Tạo tài khoản</span>
+                </button>
+                <button class="u18-button is-secondary" type="reset">
+                  <i data-icon="refresh"></i><span>Làm mới form</span>
+                </button>
+              </div>
+            </fieldset>
+            <p
+              class="u18-form-status"
+              id="form-status"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></p>
+          </form>
+        </section>
+        <div class="u18-overview">
+          <section class="u18-card" aria-labelledby="quick-heading">
+            <header class="u18-card-heading">
+              <h2 id="quick-heading">
+                <i data-icon="users"></i>Phân quyền nhanh
+              </h2>
+            </header>
+            <div class="u18-quick-roles">
+              <button
+                class="u18-quick-role is-admin"
+                type="button"
+                data-role="ADMIN"
+                aria-pressed="false"
+              >
+                <i data-icon="shield"></i
+                ><span
+                  ><strong>Admin</strong
+                  ><small>Toàn quyền quản lý hệ thống</small></span
+                >
+              </button>
+              <button
+                class="u18-quick-role is-pm"
+                type="button"
+                data-role="PM"
+                aria-pressed="false"
+              >
+                <i data-icon="users"></i
+                ><span
+                  ><strong>PM</strong
+                  ><small>Quản lý dự án, đặt phòng thiết bị</small></span
+                >
+              </button>
+              <button
+                class="u18-quick-role is-member"
+                type="button"
+                data-role="MEMBER"
+                aria-pressed="true"
+              >
+                <i data-icon="user"></i
+                ><span
+                  ><strong>Member</strong
+                  ><small>Thành viên, tham dự cuộc họp</small></span
+                >
+              </button>
+            </div>
+          </section>
+          <section class="u18-card" aria-labelledby="roles-heading">
+            <header class="u18-card-heading">
+              <h2 id="roles-heading">
+                <i data-icon="shield-check"></i>Danh sách vai trò
+              </h2>
+            </header>
+            <div
+              class="u18-table-scroll"
+              role="region"
+              aria-label="Danh sách vai trò"
+              tabindex="0"
+            >
+              <table class="u18-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Vai trò</th>
+                    <th scope="col">Mô tả</th>
+                    <th scope="col">Số người dùng</th>
+                    <th scope="col">Mã vai trò</th>
+                  </tr>
+                </thead>
+                <tbody id="roles-body"></tbody>
+              </table>
+            </div>
+            <p class="u18-form-hint">
+              API nhận đúng một vai trò cho mỗi tài khoản. Số người dùng được
+              đếm từ danh sách API.
+            </p>
+          </section>
+          <section class="u18-card" aria-labelledby="recent-heading">
+            <header class="u18-card-heading">
+              <h2 id="recent-heading">
+                <i data-icon="users"></i
+                ><span id="accounts-title">Tài khoản được tạo gần đây</span>
+              </h2>
+              <button
+                class="u18-text-button"
+                id="show-all"
+                type="button"
+                aria-expanded="false"
+              >
+                Xem tất cả <i data-icon="right"></i>
+              </button>
+            </header>
+            <div class="u18-list-tools">
+              <label class="u18-list-search"
+                ><i data-icon="search"></i
+                ><input
+                  id="account-search"
+                  type="search"
+                  placeholder="Tìm mã tài khoản, họ tên, email..."
+                  aria-label="Lọc danh sách tài khoản"
+              /></label>
+            </div>
+            <p
+              class="u18-list-summary"
+              id="list-summary"
+              aria-live="polite"
+            ></p>
+            <div
+              class="u18-table-scroll"
+              role="region"
+              aria-label="Danh sách tài khoản"
+              tabindex="0"
+            >
+              <table class="u18-table u18-accounts-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Mã tài khoản</th>
+                    <th scope="col">Họ và tên</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Vai trò</th>
+                    <th scope="col">Ngày tạo</th>
+                    <th scope="col">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody id="accounts-body"></tbody>
+              </table>
+            </div>
+            <p class="u18-empty" id="empty-accounts" hidden>
+              Không tìm thấy tài khoản phù hợp. Hãy thử tên hoặc email khác.
+            </p>
+          </section>
+        </div>
+      </div>
+      <footer class="u18-demo-note">
+        <i data-icon="info"></i>Dữ liệu đọc và tạo qua API cùng máy chủ. Chỉ báo
+        thành công khi Backend trả tài khoản hợp lệ; không lưu mật khẩu trong
+        trình duyệt. Quyền quản trị do Backend kiểm tra.
+      </footer>
+    </main>
+    <div
+      class="u18-toast"
+      id="toast"
+      role="status"
+      aria-live="polite"
+      hidden
+    ></div>
+  </body>
+</html>

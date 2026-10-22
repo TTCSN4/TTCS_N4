@@ -3,7 +3,6 @@ package com.ttcs.meetingmanagement.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
 public class UpdateRoomRequest {
 
@@ -19,10 +18,6 @@ public class UpdateRoomRequest {
     private String qrCode;
 
     @NotBlank(message = "Trạng thái phòng không được để trống")
-    @Pattern(
-            regexp = "^\\s*(AVAILABLE|OCCUPIED|MAINTENANCE|INACTIVE)\\s*$",
-            message = "Trạng thái phòng không hợp lệ (chỉ chấp nhận: AVAILABLE, OCCUPIED, MAINTENANCE, INACTIVE)"
-    )
     private String status;
 
     public String getRoomName() {

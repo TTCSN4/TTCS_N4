@@ -5,6 +5,8 @@ import com.ttcs.meetingmanagement.dto.RoomBookingRequest;
 import com.ttcs.meetingmanagement.dto.RoomBookingResponse;
 import com.ttcs.meetingmanagement.model.Meeting;
 import com.ttcs.meetingmanagement.repository.MeetingRepository;
+import com.ttcs.meetingmanagement.room.Room;
+import com.ttcs.meetingmanagement.room.RoomService;
 import com.ttcs.meetingmanagement.room.RoomRepository;
 import com.ttcs.meetingmanagement.service.RoomBookingPermissionService;
 
@@ -21,15 +23,26 @@ public class RoomBookingService {
     private final MeetingRepository meetingRepository;
     private final RoomRepository roomRepository;
     private final RoomBookingPermissionService permissionService;
+    private final com.ttcs.meetingmanagement.repository.MeetingParticipantRepository participantRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public RoomBookingService(
+            MeetingRepository meetingRepository,
+            RoomRepository roomRepository,
+            RoomBookingPermissionService permissionService,
+            com.ttcs.meetingmanagement.repository.MeetingParticipantRepository participantRepository) {
+
+        this.meetingRepository = meetingRepository;
+        this.roomRepository = roomRepository;
+        this.permissionService = permissionService;
+        this.participantRepository = participantRepository;
+    }
 
     public RoomBookingService(
             MeetingRepository meetingRepository,
             RoomRepository roomRepository,
             RoomBookingPermissionService permissionService) {
-
-        this.meetingRepository = meetingRepository;
-        this.roomRepository = roomRepository;
-        this.permissionService = permissionService;
+        this(meetingRepository, roomRepository, permissionService, null);
     }
 
     // US08 + US21: Dat phong va kiem tra quyen
@@ -52,9 +65,6 @@ public class RoomBookingService {
         String meetingId = request.getMeetingId().trim();
         String roomId = request.getRoomId().trim();
 
-        // US21: Xac thuc nguoi thuc hien thao tac
-        String actorId = permissionService.resolveCurrentUserId();
-
         // 1. Kiem tra Meeting
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -70,12 +80,43 @@ public class RoomBookingService {
             );
         }
 
-        // 3. Kiem tra phong
-        if (!roomRepository.existsById(roomId)) {
+        // 3. Kiem tra phong va trang thai phong
+        Room room = roomRepository.findLockedById(roomId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Room not found"
+                ));
+
+        if (!RoomService.isRoomBookable(room.getStatus())) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Room not found"
+                    HttpStatus.CONFLICT,
+                    "Room is under maintenance or unavailable"
             );
+        }
+
+        // Kiem tra suc chua phong voi so nguoi tham du thuc te
+        if (room.getCapacity() != null && room.getCapacity() > 0 && participantRepository != null) {
+            java.util.Set<String> attendeeIds = new java.util.HashSet<>();
+            if (meeting.getOrganizerId() != null && !meeting.getOrganizerId().isBlank()) {
+                attendeeIds.add(meeting.getOrganizerId().trim());
+            }
+            var participants = participantRepository.findByMeetingId(meetingId);
+            if (participants != null) {
+                for (var p : participants) {
+                    if (p.getUserId() != null && !p.getUserId().isBlank()) {
+                        String st = p.getStatus() != null ? p.getStatus().trim().toUpperCase() : "";
+                        if (!"DECLINED".equals(st) && !"REMOVED".equals(st)) {
+                            attendeeIds.add(p.getUserId().trim());
+                        }
+                    }
+                }
+            }
+            if (attendeeIds.size() > room.getCapacity()) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Room capacity exceeded"
+                );
+            }
         }
 
         // 4. Kiem tra thoi gian
@@ -90,8 +131,10 @@ public class RoomBookingService {
             );
         }
 
-        // 5. US21: Kiem tra quyen dat phong cua nguoi thuc hien
-        permissionService.assertCanBook(actorId, roomId);
+        // 5. US21: Kiem tra quyen theo USER, ROLE, DEPARTMENT
+        String userId = meeting.getOrganizerId();
+
+        permissionService.assertCanBook(userId, roomId);
 
         // 6. US08: Kiem tra trung lich
         long conflicts = meetingRepository.countRoomConflicts(
@@ -123,113 +166,9 @@ public class RoomBookingService {
         );
     }
 
-    // US21: Chinh sua dat phong
-    @Transactional
-    public RoomBookingResponse updateRoomBooking(
-            String meetingId,
-            RoomBookingRequest request) {
-
-        if (meetingId == null || meetingId.isBlank()
-                || request == null || request.getRoomId() == null || request.getRoomId().isBlank()) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Meeting ID and Room ID are required"
-            );
-        }
-
-        meetingId = meetingId.trim();
-        String roomId = request.getRoomId().trim();
-
-        // US21: Xac thuc nguoi thuc hien thao tac
-        String actorId = permissionService.resolveCurrentUserId();
-
-        // 1. Kiem tra Meeting
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Meeting not found"
-                ));
-
-        // 2. Kiem tra trang thai
-        if ("CANCELLED".equalsIgnoreCase(meeting.getStatus())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Cannot book a cancelled meeting"
-            );
-        }
-
-        // 3. Kiem tra phong
-        if (!roomRepository.existsById(roomId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Room not found"
-            );
-        }
-
-        // 4. Kiem tra thoi gian
-        if (meeting.getStartTime() == null
-                || meeting.getEndTime() == null
-                || !meeting.getEndTime().isAfter(
-                        meeting.getStartTime())) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Invalid meeting time"
-            );
-        }
-
-        // 5. US21: Kiem tra quyen sua dat phong cua nguoi thuc hien
-        permissionService.assertCanUpdate(actorId, roomId);
-
-        // 6. US08: Kiem tra trung lich
-        long conflicts = meetingRepository.countRoomConflicts(
-                roomId,
-                meetingId,
-                meeting.getStartTime(),
-                meeting.getEndTime()
-        );
-
-        if (conflicts > 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Room already booked"
-            );
-        }
-
-        // 7. Luu thong tin dat phong moi
-        meeting.setRoomId(roomId);
-        meeting.setUpdatedAt(LocalDateTime.now());
-
-        Meeting saved = meetingRepository.save(meeting);
-
-        return new RoomBookingResponse(
-                saved.getMeetingId(),
-                saved.getRoomId(),
-                saved.getStartTime(),
-                saved.getEndTime(),
-                "Room booking updated successfully"
-        );
-    }
-
-    // US09 + US21: Huy dat phong
+    // US09: Huy dat phong
     @Transactional
     public RoomBookingResponse cancelRoomBooking(String meetingId) {
-
-        if (meetingId == null || meetingId.isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Meeting ID is required"
-            );
-        }
-
-        meetingId = meetingId.trim();
-
-        // US21: Xac thuc nguoi thuc hien thao tac
-        String actorId = permissionService.resolveCurrentUserId();
-
-        // US21: Kiem tra quyen huy dat phong cua nguoi thuc hien
-        permissionService.assertCanCancel(actorId, meetingId);
 
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new ResponseStatusException(

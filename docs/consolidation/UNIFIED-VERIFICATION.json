@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-22T23:39:57.292692+07:00",
+  "structure": "Maven source tree with Node web runtime in tools/web",
+  "canonicalFrontend": "src/main/resources/static",
+  "canonicalJava": "src/main/java",
+  "runtime": "node server.cjs",
+  "javaTestCount": 67,
+  "javaFailures": 0,
+  "webTestCount": 8,
+  "webFailures": 0,
+  "browserPages": 27,
+  "browserErrors": 0,
+  "cleanCloneVerified": true,
+  "npmCiVerified": true,
+  "mavenVerifyPassed": true,
+  "javaJarStartupPassed": true,
+  "personalDataIncluded": false,
+  "excludedDirectory": "TTCS_N4",
+  "sourceJavaConflictsResolved": 14,
+  "sourceJavaFiles": 149,
+  "sourceJavaTestFiles": 16,
+  "note": "Temporary commits were created only in the separate clone-verification fixture. The user project remains uncommitted and unpushed."
+}

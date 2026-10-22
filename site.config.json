@@ -1,0 +1,6 @@
+{
+  "mode": "local",
+  "storage": "file",
+  "port": 8090,
+  "backendUrl": "http://127.0.0.1:8080"
+}

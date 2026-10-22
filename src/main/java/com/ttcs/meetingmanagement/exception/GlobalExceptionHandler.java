@@ -7,41 +7,45 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private Map<String, Object> buildErrorResponse(HttpStatus status, String message) {
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("status", status.value());
-        response.put("error", status.getReasonPhrase());
-        response.put("message", message);
-        response.put("timestamp", LocalDateTime.now().toString());
-        return response;
-    }
 
     // =========================
     // ROOM EXCEPTION
     // =========================
     @ExceptionHandler(RoomException.class)
     public ResponseEntity<Map<String, Object>> handleRoomException(RoomException ex) {
+
+        Map<String, Object> response = new HashMap<>();
+        HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.BAD_REQUEST;
+        response.put("status", status.value());
+        response.put("error", status.getReasonPhrase());
+        response.put("message", ex.getMessage());
+
         return ResponseEntity
-                .status(ex.getStatus())
-                .body(buildErrorResponse(ex.getStatus(), ex.getMessage()));
+                .status(status)
+                .body(response);
     }
 
     // =========================
     // EQUIPMENT EXCEPTION
     // =========================
     @ExceptionHandler(EquipmentException.class)
-    public ResponseEntity<Map<String, Object>> handleEquipmentException(EquipmentException ex) {
+    public ResponseEntity<Map<String, Object>> handleEquipmentException(
+            EquipmentException ex) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", ex.getStatus().value());
+        response.put("error", ex.getStatus().getReasonPhrase());
+        response.put("message", ex.getMessage());
+
         return ResponseEntity
                 .status(ex.getStatus())
-                .body(buildErrorResponse(ex.getStatus(), ex.getMessage()));
+                .body(response);
     }
 
     // =========================
@@ -62,8 +66,12 @@ public class GlobalExceptionHandler {
                         )
                 );
 
-        Map<String, Object> response = buildErrorResponse(
-                HttpStatus.BAD_REQUEST,
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Bad Request");
+        response.put(
+                "message",
                 errors.values()
                         .stream()
                         .findFirst()
@@ -83,13 +91,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(
             DataIntegrityViolationException ex) {
 
-        String detail = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Bad Request");
+        response.put(
+                "message",
+                "Dữ liệu không hợp lệ hoặc vi phạm ràng buộc cơ sở dữ liệu"
+        );
+
         return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(buildErrorResponse(
-                        HttpStatus.CONFLICT,
-                        "Dữ liệu không hợp lệ hoặc vi phạm ràng buộc cơ sở dữ liệu: " + detail
-                ));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
     // =========================
@@ -99,11 +112,25 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleGenericException(
             Exception ex) {
 
+        Map<String, Object> response = new HashMap<>();
+
+        response.put(
+                "status",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+
+        response.put(
+                "error",
+                "Internal Server Error"
+        );
+
+        response.put(
+                "message",
+                ex.getMessage()
+        );
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(buildErrorResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        ex.getMessage()
-                ));
+                .body(response);
     }
 }

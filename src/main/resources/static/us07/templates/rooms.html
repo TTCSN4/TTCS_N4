@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="vi">
+  <head><link rel="icon" href="data:,"><script defer src="/portal/module-bridge.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1b304d" />
+    <title>Phòng họp trống · Meeting Management</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="../css/available-rooms.css" />
+    <script src="../js/room-availability.js" defer></script>
+    <script src="../js/available-rooms.js" defer></script>
+  </head>
+  <body class="room-browser">
+    <svg
+      class="icon-definitions"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="3" />
+        <path d="M7 3v4m10-4v4M3 11h18m-11 4h4" />
+      </symbol>
+      <symbol id="i-home" viewBox="0 0 24 24">
+        <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" />
+      </symbol>
+      <symbol id="i-rooms" viewBox="0 0 24 24">
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+        <path d="M9 21V8h7v13m-3-7h.01M8 3v3m4-3v3m4-3v3" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3" />
+        <path
+          d="M3 21v-2a6 6 0 0 1 12 0v2m1-16a3 3 0 0 1 0 6m3 10v-2a6 6 0 0 0-3-5"
+        />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </symbol>
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h16m-6-6 6 6-6 6" />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24">
+        <path d="m8 10 4 4 4-4" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="i-wifi" viewBox="0 0 24 24">
+        <path
+          d="M3 8a14 14 0 0 1 18 0M6 12a9 9 0 0 1 12 0m-9 4a4 4 0 0 1 6 0m-3 4h.01"
+        />
+      </symbol>
+      <symbol id="i-projector" viewBox="0 0 24 24">
+        <path d="M3 4h18M5 4v11h14V4M12 15v6m-4 0 4-3 4 3" />
+      </symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </symbol>
+      <symbol id="i-list" viewBox="0 0 24 24">
+        <path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01" />
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4" />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v6m0-10h.01" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24">
+        <path d="M3 6h18M3 12h18M3 18h18" />
+      </symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24">
+        <path d="M4 21V11h4v10m2 0V3h4v18m2 0v-7h4v7" />
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z" />
+        <path d="m8 12 3 3 5-6" />
+      </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <path
+          d="m9 3-1 3-3 1v4l-2 1 2 2v4l3 1 1 2h6l1-2 3-1v-4l2-2-2-1V7l-3-1-1-3Z"
+        />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+    </svg>
+    <a class="skip-link" href="#content">Đến nội dung chính</a>
+    <button
+      id="menu-overlay"
+      class="menu-overlay"
+      aria-label="Đóng menu"
+      tabindex="-1"
+      hidden
+    ></button>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand-row">
+        <a class="brand" href="dashboard.html"
+          ><span class="brand-mark"
+            ><svg><use href="#i-calendar" /></svg></span
+          ><span
+            ><strong>Meeting</strong><small>Meeting Managenment</small></span
+          ></a
+        ><button
+          id="sidebar-close"
+          type="button"
+          class="icon-button"
+          aria-label="Thu gọn thanh điều hướng"
+        >
+          ×
+        </button>
+      </div>
+      <nav aria-label="Điều hướng chính">
+        <a href="dashboard.html"
+          ><svg><use href="#i-home" /></svg><span>Trang chủ</span></a
+        >
+        <button type="button" disabled>
+          <svg><use href="#i-calendar" /></svg><span>Lịch họp</span>
+        </button>
+        <button type="button" id="nav-create-meeting">
+          <svg><use href="#i-calendar" /></svg><span>Tạo lịch họp</span>
+        </button>
+        <a href="rooms.html" class="active"
+          ><svg><use href="#i-rooms" /></svg><span>Phòng họp</span></a
+        >
+        <div class="room-subnav">
+          <a href="rooms.html" aria-current="page"
+            ><span>◆</span>Danh sách phòng trống</a
+          ><button type="button" disabled>
+            <span>◇</span>Quản lý phòng họp
+          </button>
+        </div>
+        <button type="button" disabled>
+          <svg><use href="#i-projector" /></svg><span>Thiết bị</span>
+        </button>
+        <button type="button" disabled>
+          <svg><use href="#i-users" /></svg><span>Người tham gia</span>
+        </button>
+        <button type="button" disabled>
+          <svg><use href="#i-chart" /></svg><span>Báo cáo</span>
+        </button>
+        <button type="button" disabled>
+          <svg><use href="#i-shield" /></svg><span>Tài khoản</span>
+        </button>
+        <button type="button" disabled>
+          <svg><use href="#i-settings" /></svg><span>Cài đặt</span>
+        </button>
+      </nav>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <button
+          id="menu-toggle"
+          class="icon-button menu-toggle"
+          type="button"
+          aria-label="Ẩn hoặc hiện menu"
+          aria-controls="sidebar"
+          aria-expanded="true"
+        >
+          <svg><use href="#i-menu" /></svg>
+        </button>
+        <label class="global-search"
+          ><svg><use href="#i-search" /></svg
+          ><input
+            id="search"
+            type="search"
+            placeholder="Tìm tên phòng, vị trí…"
+            aria-label="Tìm tên phòng hoặc vị trí"
+        /></label>
+        <div class="topbar-actions">
+          <button
+            id="notifications"
+            class="icon-button"
+            type="button"
+            aria-label="Thông báo"
+          >
+            <svg><use href="#i-bell" /></svg></button
+          ><span class="topbar-divider"></span><span class="avatar">NA</span
+          ><span class="topbar-name"
+            ><strong>Nguyễn Văn An</strong
+            ><small id="profile-role">PM</small></span
+          ><svg class="profile-chevron"><use href="#i-chevron" /></svg>
+        </div>
+      </header>
+      <main id="content">
+        <div class="breadcrumb">
+          Trang chủ <span>›</span> Phòng họp <span>›</span>
+          <strong>Danh sách phòng trống</strong>
+        </div>
+        <div class="page-heading">
+          <div class="heading-icon">
+            <svg><use href="#i-rooms" /></svg>
+          </div>
+          <div>
+            <span class="eyebrow">QUẢN LÝ PHÒNG HỌP</span>
+            <h1>Danh sách phòng họp trống</h1>
+            <p>Tìm kiếm và lựa chọn phòng họp phù hợp cho cuộc họp của bạn.</p>
+          </div>
+          <button id="help" class="secondary-button help-button" type="button">
+            <svg><use href="#i-info" /></svg>Hướng dẫn
+          </button>
+        </div>
+        <p id="role-notice" class="result-note" role="status"></p>
+        <section class="stats" aria-label="Tổng quan phòng họp">
+          <article>
+            <span class="stat-icon blue"
+              ><svg><use href="#i-rooms" /></svg
+            ></span>
+            <div>
+              <span>Tổng số phòng</span><strong id="stat-total">—</strong
+              ><small>Trong danh sách</small>
+            </div>
+          </article>
+          <article>
+            <span class="stat-icon green"
+              ><svg><use href="#i-check" /></svg
+            ></span>
+            <div>
+              <span>Phòng đang trống</span><strong id="stat-available">—</strong
+              ><small>Trong khung giờ đã chọn</small>
+            </div>
+          </article>
+          <article>
+            <span class="stat-icon orange"
+              ><svg><use href="#i-clock" /></svg
+            ></span>
+            <div>
+              <span>Đã được đặt</span><strong id="stat-busy">—</strong
+              ><small>Trong khung giờ đã chọn</small>
+            </div>
+          </article>
+          <article>
+            <span class="stat-icon purple"
+              ><svg><use href="#i-users" /></svg
+            ></span>
+            <div>
+              <span>Phòng phù hợp</span><strong id="stat-suitable">—</strong
+              ><small>Trống và đủ sức chứa</small>
+            </div>
+          </article>
+        </section>
+        <section
+          id="participant-alert"
+          class="participant-alert"
+          role="alert"
+          hidden
+        >
+          <strong id="participant-alert-message"
+            >Chưa nhận dữ liệu người tham dự từ US01.</strong
+          >
+          <p>
+            Quay lại tab <b>US01 – Tạo lịch họp</b>, chọn người tham dự từ danh
+            sách tài khoản và chuyển sang tìm phòng. US07 tự tính số người theo
+            các ID đã chọn; không nhận số lượng nhập tay.
+          </p>
+          <p>
+            Nếu US01 chưa gửi dữ liệu, hãy giữ nguyên bản nháp tại US01. Các nút
+            chọn phòng sẽ bị khóa cho đến khi nhận danh sách hợp lệ.
+          </p>
+        </section>
+
+        <a id="return-us01" class="secondary-button" hidden>← Quay lại US01</a>
+        <section class="filter-panel" aria-labelledby="filter-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="filter-title">
+                <svg><use href="#i-search" /></svg>Bộ lọc tìm kiếm
+              </h2>
+              <p>
+                Phòng trống được kiểm tra theo ngày, giờ bắt đầu và giờ kết
+                thúc.
+              </p>
+            </div>
+            <span class="api-label"
+              ><span></span>Dữ liệu trực tiếp từ API</span
+            >
+          </div>
+          <form id="availability-form" novalidate>
+            <div class="field">
+              <label for="date">Ngày họp <em>*</em></label
+              ><input id="date" type="date" required />
+            </div>
+            <div class="field">
+              <label for="start-time">Giờ bắt đầu <em>*</em></label
+              ><input id="start-time" type="time" required />
+            </div>
+            <div class="field">
+              <label for="end-time">Giờ kết thúc <em>*</em></label
+              ><input id="end-time" type="time" required />
+            </div>
+            <div class="field">
+              <label for="people">Số người tham dự</label
+              ><input id="people" type="number" min="1" max="200" step="1" value="1" inputmode="numeric" aria-describedby="participant-source" required><small id="participant-source" class="participant-source"
+                >Nhập số người cần tìm phòng, hoặc dùng số người từ lịch đang tạo.</small
+              >
+            </div>
+            <div class="field">
+              <label for="building">Tòa nhà / Khu vực</label
+              ><select id="building">
+                <option value="">Tất cả</option>
+                <option>Tòa A</option>
+                <option>Tòa B</option>
+                <option>Tòa C</option>
+                <option>Tòa D</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="room-type">Loại phòng</label
+              ><select id="room-type">
+                <option value="">Tất cả</option>
+                <option value="small">Phòng nhỏ (dưới 20 người)</option>
+                <option value="large">Phòng lớn (từ 20 người)</option>
+              </select>
+            </div>
+            <button id="reset-all" class="secondary-button" type="button">
+              ↻ Làm mới</button
+            ><button
+              id="find-rooms"
+              class="primary-button search-button"
+              type="submit"
+            >
+              <svg><use href="#i-search" /></svg><span>Tìm phòng trống</span>
+            </button>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+          </form>
+          <div class="secondary-filters">
+            <div class="location-field">
+              <label for="location">Vị trí</label
+              ><select id="location">
+                <option value="">Tất cả vị trí</option>
+              </select>
+            </div>
+            <fieldset>
+              <legend>Thiết bị</legend>
+              <label
+                ><input type="checkbox" name="device" value="projector" />Máy
+                chiếu</label
+              ><label
+                ><input
+                  type="checkbox"
+                  name="device"
+                  value="wifi"
+                />Wi-Fi</label
+              ><label
+                ><input type="checkbox" name="device" value="board" />Bảng
+                trắng</label
+              ><label
+                ><input type="checkbox" name="device" value="tv" />TV</label
+              >
+            </fieldset>
+            <button id="reset-filters" class="text-button" type="button">
+              Đặt lại bộ lọc
+            </button>
+          </div>
+        </section>
+        <div class="room-content-layout">
+          <section class="results-section" aria-labelledby="results-title">
+            <div class="results-toolbar">
+              <div>
+                <h2 id="results-title">
+                  Danh sách phòng họp
+                  <span id="result-count" class="count-badge">0</span>
+                </h2>
+                <p id="query-summary" aria-live="polite">
+                  Đang kiểm tra phòng…
+                </p>
+              </div>
+              <p id="inline-stats" class="inline-stats" aria-live="polite"></p>
+              <div class="result-controls">
+                <label class="sr-only" for="availability-filter"
+                  >Tình trạng phòng</label
+                ><select id="availability-filter">
+                  <option value="all">Tất cả phòng</option>
+                  <option value="available">Chỉ phòng trống</option>
+                  <option value="busy">Đã được đặt</option></select
+                ><label class="sr-only" for="sort">Sắp xếp</label
+                ><select id="sort">
+                  <option value="capacity">Sức chứa tăng dần</option>
+                  <option value="capacity-desc">Sức chứa giảm dần</option>
+                  <option value="name" selected>Tên phòng A–Z</option>
+                </select>
+                <div class="view-toggle" aria-label="Cách hiển thị">
+                  <button
+                    id="view-grid"
+                    type="button"
+                    aria-label="Hiển thị dạng thẻ"
+                    aria-pressed="true"
+                  >
+                    <svg><use href="#i-grid" /></svg></button
+                  ><button
+                    id="view-list"
+                    type="button"
+                    aria-label="Hiển thị dạng danh sách"
+                    aria-pressed="false"
+                  >
+                    <svg><use href="#i-list" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="room-list" class="room-grid" aria-busy="true"></div>
+            <div id="empty-state" class="empty-state" hidden>
+              <span
+                ><svg><use href="#i-search" /></svg
+              ></span>
+              <h3>Chưa tìm thấy phòng phù hợp</h3>
+              <p id="empty-message">
+                Thử thay đổi thời gian, số người hoặc điều kiện tìm kiếm.
+              </p>
+              <button id="empty-reset" class="secondary-button" type="button">
+                Xóa bộ lọc phụ
+              </button>
+            </div>
+            <div class="result-note">
+              <svg><use href="#i-info" /></svg>
+              <p>
+                Trạng thái dựa trên khung giờ đã chọn. Phòng được kiểm tra lại
+                trước khi chuyển sang tạo lịch và được lấy trực tiếp từ hệ
+                thống.
+              </p>
+            </div>
+          </section>
+          <aside class="selection-panel" aria-labelledby="selection-heading">
+            <h2 id="selection-heading">
+              <span>✓</span> Thông tin phòng được chọn
+            </h2>
+            <div id="selection-placeholder">
+              Chọn một phòng phù hợp để xem thông tin và lịch sử dụng.
+            </div>
+            <div id="selection-content" hidden>
+              <div id="selected-photo" class="room-photo">
+                <span class="selected-photo-badge">Đã chọn</span>
+              </div>
+              <h3 id="selected-name"></h3>
+              <p class="selected-meta" id="selected-capacity"></p>
+              <p class="selected-meta" id="selected-location"></p>
+              <p class="selected-meta" id="selected-devices"></p>
+              <p id="selected-state" role="status"></p>
+              <p id="selected-fit" class="selected-fit" role="status"></p>
+              <h4>
+                Lịch sử dụng phòng trong ngày <small>Dữ liệu hệ thống</small>
+              </h4>
+              <div id="selected-timeline" class="room-timeline"></div>
+              <button
+                id="continue-selection"
+                class="primary-button"
+                type="button"
+              >
+                Dùng phòng này để tạo lịch →
+              </button>
+            </div>
+          </aside>
+        </div>
+        <footer class="page-footer">
+          <span>Meeting Management</span
+          ><span>Không gian phù hợp · Cuộc họp hiệu quả</span>
+        </footer>
+      </main>
+    </div>
+    <dialog
+      id="room-detail"
+      class="detail-dialog"
+      aria-labelledby="detail-title"
+    >
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">THÔNG TIN PHÒNG HỌP</span>
+          <h2 id="detail-title"></h2>
+          <p id="detail-location"></p>
+        </div>
+        <button
+          id="close-detail"
+          class="icon-button"
+          type="button"
+          aria-label="Đóng chi tiết phòng"
+        >
+          <svg><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-summary">
+          <span class="detail-room-icon"
+            ><svg><use href="#i-rooms" /></svg
+          ></span>
+          <div>
+            <span id="detail-status" class="status-badge"></span>
+            <p id="detail-capacity"></p>
+          </div>
+        </div>
+        <h3>Thiết bị có sẵn</h3>
+        <div id="detail-devices" class="device-list"></div>
+        <div class="detail-time">
+          <svg><use href="#i-calendar" /></svg>
+          <div>
+            <strong>Khung giờ đang xem</strong>
+            <p id="detail-range"></p>
+          </div>
+        </div>
+        <h3>Lịch phòng trong ngày <small>Dữ liệu hệ thống</small></h3>
+        <div id="detail-schedule" class="detail-schedule"></div>
+        <p id="detail-message" class="detail-message" role="status"></p>
+      </div>
+      <div class="dialog-footer">
+        <button id="cancel-detail" class="secondary-button" type="button">
+          Đóng</button
+        ><button id="select-detail" class="primary-button" type="button">
+          Chọn phòng này<svg><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+    </dialog>
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <h2 id="help-title">Tìm và chọn phòng họp</h2>
+      <ol>
+        <li>
+          Chọn ngày, giờ bắt đầu, giờ kết thúc và dùng danh sách người đã chọn
+          từ US01.
+        </li>
+        <li>
+          Nhấn <strong>Tìm phòng trống</strong>, sau đó lọc thêm theo vị trí
+          hoặc thiết bị.
+        </li>
+        <li>Xem chi tiết phòng để kiểm tra sức chứa và lịch trong ngày.</li>
+        <li>
+          Nhấn <strong>Chọn phòng</strong> để mang thông tin phòng và thời gian
+          sang trang tạo lịch.
+        </li>
+      </ol>
+      <p>
+        Danh sách phòng, trạng thái và lịch sử dụng được tải từ hệ thống. Phòng
+        sẽ được kiểm tra lại ngay trước khi chuyển về US01.
+      </p>
+      <button id="close-help" class="primary-button" type="button">
+        Đã hiểu
+      </button>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <noscript
+      ><p class="noscript-note">
+        Vui lòng bật JavaScript để tìm và chọn phòng họp.
+      </p></noscript
+    >
+  </body>
+</html>

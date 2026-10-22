@@ -1,0 +1,605 @@
+{
+  "generatedAt": "2026-10-19T19:51:46.850Z",
+  "backendRoot": "C:/TTCS-FIX/TTCS_N4/src/main/java",
+  "websiteRoot": "C:/TTCS-FIX/TTCS_N4-WEB-20261020",
+  "warning": "Static audit only. API-like strings do not establish runtime integration. Demo server remains enabled.",
+  "blockingIssues": [
+    {
+      "module": "us01",
+      "issue": "Frontend POST /api/meetings/create does not exist in common Backend. Backend POST /api/meetings expects room rather than roomId and does not accept equipmentIds."
+    },
+    {
+      "module": "us07",
+      "issue": "Frontend /api/rooms/availability differs from common Backend /api/rooms/available."
+    },
+    {
+      "module": "us02",
+      "issue": "MeetingController and US02MeetingController both declare PUT and DELETE /api/meetings/{id}."
+    },
+    {
+      "module": "us15",
+      "issue": "No frontend entry in collected sources."
+    },
+    {
+      "module": "global",
+      "issue": "MySQL password not configured; real Backend not verified running on 8080."
+    }
+  ],
+  "modules": [
+    {
+      "id": "us01",
+      "title": "Tạo lịch họp",
+      "entry": "/us01/templates/create-meeting.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us02",
+      "title": "Chỉnh sửa & hủy lịch",
+      "entry": "/us02/update-cancel-meeting.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us03",
+      "title": "Lịch họp định kỳ",
+      "entry": "/us03/create-meeting.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us04",
+      "title": "Người tham gia",
+      "entry": "/us04/us04.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us05",
+      "title": "Gợi ý thời gian",
+      "entry": "/us05/available-time-slots.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us06",
+      "title": "Lịch sử cuộc họp",
+      "entry": "/us06/templates/meeting-history.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us07",
+      "title": "Phòng trống",
+      "entry": "/us07/templates/rooms.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us08",
+      "title": "Đặt phòng",
+      "entry": "/us08/room-booking.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us09",
+      "title": "Hủy đặt phòng",
+      "entry": "/us09/cancel-room-booking.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us10",
+      "title": "Kiểm tra sức chứa phòng",
+      "entry": "/us10/templates/rooms.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us11",
+      "title": "Admin quản lý phòng",
+      "entry": "/us11/templates/rooms.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us12",
+      "title": "Đặt thiết bị",
+      "entry": "/us12/templates/create-meeting.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us13",
+      "title": "Trạng thái thiết bị",
+      "entry": "/us13/templates/create-meeting.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us14",
+      "title": "Quản lý thiết bị",
+      "entry": "/us14/equipment-management.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us15",
+      "title": "Đồng bộ lịch",
+      "entry": null,
+      "available": false,
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us16",
+      "title": "Nhắc lịch & thông báo",
+      "entry": "/us16/meeting-reminder.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us17",
+      "title": "Lịch họp trên di động",
+      "entry": "/us17/mobile-meetings.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us18",
+      "title": "Tạo tài khoản",
+      "entry": "/us18/templates/create-account.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us19",
+      "title": "Danh sách tài khoản",
+      "entry": "/us19/templates/user-list.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us20",
+      "title": "Quản lý vai trò",
+      "entry": "/us20/user-permission.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us21",
+      "title": "Quyền đặt phòng",
+      "entry": "/us21/templates/room-permissions.html",
+      "available": true,
+      "declaredMode": "api",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us22",
+      "title": "Báo cáo sử dụng phòng",
+      "entry": "/us22/templates/room-usage-report.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us23",
+      "title": "Thống kê lịch đã hủy",
+      "entry": "/us23/cancelled-meeting-statistics.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us24",
+      "title": "Xuất báo cáo",
+      "entry": "/us24/templates/export-report.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us25",
+      "title": "Chatbot đặt phòng",
+      "entry": "/us25/chatbot-room-booking.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us26",
+      "title": "Gợi ý phòng họp",
+      "entry": "/us26/room-recommendation.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us27",
+      "title": "QR check-in / check-out",
+      "entry": "/us27/templates/qr-attendance.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    },
+    {
+      "id": "us28",
+      "title": "Đồng bộ HRM / ERP",
+      "entry": "/us28/templates/hrm-integration.html",
+      "available": true,
+      "declaredMode": "local",
+      "verifiedWithRealBackend": false
+    }
+  ],
+  "backendMappings": [
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\chatbot\\US25ChatbotController.java",
+      "base": "/api/chatbot",
+      "mapping": "@PostMapping(\"/message\") US25ChatMessageResponse message(@Valid @RequestBody US25ChatMessageRequest request) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\chatbot\\US25ChatbotController.java",
+      "base": "/api/chatbot",
+      "mapping": "@PostMapping(\"/book-room\") @ResponseStatus(HttpStatus.CREATED)"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\chatbot\\US25ChatbotController.java",
+      "base": "/api/chatbot",
+      "mapping": "@GetMapping(\"/rooms/available\") List<US25AvailableRoom> available(@RequestParam LocalDateTime startTime,@RequestParam LocalDateTime endTime,@RequestParam @Min(1) int attendees) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\CheckInController.java",
+      "base": "/api",
+      "mapping": "@PostMapping(\"/check-in\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\CheckInController.java",
+      "base": "/api",
+      "mapping": "@PostMapping(\"/check-out\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\CheckInController.java",
+      "base": "/api",
+      "mapping": "@GetMapping(\"/meetings/{meetingId}/check-in-logs\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@GetMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@GetMapping(\"/history\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@PostMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@PutMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@DeleteMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@PostMapping(\"/suggestions\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingHistoryController.java",
+      "base": "/api/users/{userId}/meeting-history",
+      "mapping": "@GetMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingHistoryController.java",
+      "base": "/api/users/{userId}/meeting-history",
+      "mapping": "@GetMapping(\"/{meetingId}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingParticipantController.java",
+      "base": "/api/meetings/{meetingId}/participants",
+      "mapping": "@PostMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingParticipantController.java",
+      "base": "/api/meetings/{meetingId}/participants",
+      "mapping": "@GetMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingParticipantController.java",
+      "base": "/api/meetings/{meetingId}/participants",
+      "mapping": "@DeleteMapping(\"/{userId}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MeetingParticipantController.java",
+      "base": "/api/meetings/{meetingId}/participants",
+      "mapping": "@PatchMapping(\"/{userId}/status\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MobileMeetingCalendarController.java",
+      "base": "/api/mobile/calendar",
+      "mapping": "@GetMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\MobileMeetingCalendarController.java",
+      "base": "/api/mobile/calendar",
+      "mapping": "@GetMapping(\"/{meetingId}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\QrCodeController.java",
+      "base": "/api/meetings",
+      "mapping": "@GetMapping(\"/{meetingId}/qr\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\RecurringMeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@PostMapping(\"/recurring\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\ReportController.java",
+      "base": "/api/reports/meetings/export",
+      "mapping": "@GetMapping("
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\ReportController.java",
+      "base": "/api/reports/meetings/export",
+      "mapping": "@GetMapping("
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\RoleManagementController.java",
+      "base": "/api/admin",
+      "mapping": "@GetMapping(\"/roles\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\RoleManagementController.java",
+      "base": "/api/admin",
+      "mapping": "@GetMapping(\"/users/{userId}/role\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\RoleManagementController.java",
+      "base": "/api/admin",
+      "mapping": "@PutMapping(\"/users/{userId}/role\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\RoleManagementController.java",
+      "base": "/api/admin",
+      "mapping": "@DeleteMapping(\"/users/{userId}/role\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\controller\\RoomSuggestionController.java",
+      "base": "/api/rooms",
+      "mapping": "@PostMapping(\"/suggestions\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@GetMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@GetMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@PostMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@PutMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@DeleteMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@GetMapping(\"/{id}/booked\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@GetMapping(\"/{id}/availability\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@GetMapping(\"/status\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@PostMapping(\"/bookings\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@PostMapping(\"/maintenance\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\equipment\\EquipmentController.java",
+      "base": "/api/equipment",
+      "mapping": "@DeleteMapping(\"/bookings/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@PostMapping(\"/pull\") ResponseEntity<US28SyncResult> pull() {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@PostMapping(\"/webhook\") ResponseEntity<US28SyncResult> webhook(@RequestHeader(value=\"X-Integration-Key\",required=false) String key,@Valid @RequestBody US28SyncRequest request) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@PostMapping(\"/sync\") ResponseEntity<US28SyncResult> sync(@RequestHeader(value=\"X-Integration-Key\",required=false) String key,@Valid @RequestBody US28SyncRequest request) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@GetMapping(\"/status\") ResponseEntity<US28IntegrationStatus> status() {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@GetMapping(\"/history\") ResponseEntity<List<US28HrmSyncRun>> history(@RequestParam(defaultValue=\"20\") int limit) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@GetMapping(\"/users\") ResponseEntity<List<US28UserView>> users() {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\integration\\hrm\\US28HrmController.java",
+      "base": "/api/integrations/hrm",
+      "mapping": "@GetMapping(\"/departments\") ResponseEntity<List<Department>> departments() {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\meeting\\availability\\US05AvailabilityController.java",
+      "base": "/api",
+      "mapping": "@GetMapping(\"/participants\") public ParticipantList participants() { return new ParticipantList(service.participants()); }"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\meeting\\availability\\US05AvailabilityController.java",
+      "base": "/api",
+      "mapping": "@PostMapping(\"/availability\") public AvailabilityResponse availability(@Valid @RequestBody AvailabilityRequest request) { return service.find(request); }"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\meeting\\update\\US02MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@GetMapping(\"/{id}\") public Meeting get(@PathVariable String id) { return service.get(id); }"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\meeting\\update\\US02MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@PutMapping(\"/{id}\") public Meeting update(@PathVariable String id, @Valid @RequestBody US02MeetingRequest request) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\meeting\\update\\US02MeetingController.java",
+      "base": "/api/meetings",
+      "mapping": "@DeleteMapping(\"/{id}\") public ResponseEntity<Void> cancel(@PathVariable String id, @RequestParam(required = false) String reason) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\notification\\reminder\\US16ReminderController.java",
+      "base": "/api",
+      "mapping": "@PostMapping(\"/meetings/{id}/reminders\") @ResponseStatus(HttpStatus.CREATED)"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\notification\\reminder\\US16ReminderController.java",
+      "base": "/api",
+      "mapping": "@GetMapping(\"/meetings/{id}/reminders\") List<US16Notification> list(@PathVariable String id){"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\notification\\reminder\\US16ReminderController.java",
+      "base": "/api",
+      "mapping": "@PostMapping(\"/reminders/dispatch\") Map<String,Integer> dispatch(){return Map.of(\"sent\",service.dispatchDue());}"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\report\\RoomUsageController.java",
+      "base": "/api/admin/reports",
+      "mapping": "@GetMapping(\"/room-usage\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomAvailabilityController.java",
+      "base": "/api/rooms",
+      "mapping": "@GetMapping(\"/available\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomController.java",
+      "base": "/api/rooms",
+      "mapping": "@GetMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomController.java",
+      "base": "/api/rooms",
+      "mapping": "@GetMapping(params = \"participants\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomController.java",
+      "base": "/api/rooms",
+      "mapping": "@GetMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomController.java",
+      "base": "/api/rooms",
+      "mapping": "@PostMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomController.java",
+      "base": "/api/rooms",
+      "mapping": "@PutMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\room\\RoomController.java",
+      "base": "/api/rooms",
+      "mapping": "@DeleteMapping(\"/{id}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\roombooking\\RoomBookingController.java",
+      "base": "/api/room-bookings",
+      "mapping": "@PostMapping"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\roombooking\\RoomBookingController.java",
+      "base": "/api/room-bookings",
+      "mapping": "@PutMapping(\"/{meetingId}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\roombooking\\RoomBookingController.java",
+      "base": "/api/room-bookings",
+      "mapping": "@DeleteMapping(\"/{meetingId}\")"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\user\\creation\\US18UserController.java",
+      "base": "/api",
+      "mapping": "@PostMapping(\"/users\") @ResponseStatus(HttpStatus.CREATED) US18UserResponse create(@Valid @RequestBody US18CreateUserRequest r) {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\user\\creation\\US18UserController.java",
+      "base": "/api",
+      "mapping": "@GetMapping(\"/users\") List<US18UserResponse> all() {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\user\\creation\\US18UserController.java",
+      "base": "/api",
+      "mapping": "@GetMapping(\"/roles\") List<Role> roles() {"
+    },
+    {
+      "controller": "com\\ttcs\\meetingmanagement\\user\\creation\\US18UserController.java",
+      "base": "/api",
+      "mapping": "@GetMapping(\"/departments\") List<Department> departments() {"
+    }
+  ]
+}

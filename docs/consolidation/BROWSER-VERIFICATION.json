@@ -1,0 +1,566 @@
+{
+  "pages": [
+    {
+      "id": "us01",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nTạo lịch họp\n\nTạo cuộc họp và chuẩn bị mọi thứ trong một bước.\n\nTạo lịch họp\nChỉnh sửa & hủy lịch\nLịch họp định kỳ\nNgười tham gia\nGợi ý thời gian\nLị",
+      "length": 6087,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 3687.078125,
+        "top": 35,
+        "right": 1670,
+        "bottom": 3722.078125,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us02",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Chỉnh sửa và hủy lịch họp\nL\nChỉnh sửa và hủy lịch họp\n\nCập nhật cuộc họp khi kế hoạch thay đổi.\n\nBản demo dùng API mô phỏng chung · Không ",
+      "length": 16974,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 11609.59375,
+        "top": 35,
+        "right": 1670,
+        "bottom": 11644.59375,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us03",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nTạo cuộc họp\n♧\nN\nNguyễn Văn A\n⌄\nĐã tải lịch từ máy chủ.\nThông tin cuộc họp\nTiêu đề cuộc họp *\nMô tả\nPhòng họp *\nChọn phòng họp\nPhòng A101 · 10 người",
+      "length": 10858,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 12325.71875,
+        "top": 35,
+        "right": 1670,
+        "bottom": 12360.71875,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us04",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nUS04 - Mời người tham dự\n\nMeeting Management System - Backend localhost:8080\n\nThông tin cuộc họp\nMeeting ID  Xem danh sách người tham dự\nMời người t",
+      "length": 464,
+      "demo": true,
+      "overflow": false,
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us05",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Gợi ý thời gian họp\nL\nGợi ý thời gian họp\n\nTìm khung giờ mà tất cả người tham dự đều rảnh.\n\nLịch và nhóm lấy từ API chung, được cập nhật k",
+      "length": 2197,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 1134.796875,
+        "top": 35,
+        "right": 1670,
+        "bottom": 1169.796875,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us06",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nU\nTài khoản\n⌄\nLịch sử cuộc họp\n\nXem lại các cuộc họp đã diễn ra trong hệ thống.\n\n↻ Làm mới\nThiết lập tài khoản xem lịch sử\nTìm tên cuộc họp\nTừ ngày\n",
+      "length": 1662,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 1199.6875,
+        "top": 35,
+        "right": 1670,
+        "bottom": 1234.6875,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us07",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nĐến nội dung chính\nNA\nNguyễn Văn An\nUS07\nTrang chủ\n›\nPhòng họp\n›\nDanh sách phòng trống\nDanh sách phòng họp trống\n\nTìm kiếm và lựa chọn phòng họp phù",
+      "length": 2960,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 35,
+        "y": 89,
+        "width": 1600,
+        "height": 1519.5625,
+        "top": 89,
+        "right": 1635,
+        "bottom": 1608.5625,
+        "left": 35
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us08",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Đặt phòng họp\nL\nĐặt phòng họp\n\nChọn phòng và khung giờ cụ thể cho cuộc họp.\n\nBản demo dùng API mô phỏng chung · Không gửi email thật · Dữ ",
+      "length": 2990,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 6713.015625,
+        "top": 35,
+        "right": 1670,
+        "bottom": 6748.015625,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us09",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Hủy đặt phòng\nL\nHủy đặt phòng\n\nGiải phóng phòng và khung giờ khi cuộc họp bị hủy.\n\nBản demo dùng API mô phỏng chung · Không gửi email thật",
+      "length": 25992,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 25257.59375,
+        "top": 35,
+        "right": 1670,
+        "bottom": 25292.59375,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us10",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nTrang chủ\n›\nLịch họp\n›\nQuản lý sức chứa phòng\nNA\nNguyễn Văn An\nPM\n⌄\nQuản lý sức chứa phòng\n\nTheo dõi sức chứa, tình trạng sử dụng và kiểm tra phù hợ",
+      "length": 2525,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 84,
+        "width": 1670,
+        "height": 1324.1875,
+        "top": 84,
+        "right": 1670,
+        "bottom": 1408.1875,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us11",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nTrang chủ\n›\nPhòng & thiết bị\n›\nQuản lý phòng họp\nNA\nNguyễn Văn An\nAdmin\n⌄\nQuản lý phòng họp\n\nQuản lý thông tin phòng họp: thêm, sửa, trạng thái hoạt",
+      "length": 1947,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 84,
+        "width": 1670,
+        "height": 1449.796875,
+        "top": 84,
+        "right": 1670,
+        "bottom": 1533.796875,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us12",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting\nMeeting Management\nN\nNguyễn Văn A\nAdmin\nTrang chủ\n›\nĐặt thiết bị\nĐặt thiết bị\n\nChọn cuộc họp đã tạo và số lượng thiết bị cần đặt. Tồn kho đư",
+      "length": 2643,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 943.015625,
+        "top": 35,
+        "right": 1670,
+        "bottom": 978.015625,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us13",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nTTCS_N4\nQuản lý cuộc họp\n?\nNgười dùng\nChưa có phiên đăng nhập\nTrang chủ\n›\nTrạng thái thiết bị\nTrạng thái thiết bị\n\nXem số lượng, tình trạng sử dụng ",
+      "length": 3153,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 99,
+        "width": 1670,
+        "height": 1722.09375,
+        "top": 99,
+        "right": 1670,
+        "bottom": 1821.09375,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us14",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Quản lý thiết bị\nAD\nQuản lý thiết bị\n\nQuản lý danh mục và trạng thái sử dụng thiết bị.\n\nBản demo dùng API mô phỏng chung · Không gửi email",
+      "length": 5110,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 5363.78125,
+        "top": 35,
+        "right": 1670,
+        "bottom": 5398.78125,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us16",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Thông báo nhắc nhở\nL\nThông báo nhắc nhở\n\nChọn kênh và thời điểm nhắc trước cuộc họp.\n\nBản demo dùng API mô phỏng chung · Không gửi email t",
+      "length": 1041,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 1305.59375,
+        "top": 35,
+        "right": 1670,
+        "bottom": 1340.59375,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us17",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting Management\n● Trực tuyến\nA\n\nĐang dùng API demo chung. Chế độ ngoại tuyến được tắt để tránh dữ liệu cũ.\n\nTrang chủ / Lịch của tôi\n\nLỊCH TRÌNH ",
+      "length": 18275,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 195,
+        "y": 111,
+        "width": 1280,
+        "height": 17884.59375,
+        "top": 111,
+        "right": 1475,
+        "bottom": 17995.59375,
+        "left": 195
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us18",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nĐến nội dung chính\nN\nNguyễn Văn A\nAdmin (dữ liệu API)\nTrang chủ\nNgười dùng & quyền\nQuản lý tài khoản\nQuản lý tài khoản\n\nTạo tài khoản và chọn vai tr",
+      "length": 1573,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 99,
+        "width": 1670,
+        "height": 1016.203125,
+        "top": 99,
+        "right": 1670,
+        "bottom": 1115.203125,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us19",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nĐến nội dung chính\nN\nNguyễn Văn A\nAdmin\nTrang chủ\nNgười dùng & quyền\nDanh sách tài khoản\nDanh sách tài khoản\n\nXem, tìm kiếm, lọc tài khoản theo vai ",
+      "length": 1768,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 99,
+        "width": 1670,
+        "height": 886.34375,
+        "top": 99,
+        "right": 1670,
+        "bottom": 985.34375,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us20",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Phân quyền người dùng\nAD\nPhân quyền người dùng\n\nGán vai trò Admin, Người đặt lịch và Người tham dự.\n\nBản demo dùng API mô phỏng chung · Kh",
+      "length": 2472,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 3318.390625,
+        "top": 35,
+        "right": 1670,
+        "bottom": 3353.390625,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us21",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\n♧\n3\nA\nNguyễn Văn A\nQuản trị viên\n\nTrang chủ / Quản trị hệ thống / Phân quyền đặt phòng\n\n♙\nPhân quyền đặt phòng họp\n\nCấu hình quyền theo vai trò; xem",
+      "length": 2487,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 55,
+        "y": 101,
+        "width": 1560,
+        "height": 1757.296875,
+        "top": 101,
+        "right": 1615,
+        "bottom": 1858.296875,
+        "left": 55
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us22",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\n♧\n3\nU\nTài khoản quản trị\nQuản trị viên\n⌄\nBáo cáo sử dụng phòng\n\nThống kê tình hình sử dụng các phòng họp trong hệ thống · Dữ liệu demo.\n\n⇩   Xuất bá",
+      "length": 2106,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 1641,
+        "top": 35,
+        "right": 1670,
+        "bottom": 1676,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us23",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Thống kê hủy họp\nAD\nThống kê hủy họp\n\nTheo dõi số lượng cuộc họp bị hủy và nguyên nhân.\n\nBản demo dùng API mô phỏng chung · Không gửi emai",
+      "length": 741,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 1125.390625,
+        "top": 35,
+        "right": 1670,
+        "bottom": 1160.390625,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us24",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting Management\nUS24 · Dữ liệu mẫu\n\nTrang chủ / Báo cáo / Tải báo cáo\n\nBáo cáo sử dụng phòng họp\n\nXem số liệu theo kỳ và tải báo cáo phục vụ tổng",
+      "length": 1202,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 210,
+        "y": 104,
+        "width": 1250,
+        "height": 1669.078125,
+        "top": 104,
+        "right": 1460,
+        "bottom": 1773.078125,
+        "left": 210
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us25",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Đặt phòng qua chatbot\nL\nĐặt phòng qua chatbot\n\nĐặt phòng nhanh bằng hội thoại với trợ lý.\n\nBản demo dùng API mô phỏng chung · Không gửi em",
+      "length": 619,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 900,
+        "top": 35,
+        "right": 1670,
+        "bottom": 935,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us26",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\nMeeting / Gợi ý phòng họp\nL\nGợi ý phòng họp\n\nChọn phòng phù hợp với số người và thiết bị cần có.\n\nBản demo dùng API mô phỏng chung · Không gửi email",
+      "length": 1379,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 0,
+        "y": 35,
+        "width": 1670,
+        "height": 1428.59375,
+        "top": 35,
+        "right": 1670,
+        "bottom": 1463.59375,
+        "left": 0
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us27",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\n☰\nNA\nNguyễn Văn A\nNgười tham gia\nUS27 › Điểm danh cuộc họp\n▧\nCheck-in / Check-out bằng QR\n\nQuét mã cuộc họp để xác nhận tham gia và ghi nhận thời gi",
+      "length": 6356,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 85,
+        "y": 101,
+        "width": 1500,
+        "height": 2030.484375,
+        "top": 101,
+        "right": 1585,
+        "bottom": 2131.484375,
+        "left": 85
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    },
+    {
+      "id": "us28",
+      "text": "DỮ LIỆU CỤC BỘ · Tự động lưu · Đăng nhập và kiểm tra quyền trên máy chủ\n☰\nNA\nNguyễn Văn A\nNgười tổ chức\nTrang chủ\n›\nTích hợp hệ thống\n›\nTích hợp HRM/ERP\n↗\nTích hợp HRM/ERP\n\nQuản lý kết nối, đồng bộ dữ liệu người dùng, ph",
+      "length": 2003,
+      "demo": true,
+      "overflow": false,
+      "mainRect": {
+        "x": 10,
+        "y": 93,
+        "width": 1650,
+        "height": 1185.75,
+        "top": 93,
+        "right": 1660,
+        "bottom": 1278.75,
+        "left": 10
+      },
+      "scrollY": 0,
+      "readyState": "complete",
+      "errors": [],
+      "failures": []
+    }
+  ],
+  "viewport": {
+    "width": 1900,
+    "height": 900
+  },
+  "passed": true
+}

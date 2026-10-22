@@ -47,9 +47,9 @@ public class RecurringMeetingService {
         String roomId = request.roomId().trim();
         String organizerId = request.organizerId().trim();
 
-        // 2. Khoa phong trong transaction
+        // 2. Khoa phong trong transaction va kiem tra trang thai phong
         List<?> rooms = entityManager.createNativeQuery(
-                "SELECT room_id FROM room " +
+                "SELECT room_id, status, capacity FROM room " +
                 "WHERE room_id = :roomId FOR UPDATE"
         )
         .setParameter("roomId", roomId)
@@ -59,6 +59,20 @@ public class RecurringMeetingService {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Phong hop khong ton tai");
+        }
+
+        Object[] roomRow = (Object[]) rooms.get(0);
+        String roomStatus = (String) roomRow[1];
+        if (!com.ttcs.meetingmanagement.room.RoomService.isRoomBookable(roomStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Phong dang trong trang thai bao tri hoac khong kha dung de dat lich");
+        }
+        Number roomCapacity = (Number) roomRow[2];
+        if (roomCapacity != null && roomCapacity.intValue() < 1) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Suc chua phong khong du");
         }
 
         // 3. Kiem tra nguoi to chuc
@@ -76,13 +90,7 @@ public class RecurringMeetingService {
         }
 
         // 4. Sinh danh sach lich hop
-        var schedules = calculator.generate(
-                request.startTime(),
-                request.endTime(),
-                request.frequency(),
-                request.interval(),
-                request.occurrences()
-        );
+        var schedules = calculator.generate(request);
 
         // 5. Kiem tra toan bo lich truoc khi luu
         for (int i = 0; i < schedules.size(); i++) {
@@ -99,7 +107,7 @@ public class RecurringMeetingService {
             Number conflicts =
                     (Number) entityManager.createNativeQuery("""
                         SELECT COUNT(*)
-                        FROM meetings
+                        FROM meeting
                         WHERE room_id = :roomId
                           AND status <> 'CANCELLED'
                           AND start_time < :endTime
@@ -132,7 +140,7 @@ public class RecurringMeetingService {
             String meetingId = UUID.randomUUID().toString();
 
             entityManager.createNativeQuery("""
-                INSERT INTO meetings (
+                INSERT INTO meeting (
                     meeting_id,
                     organizer_id,
                     room_id,

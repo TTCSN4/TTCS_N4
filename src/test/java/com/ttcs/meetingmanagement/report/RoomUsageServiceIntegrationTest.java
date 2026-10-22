@@ -10,8 +10,27 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(classes=com.ttcs.meetingmanagement.MeetingmanagementApplication.class)
+@org.springframework.transaction.annotation.Transactional
 class RoomUsageServiceIntegrationTest {
+    @Autowired com.ttcs.meetingmanagement.room.RoomRepository rooms;
+    @Autowired com.ttcs.meetingmanagement.repository.MeetingRepository meetings;
+    @org.junit.jupiter.api.BeforeEach
+    void fixtures() {
+        for (int n=1;n<=3;n++) {
+            var room=new com.ttcs.meetingmanagement.room.Room();
+            room.setRoomId("R00"+n);room.setRoomName("Report room "+n);room.setCapacity(20);room.setStatus("AVAILABLE");rooms.saveAndFlush(room);
+        }
+        for (int n=0;n<5;n++) {
+            var meeting=new com.ttcs.meetingmanagement.model.Meeting();
+            meeting.setMeetingId("REPORT-"+n);meeting.setOrganizerId("REPORT-USER");
+            meeting.setRoomId(n<3?"R001":"R002");meeting.setTitle("Report fixture");
+            var start=java.time.LocalDateTime.of(2026,10,1+n%3,9+n*2,0);
+            meeting.setStartTime(start);meeting.setEndTime(start.plusMinutes(n==3?120:90));
+            meeting.setStatus(n==4?"CANCELLED":"SCHEDULED");meetings.saveAndFlush(meeting);
+        }
+    }
+
 
     @Autowired
     private RoomUsageService service;

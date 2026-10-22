@@ -1,4 +1,3 @@
-
 package com.ttcs.meetingmanagement.room;
 
 import com.ttcs.meetingmanagement.dto.AvailableRoomResponse;
@@ -62,10 +61,10 @@ public class RoomAvailabilityService {
             );
         }
 
-        // 4. Loc phong khong trung lich
+        // 4. Loc phong phai KHA DUNG (AVAILABLE hoac ACTIVE) va khong trung lich
         return rooms.stream()
+                .filter(room -> RoomService.isRoomBookable(room.getStatus()))
                 .filter(room -> {
-
                     long conflicts =
                             meetingRepository.countRoomConflicts(
                                     room.getRoomId(),

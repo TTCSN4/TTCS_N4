@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "mysql2": "^3.24.6"
+  },
+  "name": "ttcs-meeting-web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test tools/tests/*.test.cjs"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}
