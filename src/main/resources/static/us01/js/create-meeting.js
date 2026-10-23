@@ -12,6 +12,7 @@
     participants: new Set(),
     plannedAttendeeCount: null,
     users: [],
+    userDirectory: [],
     participantGroups: [],
     groupsLoading: true,
     groupsSaving: false,
@@ -19,6 +20,7 @@
     equipmentQuantities: new Map(),
     ready: false,
     loading: false,
+    editingLoading: Boolean(editingId),
     stockReady: false,
     stockLoading: false,
     stockKey: "",
@@ -319,7 +321,7 @@
     );
   }
   function syncControls() {
-    const locked = state.busy || state.loading;
+    const locked = state.busy || state.loading || state.editingLoading;
     form.querySelectorAll("input,select,textarea,button").forEach((control) => {
       control.disabled = locked;
     });
@@ -375,22 +377,25 @@
   }
   function renderPeople() {
     $("participantOptions").replaceChildren();
+    $("editingParticipantsHint").hidden = !editingId;
     const organizer = $("organizerId").value.trim();
     for (const id of state.participants) {
       const row = node("div", undefined, "participant-token"),
         remove = node("button", "×");
       remove.type = "button";
-      remove.setAttribute("aria-label", "Bỏ người tham dự " + id);
+      const person = state.userDirectory.find(user => String(user.id) === String(id));
+      const name = person?.fullName || id;
+      remove.setAttribute("aria-label", "Bỏ người tham dự " + name);
       remove.addEventListener("click", () => {
         if (state.busy || state.loading) return;
         state.participants.delete(id);
         renderPeople();
         renderRooms();
       });
-      row.append(
-        node("span", (state.users.find(u=>u.id===id)?.fullName||id) + (id === organizer ? " · Chủ trì" : "")),
-        remove,
-      );
+      const details = node("span", undefined, "participant-token-details");
+      details.append(node("strong", name + (id === organizer ? " · Chủ trì" : "")));
+      details.append(node("small", [person?.email, id].filter(Boolean).join(" · ")));
+      row.append(details, remove);
       $("participantOptions").append(row);
     }
     if (!state.participants.size)
@@ -733,6 +738,24 @@ if(globalThis.TTCSDemo)try{sessionStorage.setItem('meeting.us01.participants.v1'
     }
     return item;
   }
+  function addPendingParticipantSelections() {
+    const groupId = $('participantGroup').value;
+    const personId = $('participantPerson').value;
+    if (!groupId && !personId) return true;
+    const group = state.participantGroups.find(item => item.id === groupId);
+    if (state.groupsLoading || (groupId && !group?.memberIds.length)) {
+      showErrors({ participants: 'Chưa tải được thành viên nhóm đã chọn. Hãy chọn lại nhóm hoặc đợi tải xong.' }, true);
+      return false;
+    }
+    if (group) group.memberIds.forEach(id => state.participants.add(id));
+    if (personId) state.participants.add(personId);
+    $('participantGroup').value = '';
+    $('participantPerson').value = '';
+    previewParticipantGroup();
+    renderPeople();
+    renderRooms();
+    return true;
+  }
   function renderParticipantGroups(){
     const select=$('participantGroup'),selected=select.value;select.replaceChildren(new Option('Chọn nhóm người tham gia',''));
     for(const group of state.participantGroups)select.append(new Option(group.name+' ('+group.memberIds.length+' người)',group.id));
@@ -740,10 +763,10 @@ if(globalThis.TTCSDemo)try{sessionStorage.setItem('meeting.us01.participants.v1'
     const person=$('participantPerson'),old=person.value;person.replaceChildren(new Option('Chọn người tham gia',''));for(const user of state.users)person.append(new Option(user.fullName+' · '+(user.department||user.id),user.id));person.value=old;
     previewParticipantGroup();syncControls();
   }
-  function previewParticipantGroup(){const group=state.participantGroups.find(g=>g.id===$('participantGroup').value);$('participantGroupPreview').textContent=group?(group.memberIds.length?group.memberIds.map(id=>state.users.find(u=>u.id===id)?.fullName||id).join(', '):'Nhóm chưa có thành viên đang hoạt động.'):'Chọn nhóm để xem thành viên. Mời cả nhóm sẽ thêm từng người vào lịch, không thêm trùng.';}
-  async function loadParticipantGroups(){state.groupsLoading=true;syncControls();try{const [groups,users]=await Promise.all([request('/api/participant-groups'),request('/api/users')]);state.participantGroups=validateList(groups.data,'nhóm người tham gia');state.users=validateList(users.data,'người dùng').filter(u=>u.status==='ACTIVE');$('participantGroupStatus').textContent='Có thể mời theo phòng ban hoặc lưu nhóm riêng cho sự kiện.';renderParticipantGroups();renderPeople();}catch(error){$('participantGroupStatus').textContent='Chưa tải được nhóm: '+error.message;}finally{state.groupsLoading=false;syncControls();}}
+  function previewParticipantGroup(){const group=state.participantGroups.find(g=>g.id===$('participantGroup').value);$('participantGroupPreview').textContent=group?(group.memberIds.length?group.memberIds.map(id=>state.users.find(u=>u.id===id)?.fullName||id).join(', '):'Nhóm chưa có thành viên đang hoạt động.'):'Chọn nhóm để xem thành viên. Nhóm đang chọn sẽ được thêm khi lưu lịch; có thể nhấn Mời cả nhóm để thêm trước.';}
+  async function loadParticipantGroups(){state.groupsLoading=true;syncControls();try{const [groups,users]=await Promise.all([request('/api/participant-groups'),request('/api/users')]);state.participantGroups=validateList(groups.data,'nhóm người tham gia');state.userDirectory=validateList(users.data,'người dùng');state.users=state.userDirectory.filter(u=>u.status==='ACTIVE');$('participantGroupStatus').textContent='Có thể mời theo phòng ban hoặc lưu nhóm riêng cho sự kiện.';renderParticipantGroups();renderPeople();}catch(error){$('participantGroupStatus').textContent='Chưa tải được nhóm: '+error.message;}finally{state.groupsLoading=false;syncControls();}}
   $('participantGroup').addEventListener('change',previewParticipantGroup);
-  $('inviteParticipantGroup').addEventListener('click',()=>{if(state.busy||state.loading||state.groupsLoading)return;const group=state.participantGroups.find(g=>g.id===$('participantGroup').value);if(!group?.memberIds.length){$('participantGroupStatus').textContent='Chọn nhóm có thành viên đang hoạt động.';return;}const before=attendeeIds().length;group.memberIds.forEach(id=>state.participants.add(id));$('participantsError').textContent='';renderPeople();renderRooms();$('participantGroupStatus').textContent='Đã thêm '+(attendeeIds().length-before)+' người từ '+group.name+'. Người đã có trong lịch không bị thêm trùng. Có thể bỏ riêng từng người bên dưới.';});
+  $('inviteParticipantGroup').addEventListener('click',()=>{if(state.busy||state.loading||state.groupsLoading)return;const group=state.participantGroups.find(g=>g.id===$('participantGroup').value);if(!group?.memberIds.length){$('participantGroupStatus').textContent='Chọn nhóm có thành viên đang hoạt động.';return;}const before=attendeeIds().length;group.memberIds.forEach(id=>state.participants.add(id));$('participantsError').textContent='';renderPeople();renderRooms();$('participantGroupStatus').textContent='Đã thêm '+(attendeeIds().length-before)+' người từ '+group.name+'. Người đã có trong lịch không bị thêm trùng. Có thể bỏ riêng từng người bên trên.';$('participantGroup').value='';previewParticipantGroup();});
   $('inviteParticipantPerson').addEventListener('click',()=>{const id=$('participantPerson').value;if(!id||state.busy||state.loading)return;state.participants.add(id);renderPeople();renderRooms();$('participantPerson').value='';$('participantsError').textContent='';});
   $('saveParticipantGroup').addEventListener('click',async()=>{if(state.groupsSaving||state.groupsLoading||state.busy||state.loading)return;const name=$('participantGroupName').value.trim(),memberIds=[...state.participants].filter(id=>state.users.some(u=>u.id===id));if(!name||!memberIds.length){$('participantGroupStatus').textContent='Nhập tên nhóm và thêm ít nhất một người vào danh sách trước khi lưu nhóm.';return;}state.groupsSaving=true;syncControls();try{const {data:group}=await request('/api/participant-groups',{method:'POST',body:{name,memberIds}});state.participantGroups.push(group);renderParticipantGroups();$('participantGroup').value=group.id;previewParticipantGroup();$('participantGroupName').value='';$('participantGroupStatus').textContent='Đã lưu nhóm '+group.name+'. Có thể mời lại nhóm này khi tạo hoặc chỉnh sửa các lịch khác.';}catch(error){$('participantGroupStatus').textContent=error.message;}finally{state.groupsSaving=false;syncControls();}});
   function addParticipants() {
@@ -850,7 +873,8 @@ if(globalThis.TTCSDemo)try{sessionStorage.setItem('meeting.us01.participants.v1'
   });
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (state.busy || state.loading || !state.ready || state.uncertain) return;
+    if (state.busy || state.loading || state.editingLoading || !state.ready || state.uncertain) return;
+    if (!addPendingParticipantSelections()) return;
     let errors = validate();
     showErrors(errors, true);
     if (Object.keys(errors).length) {
@@ -953,7 +977,48 @@ if(globalThis.TTCSDemo)try{sessionStorage.setItem('meeting.us01.participants.v1'
       const actual=attendeeIds().length;status('Đã điền '+room.name+', ngày '+draft.date+', '+draft.startTime+'–'+draft.endTime+'. '+(actual<draft.participantCount?'Bạn tìm phòng cho '+draft.participantCount+' người; danh sách hiện có '+actual+' người. Hãy thêm thành viên hoặc mời nhóm. ':'Đã giữ danh sách người tham gia. ')+'Nhập tên cuộc họp, chọn thiết bị nếu cần và nhấn Tạo lịch để xác nhận.');
     }catch(error){status(error.message,true);}
   }
-  async function loadEditing(){try{const {data:m}=await request('/api/meetings/'+encodeURIComponent(editingId));if(m.status!=='SCHEDULED')throw Error('Chỉ sửa được cuộc họp chưa bắt đầu và chưa hủy.');applyMeeting(m);document.querySelector('h1').textContent='Chỉnh sửa lịch họp';$('submitBtn').textContent='Lưu thay đổi';$('resetBtn').textContent='Khôi phục dữ liệu đã lưu';await refreshEquipment();status('Đã tải đầy đủ thông tin. Có thể sửa phòng, thời gian, người tham dự, thiết bị và số lượng; bỏ chọn để trả thiết bị.');}catch(e){state.ready=false;syncControls();status(e.message,true);}}
+  async function loadEditing() {
+    state.editingLoading = true;
+    syncControls();
+    try {
+      const path = '/api/meetings/' + encodeURIComponent(editingId);
+      const [meetingResult, peopleResult] = await Promise.allSettled([
+        request(path), request(path + '/participants')
+      ]);
+      if (meetingResult.status === 'rejected') throw meetingResult.reason;
+      const meeting = meetingResult.value.data;
+      if (meeting.status !== 'SCHEDULED') throw Error('Chỉ sửa được cuộc họp chưa bắt đầu và chưa hủy.');
+      let participants;
+      if (peopleResult.status === 'fulfilled') {
+        const savedPeople = validateList(peopleResult.value.data, 'người tham gia đã lưu');
+        participants = savedPeople.map(person => typeof person === 'string' ? person : person.userId || person.id);
+        if (participants.some(id => !idValue(id))) throw Error('Danh sách người tham gia đã lưu không hợp lệ.');
+        for (const person of savedPeople) {
+          if (typeof person === 'object' && person.fullName) {
+            const id = person.userId || person.id;
+            const index = state.userDirectory.findIndex(user => user.id === id);
+            if (index < 0) state.userDirectory.push({ ...person, id });
+          }
+        }
+      } else if (Array.isArray(meeting.participants)) {
+        participants = meeting.participants;
+      } else {
+        throw Error('Chưa tải được danh sách người tham gia đã lưu. Vui lòng tải lại trước khi sửa lịch.');
+      }
+      applyMeeting({ ...meeting, participants: [...new Set([meeting.organizerId, ...participants])] });
+      document.querySelector('h1').textContent = 'Chỉnh sửa lịch họp';
+      $('submitBtn').textContent = 'Lưu thay đổi';
+      $('resetBtn').textContent = 'Khôi phục dữ liệu đã lưu';
+      await refreshEquipment();
+      status('Đã tải thông tin và đầy đủ người tham gia đã lưu. Có thể thêm hoặc bỏ từng thành viên trước khi lưu thay đổi.');
+    } catch (error) {
+      state.ready = false;
+      status(error.message, true);
+    } finally {
+      state.editingLoading = false;
+      syncControls();
+    }
+  }
   window.US01 = {
     reload: async () => {
       if (!state.busy) {

@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-module.exports = function createFileStore(api) {
+module.exports = async function createFileStore(api) {
   const file = path.resolve(process.env.DATA_FILE || path.join(__dirname, '../../data', 'web-state.json'));
   const lock = file + '.lock';
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -16,13 +16,20 @@ module.exports = function createFileStore(api) {
   fs.writeFileSync(lock, String(process.pid), { flag: 'wx', mode: 0o600 });
   let closed = false;
   function close() { if (!closed) { closed = true; fs.unlinkSync(lock); } }
-  function save(state) {
+  async function save(state) {
     const temp = file + '.' + process.pid + '.tmp';
     try {
       const descriptor = fs.openSync(temp, 'w', 0o600);
       try { fs.writeFileSync(descriptor, JSON.stringify(state)); fs.fsyncSync(descriptor); }
       finally { fs.closeSync(descriptor); }
-      fs.renameSync(temp, file);
+      // Windows/OneDrive may briefly hold the destination open. Retry only transient locks.
+      for (let attempt = 0; ; attempt++) {
+        try { await fs.promises.rename(temp, file); break; }
+        catch (error) {
+          if (!['EPERM', 'EBUSY', 'EACCES'].includes(error.code) || attempt >= 4) throw error;
+          await new Promise(resolve => setTimeout(resolve, 20 * 2 ** attempt));
+        }
+      }
     } finally { if (fs.existsSync(temp)) fs.unlinkSync(temp); }
   }
   try {
@@ -32,7 +39,7 @@ module.exports = function createFileStore(api) {
       api.restore(saved);
     }
     api.auth.initialize(api);
-    save(api.exportState());
+    await save(api.exportState());
   } catch (error) { close(); throw error; }
   process.once('exit', close);
   let tail = Promise.resolve();
@@ -48,7 +55,7 @@ module.exports = function createFileStore(api) {
       await api(req, capture, url);
       if (status >= 200 && status < 300) {
         const after = api.exportState();
-        if (after.revision !== before.revision) save(after);
+        if (after.revision !== before.revision) await save(after);
         if (url.pathname === '/__portal/health' || url.pathname === '/api/demo/state') {
           const data = JSON.parse(result); data.storage = 'file'; result = JSON.stringify(data);
         }

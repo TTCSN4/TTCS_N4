@@ -2423,6 +2423,9 @@ em {
   cursor: pointer;
   font: inherit;
 }
+.selected-participants-title { margin: 0 0 8px; font-weight: 600; }
+.participant-token-details { display: grid; gap: 4px; min-width: 0; }
+.participant-token-details small { color: #536780; font-size: 12px; }
 .equipment-choice {
   display: flex;
   align-items: center;

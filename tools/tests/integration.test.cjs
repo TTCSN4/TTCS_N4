@@ -38,7 +38,7 @@ test('standalone startup, 27 modules, shared data, permissions and restart persi
   async function request(url, cookie, method = 'GET', body, expected = 200) {
     const response = await fetch(base + url, { method, headers: { ...(cookie ? { cookie } : {}), ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
     const data = await response.json();
-    assert.equal(response.status, expected, method + ' ' + url + ': ' + JSON.stringify(data));
+    assert.equal(response.status, expected, method + ' ' + url + ': ' + JSON.stringify(data) + (response.status === expected ? '' : '\nServer: ' + output.slice(-1500)));
     return data;
   }
   async function login(role) {

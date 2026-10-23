@@ -1,0 +1,195 @@
+{
+  "startedAt": "2026-10-23T08:59:34.349Z",
+  "scope": "Node web runtime with a real MySQL database",
+  "cases": [
+    {
+      "name": "fresh schema creates six InnoDB tables, JSON fields and lookup indexes",
+      "passed": true,
+      "durationMs": 528
+    },
+    {
+      "name": "MySQL startup initializes one snapshot and all five matching projections",
+      "passed": true,
+      "durationMs": 2360
+    },
+    {
+      "name": "Admin, PM, Member login and anonymous access behave through the MySQL runtime",
+      "passed": true,
+      "durationMs": 976
+    },
+    {
+      "name": "all 27 available module entries are served with the shared API bridge",
+      "passed": true,
+      "durationMs": 1398
+    },
+    {
+      "name": "Vietnamese, emoji, groups, guests and UTC offsets persist correctly in JSON and SQL",
+      "passed": true,
+      "durationMs": 285
+    },
+    {
+      "name": "editing an unrelated field preserves participants, guest count and equipment quantities",
+      "passed": true,
+      "durationMs": 131
+    },
+    {
+      "name": "room conflicts, invalid dates, capacity and failed participant batches leave SQL unchanged",
+      "passed": true,
+      "durationMs": 377
+    },
+    {
+      "name": "maintenance, equipment booking limits and restoration update actual MySQL records",
+      "passed": true,
+      "durationMs": 531
+    },
+    {
+      "name": "Member visibility, own RSVP and PM ownership are enforced with persisted state",
+      "passed": true,
+      "durationMs": 620
+    },
+    {
+      "name": "room grants and role matrix persist and reject unauthorized PM writes",
+      "passed": true,
+      "durationMs": 548
+    },
+    {
+      "name": "room, equipment and user CRUD sync projections and preserve soft-deleted rows",
+      "passed": true,
+      "durationMs": 1054
+    },
+    {
+      "name": "recurring conflicts roll back the whole series and valid series persist all occurrences",
+      "passed": true,
+      "durationMs": 390
+    },
+    {
+      "name": "a real SQL trigger failure rolls back an earlier meeting INSERT and the snapshot",
+      "passed": true,
+      "durationMs": 293
+    },
+    {
+      "name": "restart retains credentials, Unicode, groups, guests and equipment; old sessions expire",
+      "passed": true,
+      "durationMs": 1045
+    },
+    {
+      "name": "two web processes serialize concurrent account writes without losing records",
+      "passed": true,
+      "durationMs": 1475
+    },
+    {
+      "name": "SELECT FOR UPDATE blocks two processes; only one overlapping booking commits",
+      "passed": true,
+      "durationMs": 914
+    },
+    {
+      "name": "read-only requests and suggestions do not rewrite the snapshot revision",
+      "passed": true,
+      "durationMs": 356
+    },
+    {
+      "name": "killing an application connection during a real lock wait returns 503 and reconnects",
+      "passed": true,
+      "durationMs": 339
+    },
+    {
+      "name": "cancellation retains history and releases all device bookings and reminders in SQL",
+      "passed": true,
+      "durationMs": 447
+    },
+    {
+      "name": "old schemas fail without partial writes; migration is repeatable and preserves data",
+      "passed": true,
+      "durationMs": 2247
+    },
+    {
+      "name": "missing schema fails closed; a restored snapshot rebuilds matching projections",
+      "passed": true,
+      "durationMs": 4631
+    }
+  ],
+  "cleanup": [
+    {
+      "database": "ttcs_qa_1792745974349_0a1e7130",
+      "removed": true
+    },
+    {
+      "database": "ttcs_qa_1792745974349_0a1e7130_legacy",
+      "removed": true
+    },
+    {
+      "database": "ttcs_qa_1792745974349_0a1e7130_recovery",
+      "removed": true
+    },
+    {
+      "database": "ttcs_qa_1792745974349_0a1e7130_snapshot",
+      "removed": true
+    }
+  ],
+  "passed": true,
+  "server": {
+    "version": "8.0.46",
+    "distribution": "MySQL Community Server - GPL",
+    "charset": "utf8mb4",
+    "isolationLevel": "REPEATABLE-READ"
+  },
+  "currentSnapshot": {
+    "passed": true,
+    "collections": {
+      "rooms": 12,
+      "users": 30,
+      "equipment": 72,
+      "meetings": 169,
+      "equipmentBookings": 156
+    },
+    "sourceFileUnchanged": true,
+    "credentialsUnchanged": true,
+    "canonicalSnapshotUnchanged": true
+  },
+  "finishedAt": "2026-10-23T08:59:56.005Z",
+  "passedCases": 21,
+  "failedCases": 0,
+  "limitations": [
+    "Node web store only; Java uses a separate schema and authentication contract",
+    "No production load, full penetration test, external integrations or real-device acceptance"
+  ],
+  "safety": {
+    "createdSchemasRemoved": true,
+    "liveFileStateUnchanged": true,
+    "liveRuntimeHealth": {
+      "reachable": true,
+      "mode": "demo",
+      "revision": 15,
+      "storage": "file"
+    },
+    "existingSchemasUsedForWrites": false,
+    "dbPasswordInNewSource": false
+  },
+  "nodeRegression": {
+    "tests": 38,
+    "passed": 38,
+    "failed": 0,
+    "javaRerun": false
+  },
+  "nodeTestRunner": {
+    "tests": 22,
+    "passed": 22,
+    "failed": 0,
+    "note": "21 scenario subtests plus one parent test"
+  },
+  "source": {
+    "baseCommit": "35f7c233fc6354e7cea3f50d013553d479b6d05f",
+    "uncommittedWorkingTree": true,
+    "sha256": {
+      "tools/tests/mysql-live.cjs": "0f83e9cace493808c7983452fde225dc82e759637b195ce1cc6aac9ce7d90d11",
+      "tools/web/mysql-store.cjs": "d1ca4c0c0ba155d4ba34238b58853aadd65dcfa8c8c0933d42668225eb59c70d",
+      "tools/web/demo-api.cjs": "ead0c93290f87d63348ad31bd16ea62c76c4b20114d42fa1f0e29c6cad664466",
+      "tools/web/auth.cjs": "3a4b57749366a90e077263714519330b0a5fe64648e30dac2fbaae35132ee8a0",
+      "tools/web/server.cjs": "efd33c20605884c25dbed02bad51af8787f150cf06a27d998ddfa82269a233ad",
+      "tools/web/access-policy.cjs": "7f6d7805e257e793194b7b380eda7e9bb9ec6395894f67206b3f3763ee5549de",
+      "database/web-schema.sql": "afd8cb6e494d70232bd6652f552d761efe98baefaa94f04ffa5b139e24e4c182",
+      "database/migrations/20261023_web_participant_groups.sql": "96b96a3d214e4631c42c9bf1019183b9d22d321253d0608981f5b98c44818381",
+      "package.json": "d297caa6038d387513c26910612712219f5c9812ae62a41c6e98fda273503c11"
+    }
+  }
+}
