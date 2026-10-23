@@ -109,7 +109,8 @@ public class MeetingParticipantService {
         }
 
         // Kiem tra suc chua phong neu cuoc hop da duoc gan phong
-        try {
+        // Let database/locking failures roll back instead of bypassing capacity checks.
+        {
             var meetingRows = jdbcTemplate.queryForList(
                     "SELECT room_id, organizer_id FROM meeting WHERE meeting_id = ?",
                     meetingId
@@ -157,9 +158,6 @@ public class MeetingParticipantService {
                     }
                 }
             }
-        } catch (ResponseStatusException ex) {
-            throw ex;
-        } catch (Exception ignored) {
         }
 
         MeetingParticipant participant =

@@ -36,6 +36,7 @@
     </section>
 
     <section class="toolbar" aria-label="Tìm và lọc cuộc họp">
+        <p class="toolbar-hint">Tìm theo tên, mã cuộc họp, phòng hoặc người tham dự để sửa/hủy nhanh.</p>
         <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Tìm cuộc họp..." aria-label="Tìm cuộc họp"></label>
         <select id="status-filter" aria-label="Lọc theo trạng thái">
             <option value="ALL">Tất cả trạng thái</option>
@@ -127,7 +128,8 @@
             <label class="field">Bắt đầu <span class="required">*</span><input id="start-time" type="datetime-local" required></label>
             <label class="field">Kết thúc <span class="required">*</span><input id="end-time" type="datetime-local" required></label>
         </div>
-        <label class="field">Người tham dự <span class="field-hint">Phân cách bằng dấu phẩy</span><input id="participants" placeholder="ten@congty.vn, ..."></label>
+        <label class="field">Người tham dự <span class="field-hint">Phân cách bằng dấu phẩy; khi sửa sẽ hiển thị danh sách đã chọn bên dưới</span><input id="participants" placeholder="ten@congty.vn, ..."></label>
+        <div id="participant-preview" class="participant-preview" aria-live="polite" hidden></div>
         <div class="field-row recurrence-row">
             <label class="field">Lặp lại<select id="recurrence"><option value="NONE">Không lặp</option><option value="WEEKLY">Hàng tuần</option><option value="MONTHLY">Hàng tháng</option></select></label>
             <label class="field" id="repeat-count-wrap" hidden>Số lần lặp thêm<input id="repeat-count" type="number" min="1" max="12" value="3"></label>

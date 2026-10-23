@@ -7,7 +7,8 @@
   "private": true,
   "scripts": {
     "start": "node server.cjs",
-    "test": "node --test tools/tests/*.test.cjs"
+    "test": "node --test tools/tests/*.test.cjs",
+    "test:mysql": "node --test tools/tests/mysql-live.cjs"
   },
   "engines": {
     "node": ">=18.17"

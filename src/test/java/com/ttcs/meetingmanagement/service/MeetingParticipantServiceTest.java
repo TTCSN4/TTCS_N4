@@ -25,6 +25,18 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class MeetingParticipantServiceTest {
 
+    @Test
+    void capacityQueryFailureMustNotSaveParticipant() {
+        mockMeetingExists();
+        mockUserExists();
+        when(jdbcTemplate.queryForList(contains("SELECT room_id, organizer_id"), eq("meeting-1")))
+                .thenThrow(new org.springframework.dao.DataAccessResourceFailureException("Database unavailable"));
+
+        assertThrows(org.springframework.dao.DataAccessException.class,
+                () -> service.addParticipant("meeting-1", new AddMeetingParticipantRequest("user-1")));
+        verify(repository, never()).save(any());
+    }
+
     @Mock
     private MeetingParticipantRepository repository;
 

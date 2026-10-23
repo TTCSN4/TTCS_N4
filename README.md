@@ -14,6 +14,17 @@ Repository: [TTCSN4/TTCS_N4](https://github.com/TTCSN4/TTCS_N4).
 
 **Gợi ý đọc:** khách hàng có thể bắt đầu với mục 1–5, 16 và 19; Mentor/đội kỹ thuật đọc thêm mục 6–15, 17–18 và 20–24. Để chạy ngay, tới [mục 9](#quickstart). Các sơ đồ dùng Mermaid, có thể xem trực tiếp trên GitHub hoặc trình đọc Markdown hỗ trợ Mermaid.
 
+| Thông tin nhanh | Nội dung |
+| --- | --- |
+| Lĩnh vực | Quản lý lịch họp, phòng họp, người tham dự và thiết bị trong doanh nghiệp |
+| Đối tượng | Admin, người tổ chức/PM, người tham dự/Member |
+| Phạm vi giao diện | 28 User Story trong backlog; 27 mục khả dụng, US15 chưa được triển khai trong portal |
+| Chạy bản web hiện tại | `npm ci` → `node server.cjs` → `http://127.0.0.1:8090` |
+| Nền tảng giao diện | HTML/CSS/JavaScript thuần; portal mở các module dùng chung API |
+| Backend và lưu trữ | Node.js cho bản web local; Java 21/Spring Boot trong cùng repository; file JSON, MySQL hoặc H2 theo từng backend |
+| Tài liệu trực quan | 6 sơ đồ: nghiệp vụ, kiến trúc, dữ liệu, trạng thái, xử lý yêu cầu và quy trình Git |
+| Bằng chứng gần nhất | BE/QA và MySQL thật ngày 23/10/2026; 21/21 tình huống MySQL đạt, chi tiết tại [mục 20](#testing) |
+
 ## Mục lục
 
 1. [Dành cho khách hàng: dự án giải quyết vấn đề gì?](#business)
@@ -60,7 +71,7 @@ Repository: [TTCSN4/TTCS_N4](https://github.com/TTCSN4/TTCS_N4).
 ### 1.2. Người sử dụng và kết quả nhận được
 
 - **Người tổ chức/PM:** chuẩn bị và điều chỉnh cuộc họp, tìm phòng và thiết bị, theo dõi người tham dự.
-- **Người tham dự/Member:** xem lịch và chi tiết cuộc họp qua các màn hình được cấp quyền.
+- **Người tham dự/Member:** xem lịch có mình tham gia, theo dõi chi tiết và điểm danh trong phạm vi được cấp quyền.
 - **Quản trị viên/Admin:** quản lý danh mục phòng, thiết bị, tài khoản và các cấu hình nghiệp vụ.
 - **Mentor/đội kỹ thuật:** có mã nguồn giao diện và backend, cấu trúc Maven, hướng dẫn chạy lại và bộ kiểm thử để đối chiếu hành vi.
 
@@ -100,20 +111,24 @@ Kết quả bàn giao là một repository có thể clone và chạy bản web 
 
 | Nhóm thao tác | Admin | PM | Member |
 | --- | :---: | :---: | :---: |
-| Xem các màn hình lịch được cấp quyền | Có | Có | Có, chủ yếu US17 và US06 |
-| Tạo, chỉnh sửa, hủy lịch và đặt thiết bị | Có | Có | Không |
+| Xem các màn hình lịch được cấp quyền | Có | Có | Có, US17/US06 và QR mô phỏng theo quyền xem |
+| Tạo, chỉnh sửa, hủy lịch và đặt thiết bị | Có | Theo US20; chỉ sửa lịch do mình chủ trì | Không |
 | Thêm/sửa/xóa danh mục phòng và thiết bị | Có | Không | Không |
 | Cập nhật bảo trì phòng/thiết bị | Có | Không | Không |
-| Tạo/quản lý tài khoản không phải Admin | Có | Có, theo kiểm tra API | Không |
+| Tạo/quản lý tài khoản không phải Admin | Có | Khi được Admin cấp quyền qua US20 | Không |
 | Cấp quyền Admin hoặc thay đổi tài khoản Admin | Có | Không | Không |
-| Mở báo cáo và các màn hình tích hợp của portal | Có | Có | Không |
+| Xem báo cáo | Có | Khi được Admin cấp quyền qua US20 | Không |
+| Phản hồi lời mời / điểm danh mô phỏng của mình | Có | Có | Có, với lịch được mời |
 
-Nguồn thực thi: [auth.cjs](tools/web/auth.cjs). Việc ẩn menu chỉ là phần giao diện; API tiếp tục kiểm tra tài khoản, vai trò và một số điều kiện của dữ liệu gửi lên.
+Nguồn thực thi: [auth.cjs](tools/web/auth.cjs) và [access-policy.cjs](tools/web/access-policy.cjs). Việc ẩn menu chỉ là phần giao diện; API tiếp tục kiểm tra tài khoản, vai trò và một số điều kiện của dữ liệu gửi lên.
 
-### 3.2. Hai điểm cần hiểu khi nghiệm thu
+### 3.2. Cách thực thi quyền sau đợt rà soát
 
-1. **Ma trận quyền tùy chỉnh và quyền đặt từng phòng:** US20/US21 có màn hình cấu hình và lưu dữ liệu. Tuy nhiên, bộ chạy Node vẫn quyết định nhiều quyền bằng quy tắc cố định trong `auth.cjs`; hàm tạo lịch Node chưa dùng `roomGrants` như một chính sách truy cập đầy đủ. Java có `RoomBookingPermissionService` và mô hình restriction riêng. Cần nghiệm thu riêng nếu khách hàng yêu cầu giới hạn phòng theo vai trò/phòng ban.
-2. **Phạm vi xem lịch của Member:** các API danh sách lịch Node hiện không áp dụng đầy đủ chính sách chỉ xem cuộc họp của cá nhân/phòng ban. Không xem việc có tên màn hình “Lịch của tôi” là bằng chứng đã có phân lập dữ liệu ở mức doanh nghiệp.
+1. **US20:** ma trận được dùng ở máy chủ và menu; PM nhận quyền tạo lịch, đặt tài nguyên, quản lý tài khoản và báo cáo theo cấu hình. Admin giữ quyền quản trị phòng/thiết bị/cấu hình; Member chỉ có quyền xem, phản hồi lời mời và điểm danh của mình. Các quyền cố định này không thể vượt qua bằng cách sửa ma trận hoặc gọi API trực tiếp.
+2. **US21:** tạo lịch kiểm tra quyền phòng của chủ trì, kể cả khi đặt qua chatbot hoặc adapter cũ. Vai trò PM tương ứng USER và Member tương ứng GUEST của giao diện quyền phòng. Node hiện áp dụng theo vai trò; chính sách riêng theo người/phòng ban thuộc phần cần mở rộng. Java có mô hình restriction riêng.
+3. **Quyền trên từng lịch:** PM chỉ thay đổi lịch do mình chủ trì; Member chỉ nhận dữ liệu lịch có mình tham gia, chỉ phản hồi lời mời và điểm danh cho chính mình. Lịch cá nhân được lọc theo tài khoản. Đây chưa phải mô hình phân tách dữ liệu nhiều tổ chức.
+
+Nguồn chính sách chung: [access-policy.cjs](tools/web/access-policy.cjs). Chi tiết ca kiểm tra và giới hạn còn lại: [báo cáo BE/QA](docs/qa/2026-10-23-audit.md).
 
 <a id="features"></a>
 ## 4. Danh mục 28 User Story
@@ -141,8 +156,8 @@ Mã **US** là mã yêu cầu nghiệp vụ. Trong portal, đường dẫn `/#us
 | US17 | Lịch họp trên di động | Màn hình lịch thích ứng, chi tiết và tài nguyên PWA |
 | US18 | Tạo tài khoản | Tạo người dùng, chọn vai trò và phòng ban |
 | US19 | Danh sách tài khoản | Tra cứu, chỉnh sửa và quản lý trạng thái tài khoản |
-| US20 | Quản lý vai trò | Ma trận/cấu hình quyền; có giới hạn thực thi nêu ở mục 3 |
-| US21 | Quyền đặt phòng | Cấu hình/xem trước quyền phòng; phân biệt Node và Java |
+| US20 | Quản lý vai trò | Ma trận quyền được thực thi tại API và menu; có giới hạn vai trò nêu ở mục 3 |
+| US21 | Quyền đặt phòng | Cấu hình và kiểm tra quyền phòng theo vai trò khi ghi lịch; phân biệt Node và Java |
 | US22 | Báo cáo sử dụng phòng | Tổng hợp số lượt đặt, thời lượng và tỷ lệ sử dụng |
 | US23 | Thống kê lịch đã hủy | Số lượng, xu hướng và nguyên nhân hủy từ dữ liệu có sẵn |
 | US24 | Xuất báo cáo | Tạo và tải tệp Excel/PDF trong trình duyệt |
@@ -191,6 +206,26 @@ flowchart TD
 | 10 | Khởi động lại máy chủ file rồi đăng nhập lại | Lịch và tài khoản vẫn còn, phiên đăng nhập cũ hết hiệu lực |
 
 Dùng dữ liệu thử hoặc bản sao dữ liệu cho buổi nghiệm thu. Các thao tác mô phỏng HRM/AI/QR nên được trình bày đúng phạm vi, không dùng như bằng chứng đã kết nối dịch vụ ngoài.
+
+### 5.3. Tiêu chí nghiệm thu nghiệp vụ đề xuất
+
+Bảng này giúp Mentor và khách hàng cùng kiểm tra kết quả trên bản phát hành bàn giao. Đây là danh sách cần chạy khi nghiệm thu, không phải tuyên bố mọi tình huống đã được kiểm thử trực tiếp trên trình duyệt.
+
+| Tình huống | Kết quả cần nhận được |
+| --- | --- |
+| Tạo lịch với dữ liệu hợp lệ và tài nguyên còn đủ | Có một lịch mới, đúng chủ trì, số người và số lượng thiết bị; tải lại vẫn giữ thông tin |
+| Đặt hai lịch cùng phòng 09:00–10:00 và 09:30–10:30 | Lịch thứ hai bị từ chối; lịch đã tồn tại giữ nguyên |
+| Đặt hai lịch tiếp giáp 09:00–10:00 và 10:00–11:00 | Không bị coi là trùng phòng; vẫn phải đáp ứng các điều kiện khác |
+| Một người được mời vào hai cuộc họp trùng giờ ở hai phòng khác nhau | Phát hiện xung đột người tham dự; không chỉ kiểm tra phòng |
+| Số người vượt sức chứa hoặc thiết bị vượt mức khả dụng sau bảo trì | Không ghi lịch/lượt đặt không hợp lệ |
+| Sửa riêng tên một lịch đang có nhóm người và nhiều thiết bị | Giữ danh sách người tham dự, số khách và số lượng thiết bị khi các trường đó không bị thay đổi |
+| Tạo chuỗi định kỳ có một lần xung đột | Không để lại chuỗi được ghi dở |
+| Hủy một lịch còn được phép hủy | Giữ lịch sử hủy và giải phóng lượt đặt thiết bị/nhắc lịch tương ứng |
+| PM sửa lịch của người khác hoặc Member gửi yêu cầu ghi lịch | API từ chối, kể cả khi bỏ qua giao diện |
+| Lưu thất bại hoặc dữ liệu trên máy chủ đã thay đổi | Không thông báo thành công giả; xử lý lỗi/xung đột trước khi người dùng thao tác tiếp |
+| Dừng và mở lại máy chủ dùng file/MySQL | Dữ liệu đã lưu còn tồn tại; người dùng đăng nhập lại |
+
+Khi ghi biên bản, lưu mã phiên bản Git, chế độ lưu dữ liệu, tài khoản/vai trò thử, bước thao tác, kết quả mong đợi và kết quả thực tế. Các tiêu chí email, HRM, AI, QR an toàn và Google/Outlook cần phạm vi nghiệm thu riêng ở [mục 19](#integrations).
 
 <a id="architecture"></a>
 ## 6. Kiến trúc tổng thể
@@ -277,10 +312,12 @@ TTCS_N4-WEB-20261020/
 ├── .mvn/wrapper/                     # Maven Wrapper
 ├── database/
 │   ├── web-schema.sql                # Schema web_* cho bộ chạy Node + MySQL
-│   └── backend/                      # SQL mở rộng cho backend Java
+│   ├── backend/                      # SQL mở rộng cho backend Java
+│   └── migrations/                   # Nâng cấp schema Node đang có
 ├── docs/
 │   ├── backend/                      # Tài liệu kỹ thuật theo US
-│   └── consolidation/                # Bằng chứng và lịch sử hợp nhất
+│   ├── consolidation/                # Bằng chứng và lịch sử hợp nhất
+│   └── qa/                           # Báo cáo, kết quả và ảnh rà soát BE/QA
 ├── src/
 │   ├── main/
 │   │   ├── java/com/ttcs/meetingmanagement/
@@ -301,12 +338,21 @@ TTCS_N4-WEB-20261020/
 │   ├── web/
 │   │   ├── server.cjs                # HTTP, phục vụ static, local/proxy
 │   │   ├── runtime-config.cjs        # Đọc cấu hình Node
-│   │   ├── auth.cjs                  # Tài khoản, phiên, quyền
+│   │   ├── auth.cjs                  # Tài khoản, phiên, quyền trên tài nguyên
+│   │   ├── access-policy.cjs         # Ma trận quyền và quyền phòng dùng chung
+│   │   ├── domain-rules.cjs          # Kiểm tra ngày giờ/khoảng thời gian
 │   │   ├── demo-api.cjs              # API nghiệp vụ bản web
 │   │   ├── demo-seed.cjs             # Dữ liệu mẫu ban đầu
 │   │   ├── file-store.cjs            # Lưu file, hàng đợi, rollback
 │   │   └── mysql-store.cjs           # Giao dịch MySQL và projection web_*
-│   └── tests/integration.test.cjs
+│   └── tests/
+│       ├── integration.test.cjs      # HTTP, module, đăng nhập và dữ liệu
+│       ├── business-rules.test.cjs   # Nghiệp vụ, quyền và hoàn tác
+│       ├── meeting-participants.test.cjs
+│       ├── file-store.test.cjs       # Lưu file, khóa và lỗi ghi
+│       ├── mysql-store.test.cjs      # Giao dịch và lỗi pool giả lập
+│       ├── report-periods.test.cjs   # Kỳ báo cáo, bao gồm giao năm
+│       └── mysql-live.cjs            # Kiểm thử MySQL thật, chạy riêng test:mysql
 ├── server.cjs                        # Điểm vào: node server.cjs
 ├── site.config.json                  # Cấu hình web mặc định
 ├── start-mysql.ps1                   # Chạy Node với MySQL trên Windows
@@ -319,6 +365,19 @@ TTCS_N4-WEB-20261020/
 ```
 
 Các thư mục `data/`, `node_modules/`, `target/` có thể xuất hiện sau khi chạy/cài đặt/build nhưng được Git bỏ qua. Không cần đưa chúng lên GitHub. Giao diện đang chạy nằm trong `src/main/resources/static`; không cần một bản `public` ở ngoài `src`.
+
+### Bản đồ đọc source theo câu hỏi
+
+| Muốn hiểu hoặc thay đổi | Bắt đầu từ |
+| --- | --- |
+| Một mục menu mở tệp nào? | [modules.json](src/main/resources/static/portal/modules.json), rồi tới thư mục `static/usXX` tương ứng |
+| Vì sao trang cũ vẫn lấy được dữ liệu chung? | [demo-client.js](src/main/resources/static/portal/demo-client.js), [module-bridge.js](src/main/resources/static/portal/module-bridge.js) |
+| Đăng nhập hoặc kiểm tra người được phép sửa lịch | [auth.cjs](tools/web/auth.cjs), [access-policy.cjs](tools/web/access-policy.cjs) |
+| Vì sao lịch/phòng/thiết bị bị từ chối? | [demo-api.cjs](tools/web/demo-api.cjs), [domain-rules.cjs](tools/web/domain-rules.cjs) và các test nghiệp vụ |
+| Thời điểm nào dữ liệu thực sự được ghi? | [file-store.cjs](tools/web/file-store.cjs), [mysql-store.cjs](tools/web/mysql-store.cjs) |
+| Vì sao màn hình khác tự cập nhật? | [live-sync.js](src/main/resources/static/portal/live-sync.js) |
+| Nghiệp vụ Java được xử lý ở đâu? | [package Java chính](src/main/java/com/ttcs/meetingmanagement/), controller/service theo chức năng và [test Java](src/test/java/) |
+| Lỗi nào đã được sửa, còn giới hạn gì? | [Báo cáo BE/QA](docs/qa/2026-10-23-audit.md) và [kết quả xác minh](docs/qa/2026-10-23-verification.json) |
 
 <a id="quickstart"></a>
 ## 9. Cài đặt và chạy web từ bản clone sạch
@@ -344,11 +403,28 @@ node server.cjs
 
 Mở **[http://127.0.0.1:8090](http://127.0.0.1:8090)**. Có thể thay lệnh cuối bằng `npm start`.
 
-Tại máy đang có thư mục `TTCS_N4-WEB-20261020`, chỉ cần mở terminal trong thư mục đó và chạy lệnh tương tự. `npm ci` cài đúng dependency theo lockfile; frontend hiện không cần `npm run build`.
+Tại máy đã có source, mở PowerShell trong đúng thư mục dự án. Ví dụ với vị trí đang sử dụng:
+
+```powershell
+Set-Location -LiteralPath 'C:\Users\phanc\OneDrive\Desktop\TTCS_N4-WEB-20261020'
+npm ci
+node .\server.cjs
+```
+
+Tên thư mục sau khi clone có thể khác tên thư mục hiện tại; điều quan trọng là terminal nằm cùng cấp với `package.json` và `server.cjs`. `npm ci` cài đúng dependency theo lockfile; frontend hiện không cần `npm run build`.
 
 ### 9.3. Đăng nhập lần đầu
 
-- Khi chưa có dữ liệu, máy chủ tạo ba tài khoản khởi tạo: `admin`, `pm`, `member`.
+Khi chưa có dữ liệu, máy chủ chuẩn bị ba tài khoản khởi tạo:
+
+| Tên đăng nhập | Mã người dùng | Vai trò | Mật khẩu trên bản clone mới |
+| --- | --- | --- | --- |
+| `admin` | `DEMO01` | Admin | Sinh riêng và in ở terminal, hoặc lấy từ `INITIAL_ADMIN_PASSWORD` |
+| `pm` | `DEMO02` | PM | Sinh riêng và in ở terminal, hoặc lấy từ `INITIAL_PM_PASSWORD` |
+| `member` | `DEMO03` | Member | Sinh riêng và in ở terminal, hoặc lấy từ `INITIAL_MEMBER_PASSWORD` |
+
+Các mã trên thuộc dữ liệu mẫu của Node, không phải tài khoản Spring Security/Java dùng chung.
+
 - Nếu không đặt mật khẩu qua biến môi trường, chương trình sinh mật khẩu ngẫu nhiên riêng và in ra terminal lúc khởi tạo.
 - Khi đã có dữ liệu/credentials, chạy lại không tạo mật khẩu mới. Dùng mật khẩu đã được quản trị viên bàn giao.
 - Việc đặt lại mật khẩu trên một máy trình diễn không trở thành mật khẩu mặc định cho người clone, vì `data/` không nằm trong repository.
@@ -419,7 +495,28 @@ Remove-Item Env:PORT -ErrorAction SilentlyContinue
 
 Script hỏi mật khẩu MySQL và chạy **Node ở cổng 8080**, không phải khởi động Java. Nếu Java đang dùng cổng đó thì phải dừng hoặc chọn cách chạy thủ công với `PORT` khác. Database mặc định là `meeting_management`, user mặc định là `root`; có thể đổi qua biến môi trường.
 
-Schema hiện có trường `participant_groups` trong `web_meeting`. `CREATE TABLE IF NOT EXISTS` không bổ sung cột vào một bảng cũ đã tồn tại. Nếu đang nâng cấp từ schema cũ, cần so sánh cấu trúc và thực hiện migration có kiểm soát trước khi chạy; không chỉ chạy lại script rồi giả định schema đã được cập nhật.
+Schema hiện có trường `participant_groups` trong `web_meeting`. `CREATE TABLE IF NOT EXISTS` không bổ sung cột vào một bảng cũ đã tồn tại. Nếu đang nâng cấp từ schema cũ, xem [migration bổ sung participant_groups](database/migrations/20261023_web_participant_groups.sql), sao lưu và kiểm tra trên database thử trước khi áp dụng; không chỉ chạy lại script rồi giả định schema đã được cập nhật.
+
+Nếu muốn giữ Node ở cổng 8090, có thể chạy thủ công sau khi chuẩn bị schema:
+
+```powershell
+$env:DATA_STORE = 'mysql'
+$env:PORT = '8090'
+$env:DB_HOST = '127.0.0.1'
+$env:DB_PORT = '3306'
+$env:DB_NAME = 'meeting_management'
+$env:DB_USERNAME = 'root' # Thay bằng tài khoản database được cấp
+$meetingDbSecret = Read-Host 'Mật khẩu MySQL' -AsSecureString
+try {
+    $env:DB_PASSWORD = [System.Net.NetworkCredential]::new('', $meetingDbSecret).Password
+    node .\server.cjs
+} finally {
+    Remove-Item Env:DB_PASSWORD -ErrorAction SilentlyContinue
+    $meetingDbSecret.Dispose()
+}
+```
+
+Trong cùng cửa sổ, `DATA_STORE` vẫn là `mysql` sau khi dừng. Để quay về file, đặt `$env:DATA_STORE = 'file'` trước khi chạy lại. Không dùng ví dụ này để tự chuyển dữ liệu giữa hai store.
 
 `mysql-store.cjs` không tự chạy DDL. Nó đọc snapshot từ `web_state`, cập nhật các bảng projection trong giao dịch và dùng `is_deleted` để đánh dấu những dòng đã bị bỏ khỏi danh mục. Không sửa tay các bảng projection để thay cho snapshot: lần đồng bộ sau có thể ghi lại chúng từ `web_state`.
 
@@ -619,7 +716,7 @@ Không dùng `database/web-schema.sql` thay cho schema Java. Các ID có thể k
 
 ### 14.1. Thời gian và trùng phòng
 
-Bản Node chuẩn hóa nhiều mốc thời gian về UTC+07:00. Khi gọi API, nên gửi ISO-8601 có offset, ví dụ `2030-12-10T09:00:00+07:00`, tránh phụ thuộc múi giờ của máy khách.
+Bản Node kiểm tra ngày thực, giờ hợp lệ và điều kiện kết thúc sau bắt đầu; ngày không tồn tại như 30/02 bị từ chối. Các mốc thời gian lịch được chuẩn hóa về UTC+07:00; chuỗi không có offset được hiểu theo UTC+07:00. Khi gọi API, nên gửi ISO-8601 có offset, ví dụ `2030-12-10T09:00:00+07:00`, tránh phụ thuộc múi giờ của máy khách.
 
 Hai khoảng được coi là trùng khi:
 
@@ -627,15 +724,17 @@ Hai khoảng được coi là trùng khi:
 startA < endB AND startB < endA
 ```
 
-Khoảng được hiểu theo dạng `[bắt đầu, kết thúc)`. Cuộc họp 09:00–10:00 và cuộc họp 10:00–11:00 có thể tiếp giáp mà không trùng. Lịch đã hủy được loại khỏi kiểm tra giữ phòng. Khi chỉnh sửa phải loại chính lịch đang sửa ra khỏi phép kiểm tra xung đột.
+Khoảng được hiểu theo dạng `[bắt đầu, kết thúc)`. Cuộc họp 09:00–10:00 và cuộc họp 10:00–11:00 có thể tiếp giáp mà không trùng. Lịch đã hủy được loại khỏi kiểm tra giữ phòng. Chủ trì và người tham dự cũng được kiểm tra trùng lịch khi tạo/sửa hoặc thêm lời mời; người đã từ chối không chiếm lịch bận của lần mời đó. Thời gian tạo/sửa phải ở tương lai. Khi chỉnh sửa phải loại chính lịch đang sửa ra khỏi phép kiểm tra xung đột.
 
 ### 14.2. Sức chứa và danh sách tham dự
 
-- Chủ trì được tính vào số người của lịch.
-- Người tham dự trùng được gộp theo định danh trong luồng tạo lịch.
-- Nhóm/phòng ban được mở rộng thành danh sách người dùng ở các luồng có hỗ trợ.
-- Phòng phải đang có trạng thái được phép đặt; số người không được vượt sức chứa khi ghi lịch.
-- Việc một UI đã lọc phòng không thay thế bước kiểm tra lại tại API.
+- Chủ trì được tính đúng một lần trong danh sách; các định danh trùng được gộp.
+- Tài khoản tham dự phải tồn tại và đang hoạt động. Không cho bỏ chủ trì ra khỏi danh sách.
+- Nhóm/phòng ban được mở rộng thành danh sách người dùng ở các luồng có hỗ trợ. Lịch lưu danh sách tại thời điểm đặt; thay đổi nhóm sau đó không tự thay đổi các lịch cũ.
+- `participantCount` là tổng số chỗ cần dùng, gồm người có tài khoản và khách chưa có định danh. Tổng không được nhỏ hơn số người có định danh hoặc vượt sức chứa phòng. Khách chưa có định danh không có lịch bận riêng để kiểm tra.
+- Khi sửa riêng thông tin lịch mà không gửi danh sách người/thiết bị, giữ dữ liệu hiện có. Khi thêm/bỏ người có định danh, cập nhật tổng và giữ số khách đã khai báo.
+- Thêm nhiều người được kiểm tra cả danh sách trước khi ghi; lỗi một người không để lại danh sách cập nhật một phần.
+- Phòng phải đang ở trạng thái được phép đặt và chủ trì có quyền phòng. Việc UI đã lọc phòng không thay thế bước kiểm tra lại tại API.
 
 ### 14.3. Tồn kho thiết bị theo thời gian
 
@@ -652,7 +751,7 @@ Hàm tính đặt đồng thời của Node gom các sự kiện bắt đầu/k�
 
 Ví dụ có 2 TV: đặt 1 TV từ 09:00–10:00 thì cùng khoảng đó còn 1; sang 10:00 nếu không có lượt đặt khác thì số khả dụng được tính lại. Hủy lượt đặt không làm tăng “tổng thiết bị vật lý”; nó chỉ bỏ phần chiếm dụng thời gian.
 
-Các API tạo/sửa lượt đặt, tạo/sửa cuộc họp và bảo trì có nhánh kiểm tra riêng. Việc thay đổi một nhánh cần có kiểm thử hồi quy cho các nhánh khác; không nên mặc định mọi endpoint có mức validation giống hệt nhau.
+Các API tạo/sửa lượt đặt, tạo/sửa cuộc họp và bảo trì đều kiểm tra tồn kho khả dụng. Sửa thông tin lịch giữ nguyên số lượng thiết bị nếu không gửi thay đổi; mỗi lượt đặt có định danh duy nhất, khoảng đặt nằm trong cuộc họp. Việc thay đổi một nhánh cần có kiểm thử hồi quy cho các nhánh khác; không nên mặc định mọi endpoint có mức validation giống hệt nhau.
 
 ### 14.4. Gợi ý thời gian
 
@@ -683,7 +782,7 @@ stateDiagram-v2
     CANCELLED --> [*]
 ```
 
-Đây không phải cam kết mọi trạng thái tự chuyển theo đồng hồ. Các đường dẫn cập nhật/hủy khác có implementation riêng; việc hoàn thiện một state machine thống nhất ở tất cả API là một phần cần rà soát khi đưa vào vận hành thực tế.
+API chuyển trạng thái là `POST /api/demo/meeting-status`. Trạng thái không tự chuyển theo đồng hồ. Luồng sửa thông tin chỉ nhận lịch `SCHEDULED`; không dùng PUT để mở lại lịch `COMPLETED` hoặc `CANCELLED`. Khi hủy, lịch sử được giữ lại, lượt đặt thiết bị và nhắc lịch tương ứng chuyển sang hủy. Java có luồng trạng thái riêng cần đối chiếu khi tích hợp.
 
 ### 14.7. Cơ sở tính báo cáo
 
@@ -719,7 +818,7 @@ sequenceDiagram
     end
 ```
 
-File store xếp hàng trong một tiến trình. MySQL store thêm giao dịch, khóa bản ghi snapshot bằng `SELECT ... FOR UPDATE` và cập nhật các bảng projection. Cơ chế này giúp giữ tính nhất quán cho bản chạy nhưng chưa chứng minh khả năng mở rộng ngang: snapshot đơn và các thao tác tuần tự có thể trở thành điểm nghẽn.
+File store xếp hàng trong một tiến trình và thử lại có giới hạn khi Windows/OneDrive tạm khóa thao tác đổi tên file. Chế độ memory cũng xếp hàng yêu cầu để tránh dùng nhầm actor giữa các yêu cầu đồng thời. MySQL store thêm giao dịch, khóa bản ghi snapshot bằng `SELECT ... FOR UPDATE` và cập nhật các bảng projection. Cơ chế này giúp giữ tính nhất quán cho bản chạy nhưng chưa chứng minh khả năng mở rộng ngang: snapshot đơn và các thao tác tuần tự có thể trở thành điểm nghẽn.
 
 ### 15.2. Cập nhật dữ liệu giữa các màn hình
 
@@ -747,7 +846,7 @@ File store xếp hàng trong một tiến trình. MySQL store thêm giao dịch,
 
 ### 16.2. PM — tạo và điều chỉnh lịch
 
-1. Chọn người tham dự, hoặc dùng **Gợi ý thời gian** để kiểm tra lịch bận trước.
+1. Kiểm tra tài khoản PM được cấp quyền tạo lịch/đặt tài nguyên. PM dùng chính mình làm chủ trì; chọn người tham dự hoặc dùng **Gợi ý thời gian** để kiểm tra lịch bận trước.
 2. Chọn ngày và khoảng giờ; tìm phòng đủ sức chứa, đang hoạt động.
 3. Mở **Tạo lịch họp**, kiểm tra chủ trì, tên, thời gian, phòng, mô tả và danh sách tham dự.
 4. Chọn thiết bị, nhập số lượng; kiểm tra thông báo khả dụng trước khi xác nhận.
@@ -763,9 +862,14 @@ File store xếp hàng trong một tiến trình. MySQL store thêm giao dịch,
 4. Xử lý xung đột nếu một lần họp bị trùng. Không xem việc hiển thị được preview là lịch đã được lưu.
 5. Đối chiếu các lịch thực tế sau khi API xác nhận thành công.
 
-### 16.4. Member — xem lịch
+### 16.4. Member — xem lịch và điểm danh
 
-Đăng nhập bằng tài khoản hoạt động, mở lịch trên giao diện di động/US17 hoặc lịch sử/US06 rồi xem chi tiết. Menu tạo/sửa và quản trị không được cấp cho Member; yêu cầu trực tiếp API ghi vẫn bị kiểm tra quyền.
+1. Đăng nhập bằng tài khoản đang hoạt động; mở **Lịch của tôi/US17** hoặc **Lịch sử/US06**.
+2. Lọc theo ngày, tên và trạng thái; chỉ đọc các lịch có mình tham gia.
+3. Mở chi tiết để kiểm tra thời gian, phòng và chủ trì.
+4. Nếu cần trình diễn điểm danh, vào US27, chọn lịch của mình và thực hiện check-in trước check-out. Node lưu record mô phỏng; chưa phải xác thực hiện diện qua QR an toàn.
+
+Menu tạo/sửa và quản trị không được cấp cho Member; yêu cầu trực tiếp API ghi vẫn bị kiểm tra quyền. API hỗ trợ phản hồi lời mời cho chính mình; màn hình US04 hiện thuộc nhóm chức năng của người tổ chức, nên không coi đây là luồng phản hồi tự phục vụ đã hoàn thiện trên giao diện Member.
 
 ### 16.5. Báo cáo và tải tệp
 
@@ -790,6 +894,7 @@ Chọn khoảng ngày và phòng, áp dụng bộ lọc trước khi đọc tổ
 | Lịch họp | `GET /api/meetings`, `GET /api/meetings/{id}` | Danh sách/chi tiết |
 | Ghi lịch | `POST /api/meetings/create`, `POST /api/meetings`, `PUT /api/meetings/{id}`, `DELETE /api/meetings/{id}` | Tạo, sửa, hủy |
 | Định kỳ | `POST /api/meetings/recurring` | Tạo chuỗi lịch |
+| Trạng thái lịch | `POST /api/demo/meeting-status` | Chuyển trạng thái theo sơ đồ mục 14.6 |
 | Phòng | `GET/POST /api/rooms`, `GET/PUT/DELETE /api/rooms/{id}` | Danh mục và nghiệp vụ phòng |
 | Phòng trống | `GET /api/rooms/availability`, `GET /api/rooms/available` | Tra cứu theo thời gian/sức chứa |
 | Gợi ý phòng | `POST /api/rooms/suggestions` | Đề xuất phòng |
@@ -820,6 +925,7 @@ Chọn khoảng ngày và phòng, áp dụng bộ lọc trước khi đọc tổ
   "organizerId": "DEMO01",
   "roomId": "A101",
   "participants": ["DEMO01", "DEMO02"],
+  "participantCount": 3,
   "startTime": "2030-12-10T09:00:00+07:00",
   "endTime": "2030-12-10T10:00:00+07:00",
   "description": "Đánh giá tiến độ và các công việc tiếp theo",
@@ -829,7 +935,7 @@ Chọn khoảng ngày và phòng, áp dụng bộ lọc trước khi đọc tổ
 }
 ```
 
-Payload minh họa gửi tới `POST /api/meetings/create`. Các ID phải tồn tại trong bản chạy; cùng payload có thể bị từ chối nếu phòng/thiết bị đang bận hoặc tài khoản không có quyền.
+Payload minh họa gửi tới `POST /api/meetings/create`; ví dụ có 2 người có định danh và 1 khách, tổng 3 chỗ. Các ID phải tồn tại trong bản chạy; cùng payload có thể bị từ chối nếu phòng/thiết bị đang bận hoặc tài khoản không có quyền. PM phải thay `organizerId` bằng mã của chính mình. Khi sửa, có thể bỏ các trường người tham dự/thiết bị để giữ giá trị hiện tại; gửi một danh sách mới là yêu cầu thay đổi danh sách đó.
 
 Ví dụ tra cứu thiết bị trong một khoảng:
 
@@ -902,7 +1008,7 @@ npm test
 .\mvnw.cmd verify
 ```
 
-`npm test` chạy `tools/tests/integration.test.cjs`, tạo dữ liệu tạm riêng rồi dọn sau khi xong; không dùng file `data/web-state.json` của người sử dụng để làm fixture.
+`npm test` chạy các tệp `tools/tests/*.test.cjs`, tạo dữ liệu tạm riêng rồi dọn sau khi xong; không dùng file `data/web-state.json` của người sử dụng để làm fixture.
 
 ### 20.2. Những gì bộ kiểm thử kiểm tra
 
@@ -918,11 +1024,49 @@ npm test
 
 ### 20.3. Kết quả đã ghi nhận và cách đọc
 
-Các lần xác minh trước khi phát hành source ngày **22/10/2026** đã ghi nhận **67 kiểm thử Java, 8 mục kiểm thử Node và 27 màn hình trong kiểm tra trình duyệt đạt**. Xem [UNIFIED-VERIFICATION.json](docs/consolidation/UNIFIED-VERIFICATION.json) và [BROWSER-VERIFICATION.json](docs/consolidation/BROWSER-VERIFICATION.json).
+Bằng chứng gần nhất gồm [báo cáo BE/QA ngày 23/10/2026](docs/qa/2026-10-23-audit.md), [JSON BE/QA](docs/qa/2026-10-23-verification.json) và lượt [kiểm thử MySQL thật](docs/qa/2026-10-23-mysql.md), được tóm tắt ở mục 20.4–20.5. JSON ghi cả commit nền và việc kiểm tra có thay đổi chưa commit; số liệu không được hiểu là kết quả của mọi bản clone hoặc mọi commit sau đó.
 
-Các báo cáo này là **bằng chứng tại thời điểm chạy**, không tự cập nhật theo source. Một số file còn lưu ghi chú/đường dẫn của quá trình hợp nhất cũ; ví dụ trạng thái “chưa push” trong báo cáo cũ không phải trạng thái Git hiện tại. Các sửa đổi mới về US03, API và MySQL cần được kiểm thử lại khi phát hành; không lấy kết quả cũ làm bằng chứng bao phủ toàn bộ thay đổi mới.
+Các báo cáo hợp nhất ngày **22/10/2026** là bằng chứng lịch sử: [UNIFIED-VERIFICATION.json](docs/consolidation/UNIFIED-VERIFICATION.json), [BROWSER-VERIFICATION.json](docs/consolidation/BROWSER-VERIFICATION.json). Chúng ghi 67 kiểm thử Java, 8 mục Node và 27 màn hình ở phiên bản khi đó. Một số file còn có đường dẫn/ghi chú “chưa push” cũ; đó không phải trạng thái Git hiện tại.
+
+Khi phát hành, chạy lại các kiểm tra phù hợp với thay đổi rồi ghi nhận phiên bản source và môi trường. Chỉnh sửa README không tự tạo một lượt kiểm thử ứng dụng mới.
 
 Kết quả test không đồng nghĩa đã kiểm tra tải lớn, nhiều máy chủ, lỗi mạng thực tế dài hạn, camera thật, bảo mật toàn diện, tính tương thích mọi trình duyệt hay mọi tích hợp bên ngoài. Repository hiện không được giả định có CI tự chạy chỉ vì đã có lệnh kiểm thử; cần kiểm tra workflow thực tế trên nhánh Git đang dùng.
+
+### 20.4. Đợt rà soát BE/QA ngày 23/10/2026
+
+Đợt rà soát bổ sung kiểm thử hồi quy cho quyền trên từng lịch, quyền phòng/ma trận, người tham dự, tồn kho và bảo trì, lịch định kỳ, ghi danh sách nguyên khối, lỗi file và giao dịch MySQL. Kết quả: **38 kiểm thử Node đạt**, **68 kiểm thử Java đạt**, **27 màn hình mở và hiển thị được trên trình duyệt**, không ghi nhận lỗi console trong lượt kiểm tra. Kiểm tra cú pháp bao phủ 63 tệp JS/CJS; npm audit không báo lỗ hổng dependency Node tại thời điểm chạy.
+
+Các nhóm kiểm thử hồi quy có thể đọc riêng:
+
+| Tệp | Phạm vi |
+| --- | --- |
+| [integration.test.cjs](tools/tests/integration.test.cjs) | HTTP, 27 entry giao diện, đăng nhập và lưu dữ liệu |
+| [business-rules.test.cjs](tools/tests/business-rules.test.cjs) | Lịch, thiết bị, quyền, trạng thái, định kỳ và tính nguyên vẹn khi lỗi |
+| [meeting-participants.test.cjs](tools/tests/meeting-participants.test.cjs) | Nhóm, danh sách tham dự và luồng chỉnh sửa |
+| [file-store.test.cjs](tools/tests/file-store.test.cjs) | Khóa file, lưu bền và xử lý lỗi ghi |
+| [mysql-store.test.cjs](tools/tests/mysql-store.test.cjs) | Commit/rollback và dọn pool/connection bằng đối tượng giả lập |
+| [report-periods.test.cjs](tools/tests/report-periods.test.cjs) | Lọc thời gian báo cáo, gồm tháng/năm giao nhau |
+
+Đọc [báo cáo BE/QA](docs/qa/2026-10-23-audit.md) để phân biệt kiểm thử API, mở màn hình và kiểm thử tương tác. Trong lượt BE/QA ban đầu, MySQL được kiểm tra bằng pool giả lập lỗi. Lượt kiểm thử server thật được bổ sung sau đó ở mục 20.5; kết quả cũ vẫn giữ nguyên thời điểm và phạm vi của nó. Các tích hợp dịch vụ ngoài vẫn cần nghiệm thu riêng.
+
+### 20.5. Kiểm thử MySQL thật ngày 23/10/2026
+
+**21/21 tình huống đạt** trên MySQL Community Server **8.0.46**, utf8mb4/InnoDB. Node Test Runner ghi **22 test đạt** khi tính cả test cha. Kiểm thử hồi quy Node chạy lại **38/38 đạt**. Phạm vi MySQL gồm schema mới/cũ, 5 bảng projection, Unicode/múi giờ, người/nhóm/khách, quyền, đặt/sửa/hủy, thiết bị/bảo trì, định kỳ, restart, lỗi SQL thật, mất connection và tranh phòng giữa hai tiến trình.
+
+Lỗi SQL được tạo bằng trigger trong database thử để xác minh rollback sau bước INSERT lịch; ngắt connection đang chờ khóa để xác minh 503 và phục hồi. Không phát hiện lỗi cần sửa thêm trong runtime qua các tình huống này. Cả 4 database thử được dọn sạch, gồm bản sao dữ liệu hiện tại với 12 phòng, 30 tài khoản, 72 thiết bị, 169 lịch và 156 lượt đặt; snapshot/credentials được giữ nguyên và hash file nguồn của web 8090 không đổi. Các database hiện hữu không được dùng làm đích ghi kiểm thử.
+
+Đọc [báo cáo MySQL thực](docs/qa/2026-10-23-mysql.md), [JSON kết quả](docs/qa/2026-10-23-mysql-verification.json) và [mysql-live.cjs](tools/tests/mysql-live.cjs). Đây là 100% bộ tình huống MySQL được nêu, không phải chứng nhận hoàn thiện toàn bộ backlog hay production.
+
+Chạy riêng bằng `npm run test:mysql` sau khi đặt `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD` trong môi trường; cách nhập mật khẩu không ghi vào source nằm trong báo cáo. Bộ test tự tạo database `ttcs_qa_*`, không sử dụng `DB_NAME` hiện hữu, và xóa database thử sau khi xong. Tài khoản cần quyền tạo/xóa database, bảng/trigger và thao tác với các connection kiểm thử. `npm test` không tự chạy bộ MySQL thật. Biến tùy chọn `MYSQL_QA_STATE_FILE` cho phép kiểm tra một bản sao file state hiện có trong database thử thứ tư; không ghi lại file nguồn.
+
+<details>
+<summary>Ảnh minh họa lượt kiểm tra tạo, mở lại và chỉnh sửa lịch</summary>
+
+![Màn hình chỉnh sửa lịch trong lượt kiểm tra ngày 23/10/2026](docs/qa/2026-10-23-create-edit.png)
+
+Ảnh là một phần màn hình của lượt kiểm tra trên dữ liệu thử; xem báo cáo để biết bước thực hiện và kết quả đối chiếu.
+
+</details>
 
 <a id="operations"></a>
 ## 21. Vận hành, sao lưu và khôi phục
@@ -951,6 +1095,20 @@ Mật khẩu và các quyền đã được băm/lưu trong state vẫn là dữ
 Máy chủ ghi thông tin khởi động/lỗi ra stdout/stderr. Các file như `data/web-server.log` nếu có là kết quả của cách người vận hành khởi chạy/chuyển hướng log, không phải một hệ thống log tập trung tự động.
 
 Trước khi cập nhật source: kiểm tra thay đổi cục bộ, sao lưu dữ liệu, đọc thay đổi schema, cài lại dependency khi lockfile đổi, chạy kiểm thử rồi mới khởi động lại. Dữ liệu giữ lại sau restart, nhưng người dùng cần đăng nhập lại.
+
+### 21.5. Hồ sơ bàn giao cho Mentor/khách hàng
+
+| Thành phần | Thông tin cần chốt khi bàn giao |
+| --- | --- |
+| Source | Nhánh/tag/commit được bàn giao, README, lockfile, Maven Wrapper và các tài nguyên UI |
+| Môi trường | Hệ điều hành, Node/JDK thực tế, địa chỉ/cổng, chế độ local/proxy và store được chọn |
+| Database | Schema/migration đã áp dụng; dữ liệu mẫu và dữ liệu thật được xác định rõ |
+| Tài khoản | Danh sách vai trò/quyền; thông tin đăng nhập bàn giao qua kênh riêng |
+| Chất lượng | Báo cáo kiểm thử đúng phiên bản source và kết quả các tình huống nghiệm thu mục 5.3 |
+| Vận hành | Người phụ trách, vị trí lưu dữ liệu, cách dừng/mở, sao lưu và thử khôi phục |
+| Tích hợp/phần còn lại | Tính năng mô phỏng, tính năng chưa có và điều kiện để bật dịch vụ thật |
+
+Bản clone sạch chạy bằng dữ liệu khởi tạo của nó. Nếu cần tái hiện đúng dữ liệu tại máy trình diễn, phải bàn giao thêm bản sao dữ liệu có kiểm soát; source công khai không bao gồm dữ liệu vận hành.
 
 <a id="troubleshooting"></a>
 ## 22. Xử lý lỗi thường gặp
@@ -1011,9 +1169,9 @@ Phần này là hướng hoàn thiện dựa trên mã hiện có, không phải
 | Ưu tiên | Hạng mục | Kết quả cần đạt |
 | --- | --- | --- |
 | Nền tảng nghiệp vụ | Chuẩn hóa DTO, API, ID, trạng thái và quy tắc giữa Node/Java | Có backend chuẩn và adapter rõ ràng, tránh cùng nghiệp vụ nhưng khác cách kiểm tra |
-| Phân quyền | Thống nhất US20/US21 với kiểm tra API và phân lập lịch theo người/phòng ban | Quyền cấu hình được thực thi xuyên suốt, có kiểm thử vượt quyền |
+| Phân quyền | Mở rộng chính sách US21 theo người/phòng ban và thống nhất với Java | Quyền cấu hình được thực thi xuyên suốt, có kiểm thử vượt quyền |
 | Dữ liệu | Migration có phiên bản, chuyển đổi store, ràng buộc và chỉ mục | Nâng cấp được database cũ và khôi phục được dữ liệu |
-| Kiểm thử | Bổ sung hồi quy cho mọi đường ghi, luồng US03 mới và MySQL | Bằng chứng khớp source trước từng bản phát hành |
+| Kiểm thử | Duy trì hồi quy/MySQL thực, bổ sung tương tác cho toàn bộ màn hình và đo tải | Bằng chứng khớp source, gồm lỗi kết nối và dữ liệu nâng cấp, trước từng bản phát hành |
 | Tích hợp | Email, Gemini, HRM/ERP, QR và đồng bộ lịch US15 | Có cấu hình, hợp đồng, retry/idempotency và kiểm tra với hệ thống thật |
 | Vận hành | HTTPS, quản lý secret, phiên và log phù hợp triển khai | Phù hợp môi trường mạng và người dùng mục tiêu |
 | Hiệu năng | Đo tải, tối ưu snapshot và xử lý đồng thời | Có số liệu về số người dùng/khối lượng lịch hỗ trợ |
@@ -1031,12 +1189,14 @@ Phần này là hướng hoàn thiện dựa trên mã hiện có, không phải
 | [US02](docs/backend/US02.md), [US05](docs/backend/US05.md) | Cập nhật lịch và gợi ý thời gian Java |
 | [US16](docs/backend/US16.md), [US18](docs/backend/US18.md) | Nhắc lịch và tạo tài khoản Java |
 | [US25](docs/backend/US25.md), [US28](docs/backend/US28.md) | Chatbot và HRM/ERP Java |
-| [Schema web](database/web-schema.sql) | Chuẩn bị các bảng `web_*` cho Node |
+| [Schema web](database/web-schema.sql), [migration](database/migrations/20261023_web_participant_groups.sql) | Chuẩn bị/cập nhật các bảng `web_*` cho Node |
 | [SQL backend](database/backend/) | Các phần mở rộng schema Java theo US |
 | [Danh mục module](src/main/resources/static/portal/modules.json) | Entry point chính xác và trạng thái khả dụng của US |
 | [API Node](tools/web/demo-api.cjs), [Auth Node](tools/web/auth.cjs) | Hành vi thực tế của bản trình diễn |
 | [File store](tools/web/file-store.cjs), [MySQL store](tools/web/mysql-store.cjs) | Cách lưu, phục hồi và giao dịch |
-| [Kiểm thử web](tools/tests/integration.test.cjs) | Các tình huống được tự động xác minh |
+| [Kiểm thử web](tools/tests/) | Các tình huống được tự động xác minh |
+| [Báo cáo BE/QA](docs/qa/2026-10-23-audit.md), [kết quả xác minh](docs/qa/2026-10-23-verification.json) | Phạm vi sửa lỗi, bằng chứng và giới hạn của lượt rà soát ngày 23/10/2026 |
+| [Kiểm thử MySQL thật](docs/qa/2026-10-23-mysql.md), [JSON MySQL](docs/qa/2026-10-23-mysql-verification.json) | 21 tình huống trên server MySQL 8.0.46 và cách chạy lại |
 | [Báo cáo hợp nhất](docs/consolidation/UNIFIED-VERIFICATION.json) | Bằng chứng lịch sử; đọc cùng thời điểm và phiên bản source |
 
 Nếu tài liệu lịch sử khác với mã hiện tại, cần đối chiếu lại trước khi vận hành; ghi chú trong báo cáo cũ không tự trở thành cấu hình/quyền hiện hành.

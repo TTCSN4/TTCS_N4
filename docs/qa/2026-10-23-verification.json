@@ -1,0 +1,130 @@
+{
+  "verifiedAt": "2026-10-22T19:23:17.356Z",
+  "localDate": "2026-10-23",
+  "baseCommit": "35f7c233fc6354e7cea3f50d013553d479b6d05f",
+  "uncommittedWorkingTree": true,
+  "node": {
+    "tests": 38,
+    "passed": 38,
+    "failed": 0
+  },
+  "java": {
+    "tests": 68,
+    "passed": true
+  },
+  "syntax": {
+    "files": 63,
+    "errors": 0
+  },
+  "browser": {
+    "modules": 27,
+    "allLoaded": true,
+    "consoleErrors": 0,
+    "interaction": "Create 9 attendees and 2 TVs; reload and edit title without losing participants or quantity",
+    "isolatedPort": 18090
+  },
+  "dependencies": {
+    "scope": "Node production dependencies only",
+    "reportedVulnerabilities": 0
+  },
+  "storage": {
+    "liveHealth": {
+      "reachable": true,
+      "mode": "demo",
+      "revision": 15,
+      "storage": "file"
+    },
+    "privateBackups": "data/qa-backups/",
+    "persistence": {
+      "usersUnchanged": true,
+      "roomsUnchanged": true,
+      "equipmentUnchanged": true,
+      "meetingRecordsUnchanged": true,
+      "credentialsUnchanged": true,
+      "bookingKeysRetained": true,
+      "latestBookingValuesRetained": true,
+      "duplicateBookingRowsRemoved": 1,
+      "users": 30,
+      "meetings": 169
+    },
+    "mysql": "21 real-MySQL scenarios passed on MySQL 8.0.46; see 2026-10-23-mysql-verification.json. Original fault-injected pool tests retained."
+  },
+  "preexistingEdits": [
+    {
+      "path": "src/main/resources/static/us01/css/create-meeting.css",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us03/index.html",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us02/css/update-cancel-meeting.css",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us02/js/meeting-ui-common.js",
+      "preserved": true
+    },
+    {
+      "path": "tools/tests/meeting-participants.test.cjs",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us02/js/update-cancel-meeting.js",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us01/js/create-meeting.js",
+      "preserved": true
+    },
+    {
+      "path": "database/web-schema.sql",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us03/app.js",
+      "preserved": true
+    },
+    {
+      "path": "src/main/resources/static/us03/styles.css",
+      "preserved": true
+    }
+  ],
+  "markdown": {
+    "issues": []
+  },
+  "limitations": [
+    "US15 unavailable",
+    "Node email/AI/HRM/QR integrations remain simulated",
+    "Java authentication/API parity and proxy need separate acceptance",
+    "No production load, multi-server, external service or real-device acceptance test"
+  ],
+  "passed": true,
+  "mysqlLiveAcceptance": {
+    "verifiedAt": "2026-10-23T08:59:56.005Z",
+    "report": "2026-10-23-mysql-verification.json",
+    "server": "8.0.46",
+    "scenarios": 21,
+    "passed": 21,
+    "failed": 0,
+    "nodeTestRunnerTests": 22,
+    "createdSchemasRemoved": true,
+    "liveFileStateUnchanged": true,
+    "existingSchemasUsedForWrites": false,
+    "currentSnapshot": {
+      "passed": true,
+      "collections": {
+        "rooms": 12,
+        "users": 30,
+        "equipment": 72,
+        "meetings": 169,
+        "equipmentBookings": 156
+      },
+      "sourceFileUnchanged": true,
+      "credentialsUnchanged": true,
+      "canonicalSnapshotUnchanged": true
+    },
+    "createdSchemasCount": 4
+  }
+}

@@ -361,6 +361,15 @@
                       >0 người</output
                     >
                   </legend>
+                  <p id="selectedParticipantsTitle" class="selected-participants-title">Người tham gia đã chọn</p>
+                  <p id="editingParticipantsHint" class="field-hint" hidden>Danh sách người tham gia được tải từ cuộc họp đã lưu. Bạn có thể thêm hoặc bỏ từng người bên dưới.</p>
+                  <div
+                    id="participantOptions"
+                    class="participant-options"
+                    role="group"
+                    aria-labelledby="selectedParticipantsTitle"
+                    aria-live="polite"
+                  ></div>
                   <div class="participant-group-panel">
                     <label for="participantGroup">Mời theo nhóm</label>
                     <div class="participant-group-entry"><select id="participantGroup" aria-describedby="participantGroupPreview"><option value="">Đang tải nhóm…</option></select><button type="button" id="inviteParticipantGroup" class="button secondary">Mời cả nhóm</button></div>
@@ -406,12 +415,6 @@
                   >
                     Chọn phòng để kiểm tra sức chứa.
                   </p>
-                  <div
-                    id="participantOptions"
-                    class="participant-options"
-                    role="group"
-                    aria-label="Danh sách mã người tham dự"
-                  ></div>
                   <small
                     id="participantsError"
                     class="error"
@@ -456,9 +459,9 @@
                   <small id="equipmentError" class="error" role="alert"></small>
                 </fieldset>
                 <p class="field-hint">
-                  Mỗi mã thiết bị có thể chọn một đơn vị. Số lượng còn lại được
-                  kiểm tra tại giờ bắt đầu; API hiện chưa kiểm tra trọn khoảng
-                  giờ. Trang này tạo một cuộc họp, chưa tạo chuỗi lịch lặp.
+                  Chọn thiết bị và nhập số lượng cần dùng. Máy chủ kiểm tra
+                  số lượng khả dụng trong toàn bộ khoảng giờ của cuộc họp,
+                  bao gồm các lượt đặt khác và số thiết bị đang bảo trì.
                 </p>
               </section>
             </div>

@@ -3,7 +3,7 @@
   const $ = (id) => document.getElementById(id);
   const meetings = window.TTCSDemo?Object.fromEntries(window.TTCSDemo.state.meetings.map(m=>[m.meetingId,{title:m.title,room:"Phòng "+m.roomId}])):{ M01: { title: "Họp triển khai dự án", room: "Phòng A1" }, M02: { title: "Họp báo cáo tuần", room: "Phòng B2" }, M03: { title: "Đánh giá tiến độ", room: "Phòng C1" } };
   const attendance = new Map();
-  const history = window.TTCSDemo?window.TTCSDemo.state.attendance.map(a=>({id:a.meetingId,action:a.action,time:new Date(a.time)})):[];
+  const history = window.TTCSDemo?window.TTCSDemo.state.attendance.filter(a=>a.userId===window.TTCSDemo.state.actor.id&&meetings[a.meetingId]).map(a=>({id:a.meetingId,action:a.action,time:new Date(a.time)})):[];
 if(window.TTCSDemo){const select=$('meeting');select.replaceChildren(...Object.entries(meetings).map(([id,m])=>new Option(m.title,id)));for(const h of history){const rec=attendance.get(h.id)||{};rec[h.action]=h.time;attendance.set(h.id,rec);}}
   let stream = null, cameraVersion = 0, scanTimer = null;
   const mode = () => document.querySelector('input[name="mode"]:checked').value;
@@ -15,6 +15,13 @@ if(window.TTCSDemo){const select=$('meeting');select.replaceChildren(...Object.e
   }
   function render() {
     const id = $("meeting").value, meeting = meetings[id], record = attendance.get(id);
+    if (!meeting) {
+      $("meetingTitle").textContent = "Chưa có cuộc họp được cấp quyền";
+      $("room").textContent = "—"; $("sampleCode").textContent = "—";
+      $("confirm").disabled = true; $("startCamera").disabled = true;
+      $("history").replaceChildren();
+      return;
+    }
     $("meetingTitle").textContent = meeting.title;
     $("room").textContent = meeting.room;
     $("sampleCode").textContent = "US27:" + id;
